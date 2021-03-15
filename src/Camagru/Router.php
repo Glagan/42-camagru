@@ -87,7 +87,7 @@ class Router
 			// Add a regex param if there is a "{}" delimiter
 			if ($openDelimiter >= 0 && $closeDelimiter > $openDelimiter) {
 				// Remove the delimiter
-				$value = \substr($value, $openDelimiter, $closeDelimiter - $openDelimiter);
+				$value = \substr($value, $openDelimiter + 1, $closeDelimiter - $openDelimiter - 1);
 
 				// Set the regex for each params
 				// 	Default regex is \d+ for a number
