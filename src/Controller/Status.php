@@ -8,4 +8,9 @@ class Status extends Controller
 	{
 		return $this->json(['ping' => 'pong']);
 	}
+
+	public function test($test)
+	{
+		return $this->json(['ping' => $test]);
+	}
 }

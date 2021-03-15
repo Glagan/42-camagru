@@ -1,5 +1,7 @@
 <?php namespace Camagru\Http;
 
+use Env;
+
 class Response
 {
 	const OK = 200;
@@ -54,13 +56,15 @@ class Response
 	{
 
 		// Apply deflate or gzip compression when possible
-		if ($this->compressMethods !== false) {
+		if (Env::$config['camagru']['compress'] && Env::$config['camagru']['mode'] != 'debug' && $this->compressMethods !== false) {
 			$this->compress();
 		}
 
 		// Content-Length
-		$contentLength = \mb_strlen($this->content);
-		$this->headers->add(Header::CONTENT_LENGTH, $contentLength);
+		if (Env::$config['camagru']['mode'] != 'debug') {
+			$contentLength = \mb_strlen($this->content);
+			$this->headers->add(Header::CONTENT_LENGTH, $contentLength);
+		}
 
 		// Add headers
 		foreach ($this->headers->all() as $key => $value) {
