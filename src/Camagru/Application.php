@@ -1,9 +1,35 @@
 <?php namespace Camagru;
 
+use Camagru\Http\Header;
+use Camagru\Http\Response;
+
 class Application
 {
+	private $router;
+
+	public function __construct(Router $router)
+	{
+		$this->router = $router;
+	}
+
 	public function run(): void
 	{
-		echo 'Hello world !';
+		$request = new Http\Request;
+		$match = $this->router->match($request);
+		if ($match !== false) {
+			$controller = '\\Controller\\' . $match['controller'];
+			$controller = new $controller($request);
+			$response = \call_user_func([$controller, $match['function']], ...$match['foundParams']);
+			$response->render();
+		} else {
+			(
+				new Response(
+					$request,
+					\json_encode(['error' => 'Not found']),
+					[Header::CONTENT_TYPE => 'application/json; charset=utf-8'],
+					Response::NOT_FOUND
+				)
+			)->render();
+		}
 	}
 }
