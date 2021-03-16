@@ -9,4 +9,5 @@ abstract class Header
 	const CONTENT_LENGTH = 'Content-Length';
 
 	const JSON_TYPE = 'application/json';
+	const JSON_TYPE_UTF8 = 'application/json; charset=utf-8';
 }
