@@ -37,4 +37,19 @@ class RequestInput
 			}
 		}
 	}
+
+	/**
+	 * Get the value associated with name in the Request input.
+	 * Returns $default if the value doesn't exists.
+	 * @param string $name
+	 * @param mixed $default
+	 * @return mixed
+	 */
+	public function get(string $name, $default = false)
+	{
+		if (\array_key_exists($name, $this->values)) {
+			return $this->values[$name];
+		}
+		return $default;
+	}
 }

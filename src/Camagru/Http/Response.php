@@ -18,17 +18,24 @@ class Response
 	const METHOD_NOT_ALLOWED = 405;
 	const INTERNAL_SERVER_ERROR = 500;
 
-	protected $compressMethods;
+	protected $compressMethods = null;
 	protected $content;
 	protected $headers;
 	protected $code;
 
-	public function __construct(Request $request, $content = '', $headers = [], $code = Response::OK)
+	public function __construct($content = '', $headers = [], $code = Response::OK, Request $request = null)
 	{
-		$this->compressMethods = $request->getHeaders()->get(Header::ACCEPT_ENCODING);
 		$this->content = $content;
 		$this->headers = new HeaderList($headers);
 		$this->code = $code;
+		if ($request !== null) {
+			$this->forRequest($request);
+		}
+	}
+
+	public function forRequest(Request $request)
+	{
+		$this->compressMethods = $request->getHeaders()->get(Header::ACCEPT_ENCODING);
 	}
 
 	private function compress()
@@ -54,9 +61,14 @@ class Response
 
 	public function render()
 	{
+		// Convert body to a string if it's an array
+		if (\is_array($this->content)) {
+			$this->content = \json_encode($this->content);
+			$this->headers->add(Header::CONTENT_TYPE, 'application/json; charset=utf-8');
+		}
 
 		// Apply deflate or gzip compression when possible
-		if (Env::$config['camagru']['compress'] && Env::$config['camagru']['mode'] != 'debug' && $this->compressMethods !== false) {
+		if (Env::$config['camagru']['compress'] && Env::$config['camagru']['mode'] != 'debug' && \is_array($this->compressMethods)) {
 			$this->compress();
 		}
 

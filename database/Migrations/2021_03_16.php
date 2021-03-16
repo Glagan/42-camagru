@@ -9,7 +9,7 @@ class UserMigration
 		$queries[] = "CREATE TABLE `users` (
 			`id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
 			`username` varchar(250) NOT NULL,
-			`mail` varchar(250) NOT NULL,
+			`email` varchar(250) NOT NULL,
 			`password` varchar(250) NOT NULL,
 			`verified` tinyint unsigned NOT NULL DEFAULT '0',
 			`theme` enum('light','dark') NOT NULL DEFAULT 'light',

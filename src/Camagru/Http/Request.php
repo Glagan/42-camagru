@@ -2,6 +2,10 @@
 
 /**
  * Find and normalize all requested inputs from a received request.
+ * @property string $method
+ * @property string $uri
+ * @property \Camagru\Http\HeaderList $headers
+ * @property \Camagru\Http\RequestInput $input
  */
 class Request
 {

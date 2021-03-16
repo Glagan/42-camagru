@@ -22,14 +22,13 @@ class Application
 			$response = \call_user_func([$controller, $match['function']], ...$match['foundParams']);
 			$response->render();
 		} else {
-			(
-				new Response(
-					$request,
-					\json_encode(['error' => 'Not found']),
-					[Header::CONTENT_TYPE => 'application/json; charset=utf-8'],
-					Response::NOT_FOUND
-				)
-			)->render();
+			$response = new Response(
+				['error' => 'Not found'],
+				[Header::CONTENT_TYPE => Header::JSON_TYPE_UTF8],
+				Response::NOT_FOUND,
+				$request,
+			);
+			$response->render();
 		}
 	}
 }

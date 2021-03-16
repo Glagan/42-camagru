@@ -5,7 +5,7 @@ use Camagru\Model;
 /**
  * @property int $id
  * @property string $username
- * @property string $mail
+ * @property string $email
  * @property string $password
  * @property bool $verified
  * @property {'light'|'dark'} $theme
@@ -15,7 +15,7 @@ class User extends Model
 {
 	protected static $fields = [
 		'username',
-		'mail',
+		'email',
 		'password',
 		'verified',
 		'theme',
