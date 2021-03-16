@@ -17,6 +17,7 @@
 * user: ``User.id``
 * path: ``string``
 * private: ``boolean``
+* at: ``Date``
 
 ## Like
 
@@ -29,7 +30,10 @@
 * id: ``int``
 * image: ``Image.id``
 * user: ``User.id``
+* message: ``string``
 * at: ``Date``
+* edited: ``Date`` Date of the last edition if there is one
+* deleted: ``boolean`` Is the message deleted, only the content is not visible
 
 
 ## Commands
