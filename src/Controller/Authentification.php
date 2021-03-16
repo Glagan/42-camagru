@@ -7,7 +7,7 @@ class Authentification extends Controller
 {
 	public function register()
 	{
-		// Validate User Data
+		// Validate Form Data
 		$this->validate([
 			'username' => [
 				'min' => 4,
@@ -16,9 +16,9 @@ class Authentification extends Controller
 			'email' => [
 				'validate' => \FILTER_VALIDATE_EMAIL,
 			],
+			// @see https://www.php.net/manual/en/function.password-hash.php
 			'password' => [
 				'min' => 8,
-				// @see https://www.php.net/manual/en/function.password-hash.php
 				'max' => 72,
 			],
 		]);
@@ -55,6 +55,33 @@ class Authentification extends Controller
 
 	public function login()
 	{
+		// Validate Form Data
+		$this->validate([
+			'username' => [
+				'min' => 4,
+				'max' => 100,
+			],
+			'password' => [
+				'min' => 8,
+				'max' => 72,
+			],
+		]);
+		// Find User
+		$username = $this->input->get('username');
+		$users = User::where([['username', $username]]);
+		if (\count($users) === 1) {
+			$user = $users[0];
+			$password = $this->input->get('password');
+			if (!\password_verify($password, $user->password)) {
+				return $this->json(['error' => 'Invalid credentials.'], 400);
+			}
+			if (\password_needs_rehash($user->password, \PASSWORD_BCRYPT)) {
+				$user->password = \password_hash($password, \PASSWORD_BCRYPT);
+				$user->persist();
+			}
+		} else {
+			return $this->json(['error' => 'Invalid credentials.'], 400);
+		}
 		return $this->json(['success' => 'Logged in !']);
 	}
 }
