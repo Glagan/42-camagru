@@ -1,8 +1,8 @@
 <?php require_once __DIR__ . '/../src/autoload.php';
 
 // Set ExceptionHandler
-// \set_exception_handler(["ExceptionHandler", "handle"]);
-// \set_error_handler("ErrorHandler::handle");
+\set_exception_handler(["ExceptionHandler", "handle"]);
+\set_error_handler("ErrorHandler::handle");
 
 /**
  * Configuration files

@@ -4,6 +4,11 @@ class ErrorHandler
 {
 	public static function handle($errno, $errstr, $errfile, $errline)
 	{
-		echo 'Error: ' . $errno;
+		Log::debug([
+			'errno' => $errno,
+			'errstr' => $errstr,
+			'errfile' => $errfile,
+			'errline' => $errline,
+		]);
 	}
 }

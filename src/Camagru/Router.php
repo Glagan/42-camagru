@@ -14,7 +14,19 @@ class Router
 		$this->routes = [];
 	}
 
-	private function add(string $method, string $path, string $callback)
+	/**
+	 * Add a route to the register routes.
+	 * $path format: "/any/path/{parameter}/{parameter:.*}"
+	 * 	If not regex is set for a parameter, "\d+" is assumed
+	 * $callback format: "Controller@function"
+	 *
+	 * @param string $method
+	 * @param string $path
+	 * @param string $callback
+	 *
+	 * @return void
+	 */
+	private function add(string $method, string $path, string $callback): void
 	{
 		$callback = \explode('@', $callback);
 		if (\count($callback) !== 2) {
@@ -33,36 +45,65 @@ class Router
 		];
 	}
 
+	/**
+	 * Add an OPTIONS route.
+	 * See Router::add function for formats.
+	 */
 	public function options(string $path, $callback)
 	{
 		$this->add('OPTIONS', $path, $callback);
 	}
 
+	/**
+	 * Add a GET route.
+	 * See Router::add function for formats.
+	 */
 	public function get(string $path, $callback)
 	{
 		$this->add('GET', $path, $callback);
 	}
 
+	/**
+	 * Add a POST route.
+	 * See Router::add function for formats.
+	 */
 	public function post(string $path, $callback)
 	{
 		$this->add('POST', $path, $callback);
 	}
 
+	/**
+	 * Add a PUT route.
+	 * See Router::add function for formats.
+	 */
 	public function put(string $path, $callback)
 	{
 		$this->add('PUT', $path, $callback);
 	}
 
+	/**
+	 * Add a PATCH route.
+	 * See Router::add function for formats.
+	 */
 	public function patch(string $path, $callback)
 	{
 		$this->add('PATCH', $path, $callback);
 	}
 
+	/**
+	 * Add a DELETE route.
+	 * See Router::add function for formats.
+	 */
 	public function delete(string $path, $callback)
 	{
 		$this->add('DELETE', $path, $callback);
 	}
 
+	/**
+	 * Loop trough all added routes and check them against the Request::uri.
+	 * Returns the found route or false on error.
+	 * Returned route has a 'foundParams' key with all matched parameters in the URI.
+	 */
 	public function match(Request $request)
 	{
 		$localUri = $request->getLocalUri($this->basePath);
@@ -76,6 +117,14 @@ class Router
 		return false;
 	}
 
+	/**
+	 * Find and return all parameters in the given route.
+	 * The route is simply exploded by the '/' delimiter.
+	 * Each found parameters are check for query parameters.
+	 * Returns an array of ['name', 'regex'] of each found query parameters.
+	 * @param string $route
+	 * @return array
+	 */
 	private static function pathParams(string $route): array
 	{
 		$params = \explode('/', $route);
@@ -124,6 +173,14 @@ class Router
 		return $regexRoute;
 	}
 
+	/**
+	 * Filter and clean found query parameters from the Regex match array.
+	 * Return a new cleaned match array.
+	 *
+	 * @param array $params The matched route query parameters
+	 * @param array $match Query paremeters found in the route regex
+	 * @return array
+	 */
 	private static function cleanMatches(array $params, array $match): array
 	{
 		// Delete the global match

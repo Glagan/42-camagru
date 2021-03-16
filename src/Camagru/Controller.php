@@ -16,7 +16,16 @@ abstract class Controller
 		$this->input = $request->getInput();
 	}
 
-	protected function json($body, $headers = null, $code = Response::OK)
+	/**
+	 * Returns a JSON Response with $body.
+	 *
+	 * @param array $body
+	 * @param array|null $headers
+	 * @param integer $code
+	 *
+	 * @return Http\Response
+	 */
+	protected function json($body, $headers = null, $code = Response::OK): Response
 	{
 		if ($headers !== null) {
 			$headers[Header::CONTENT_TYPE] = 'application/json; charset=utf-8';
