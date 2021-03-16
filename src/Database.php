@@ -6,7 +6,6 @@ abstract class Database
 
 	/**
 	 * Create or return the existing MySQL connection trough PDO.
-	 *
 	 * @return \PDO
 	 */
 	public static function connection(): \PDO
@@ -26,7 +25,6 @@ abstract class Database
 
 	/**
 	 * Last inserted ID.
-	 *
 	 * @return integer
 	 */
 	public static function lastId(): int
