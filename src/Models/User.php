@@ -1,5 +1,7 @@
-<?php namespace Models\User;
+<?php namespace Models;
 
-class User
+use Camagru\Model;
+
+class User extends Model
 {
 }
