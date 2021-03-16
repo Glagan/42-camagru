@@ -47,7 +47,7 @@ class Router
 
 	/**
 	 * Add an OPTIONS route.
-	 * See Router::add function for formats.
+	 * @see \Camagru\Router::add
 	 */
 	public function options(string $path, $callback)
 	{
@@ -56,7 +56,7 @@ class Router
 
 	/**
 	 * Add a GET route.
-	 * See Router::add function for formats.
+	 * @see \Camagru\Router::add
 	 */
 	public function get(string $path, $callback)
 	{
@@ -65,7 +65,7 @@ class Router
 
 	/**
 	 * Add a POST route.
-	 * See Router::add function for formats.
+	 * @see \Camagru\Router::add
 	 */
 	public function post(string $path, $callback)
 	{
@@ -74,7 +74,7 @@ class Router
 
 	/**
 	 * Add a PUT route.
-	 * See Router::add function for formats.
+	 * @see \Camagru\Router::add
 	 */
 	public function put(string $path, $callback)
 	{
@@ -83,7 +83,7 @@ class Router
 
 	/**
 	 * Add a PATCH route.
-	 * See Router::add function for formats.
+	 * @see \Camagru\Router::add
 	 */
 	public function patch(string $path, $callback)
 	{
@@ -92,7 +92,7 @@ class Router
 
 	/**
 	 * Add a DELETE route.
-	 * See Router::add function for formats.
+	 * @see \Camagru\Router::add
 	 */
 	public function delete(string $path, $callback)
 	{
