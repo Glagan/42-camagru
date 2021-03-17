@@ -2,7 +2,6 @@
 
 use Camagru\Http\Response;
 use Exception\ValidateException;
-use Log;
 
 abstract class Controller
 {
@@ -54,7 +53,6 @@ abstract class Controller
 		foreach ($validators as $field => $validator) {
 			// If the validator is a simple key, only check for presence
 			if (empty($validator)) {
-				Log::debug('huh ?');
 				if (!$this->inputFieldValue($field, $validator)) {
 					throw new ValidateException($this->request, "Missing {$field}.");
 				}

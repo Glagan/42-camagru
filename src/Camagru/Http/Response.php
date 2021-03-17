@@ -33,9 +33,36 @@ class Response
 		}
 	}
 
-	public function forRequest(Request $request)
+	public function setContent($content): self
+	{
+		$this->content = $content;
+		return $this;
+	}
+
+	public function setHeaders(array $headers): self
+	{
+		$this->headers = new HeaderList($headers);
+		return $this;
+	}
+
+	public function withHeaders(array $headers): self
+	{
+		foreach ($headers as $name => $value) {
+			$this->headers->add($name, $value);
+		}
+		return $this;
+	}
+
+	public function setCode(int $code): self
+	{
+		$this->code = $code;
+		return $this;
+	}
+
+	public function forRequest(Request $request): self
 	{
 		$this->compressMethods = $request->getHeaders()->get(Header::ACCEPT_ENCODING);
+		return $this;
 	}
 
 	private function compress()
@@ -68,12 +95,12 @@ class Response
 		}
 
 		// Apply deflate or gzip compression when possible
-		if (Env::$config['camagru']['compress'] && Env::$config['camagru']['mode'] != 'debug' && \is_array($this->compressMethods)) {
+		if (Env::get('camagru', 'compress', false) && Env::get('camagru', 'mode') != 'debug' && \is_array($this->compressMethods)) {
 			$this->compress();
 		}
 
 		// Content-Length
-		if (Env::$config['camagru']['mode'] != 'debug') {
+		if (Env::get('camagru', 'mode') != 'debug') {
 			$contentLength = \mb_strlen($this->content);
 			$this->headers->add(Header::CONTENT_LENGTH, $contentLength);
 		}
