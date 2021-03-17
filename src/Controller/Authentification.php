@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
+use Camagru\Http\JWT;
 use Models\User;
 
 class Authentification extends Controller
@@ -82,6 +83,7 @@ class Authentification extends Controller
 		} else {
 			return $this->json(['error' => 'Invalid credentials.'], 400);
 		}
-		return $this->json(['success' => 'Logged in !']);
+		$token = JWT::encode(['id' => $user->id]);
+		return $this->json(['success' => 'Logged in !', 'token' => $token, 'decoded' => JWT::decode($token)]);
 	}
 }
