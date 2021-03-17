@@ -11,11 +11,12 @@ class HeaderList
 
 	public function add($name, $value)
 	{
-		$this->list[$name] = $value;
+		$this->list[\mb_strtolower($name)] = $value;
 	}
 
 	public function has($name, $value = null)
 	{
+		$name = \mb_strtolower($name);
 		$exists = \array_key_exists($name, $this->list);
 		if ($exists && $value !== null) {
 			return $this->list[$name] == $value;
@@ -25,6 +26,7 @@ class HeaderList
 
 	public function get($name)
 	{
+		$name = \mb_strtolower($name);
 		if (\array_key_exists($name, $this->list)) {
 			return $this->list[$name];
 		}
@@ -33,6 +35,10 @@ class HeaderList
 
 	public function all()
 	{
-		return $this->list;
+		$headers = [];
+		foreach ($this->list as $name => $value) {
+			$headers[\ucwords($name, '-')] = $value;
+		}
+		return $headers;
 	}
 }
