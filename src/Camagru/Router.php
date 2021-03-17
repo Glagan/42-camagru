@@ -46,15 +46,6 @@ class Router
 	}
 
 	/**
-	 * Add an OPTIONS route.
-	 * @see \Camagru\Router::add
-	 */
-	public function options(string $path, $callback)
-	{
-		$this->add('OPTIONS', $path, $callback);
-	}
-
-	/**
 	 * Add a GET route.
 	 * @see \Camagru\Router::add
 	 */

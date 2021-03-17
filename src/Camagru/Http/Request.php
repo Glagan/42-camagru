@@ -1,5 +1,7 @@
 <?php namespace Camagru\Http;
 
+use Env;
+
 /**
  * Find and normalize all requested inputs from a received request.
  * @property string $method
@@ -13,6 +15,7 @@ class Request
 	protected $uri;
 	protected $headers;
 	protected $input;
+	protected $isSecure;
 
 	public function __construct()
 	{
@@ -25,6 +28,9 @@ class Request
 			$this->headers->add($name, $value);
 		}
 		$this->input = new RequestInput($this->method, $this->headers);
+		$this->isSecure =
+			(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+			|| $_SERVER['SERVER_PORT'] == 443;
 	}
 
 	public function getMethod(): string
@@ -50,5 +56,58 @@ class Request
 	public function getInput(): RequestInput
 	{
 		return $this->input;
+	}
+
+	/**
+	 * Find the complete requested URI with the HTTP Scheme, Host and port when necessary.
+	 * @return string
+	 */
+	public function getCompleteUri(): string
+	{
+		$scheme = $this->isSecure ? 'https' : 'http';
+		$port = $_SERVER['SERVER_PORT'];
+		$host = $_SERVER['HTTP_HOST'];
+		if (!$host) {
+			$host = $_SERVER['SERVER_NAME'];
+		}
+		if (!$host) {
+			$host = $_SERVER['SERVER_ADDR'];
+		}
+
+		if (($port == 80 && $scheme == 'http') || ($port == 443 && $scheme == 'https')) {
+			return $scheme . '://' . $host;
+		}
+		return $scheme . '://' . $host . ':' . $port;
+	}
+
+	/**
+	 * Check if the request has an origin and if it's for the current host.
+	 * @return boolean
+	 */
+	public function isCors(): bool
+	{
+		$origin = $this->headers->get('Origin');
+		if ($origin !== false) {
+			$host = $this->getCompleteUri();
+			return $origin !== $host;
+		}
+		return false;
+	}
+
+	/**
+	 * Check if the requested Origin is whitelisted and return it.
+	 * If not, returns the configured URL in config/camagru.php
+	 * @return string
+	 */
+	public function resolveAllowedOrigin(): string
+	{
+		if (Env::get('camagru', 'origin_whitelist') !== false) {
+			$whitelist = Env::get('camagru', 'origin_whitelist', []);
+			$origin = $this->headers->get('Origin');
+			if (\is_array($whitelist) && \in_array($origin, $whitelist)) {
+				return $origin;
+			}
+		}
+		return Env::get('camagru', 'url', '');
 	}
 }

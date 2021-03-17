@@ -13,7 +13,7 @@ class Database
 			'username' => $username,
 			'password' => $password,
 			'db' => $db,
-		] = Env::$config['mysql'];
+		] = Env::getNamespace('mysql');
 		$this->connection = new \PDO("mysql:host={$host};port={$port};dbname={$db}", $username, $password);
 	}
 

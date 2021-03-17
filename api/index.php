@@ -22,10 +22,10 @@
  */
 foreach (new DirectoryIterator('..' . DIRECTORY_SEPARATOR . 'config') as $file) {
 	// Skip . and ..
-	if ($file->getFilename() != '.' && $file->getFilename() != '..') {
-		// Filename withtout extension
+	if ($file->getFilename() != '.' && $file->getFilename() != '..' && !$file->isDir()) {
+		// Filename without extension
 		$fileName = $file->getBasename('.' . $file->getExtension());
-		Env::$config[$fileName] = include $file->getPathname();
+		Env::setNamespace($fileName, include $file->getPathname());
 	}
 }
 
