@@ -1,10 +1,10 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
-use Camagru\Http\JWT;
 use Models\User;
+use Models\UserSession;
 
-class Authentification extends Controller
+class Authentication extends Controller
 {
 	public function register()
 	{
@@ -23,6 +23,7 @@ class Authentification extends Controller
 				'max' => 72,
 			],
 		]);
+
 		// Check password validity
 		//	Must have at least 1 lower and 1 upper characters, 1 number and 1 special character
 		$password = $this->input->get('password');
@@ -31,6 +32,7 @@ class Authentification extends Controller
 				'error' => 'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
 			], 400);
 		}
+
 		// Check duplicates
 		$username = $this->input->get('username');
 		$usernameTaken = User::where([['username', $username]]);
@@ -42,8 +44,10 @@ class Authentification extends Controller
 		if (\count($emailTaken) > 0) {
 			return $this->json(['error' => 'Email taken !'], 400);
 		}
+
 		// Hash password
 		$password = \password_hash($password, \PASSWORD_BCRYPT);
+
 		// Create the User
 		$user = new User([
 			'username' => $username,
@@ -51,6 +55,14 @@ class Authentification extends Controller
 			'password' => $password,
 		]);
 		$user->persist();
+
+		// Register a new valid session
+		$userSession = new UserSession([
+			'user' => $user->id,
+			'session' => session_id(),
+		]);
+		$userSession->persist();
+
 		return $this->json(['success' => 'Registered !']);
 	}
 
@@ -67,6 +79,7 @@ class Authentification extends Controller
 				'max' => 72,
 			],
 		]);
+
 		// Find User
 		$username = $this->input->get('username');
 		$users = User::where([['username', $username]]);
@@ -83,7 +96,17 @@ class Authentification extends Controller
 		} else {
 			return $this->json(['error' => 'Invalid credentials.'], 400);
 		}
-		$token = JWT::encode(['id' => $user->id]);
-		return $this->json(['success' => 'Logged in !', 'token' => $token, 'decoded' => JWT::decode($token)]);
+
+		// Register the new valid session
+		$session = session_id();
+		if (\count(UserSession::where([['user', $user->id], ['session', $session]])) == 0) {
+			$userSession = new UserSession([
+				'user' => $user->id,
+				'session' => $session,
+			]);
+			$userSession->persist();
+		}
+
+		return $this->json(['success' => 'Logged in !']);
 	}
 }

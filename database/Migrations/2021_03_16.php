@@ -1,6 +1,6 @@
 <?php
 
-class UserMigration
+class AllTablesMigration
 {
 	public function run()
 	{

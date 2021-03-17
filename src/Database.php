@@ -1,8 +1,21 @@
 <?php
 
-abstract class Database
+class Database
 {
-	private static $_connection = null;
+	private static $instance = null;
+	private $connection = null;
+
+	public function __construct()
+	{
+		[
+			'host' => $host,
+			'port' => $port,
+			'username' => $username,
+			'password' => $password,
+			'db' => $db,
+		] = Env::$config['mysql'];
+		$this->connection = new \PDO("mysql:host={$host};port={$port};dbname={$db}", $username, $password);
+	}
 
 	/**
 	 * Create or return the existing MySQL connection trough PDO.
@@ -10,17 +23,10 @@ abstract class Database
 	 */
 	public static function connection(): \PDO
 	{
-		if (Database::$_connection == null) {
-			[
-				'host' => $host,
-				'port' => $port,
-				'username' => $username,
-				'password' => $password,
-				'db' => $db,
-			] = Env::$config['mysql'];
-			Database::$_connection = new PDO("mysql:host={$host};port={$port};dbname={$db}", $username, $password);
+		if (Database::$instance == null) {
+			Database::$instance = new Database;
 		}
-		return Database::$_connection;
+		return Database::$instance->connection;
 	}
 
 	/**
@@ -29,9 +35,16 @@ abstract class Database
 	 */
 	public static function lastId(): int
 	{
-		if (Database::$_connection == null) {
+		if (Database::$instance == null) {
 			return -1;
 		}
-		return Database::$_connection->lastInsertId();
+		return Database::$instance->connection->lastInsertId();
+	}
+
+	public function __destruct()
+	{
+		if (static::$instance->connection) {
+			static::$instance->connection = null;
+		}
 	}
 }
