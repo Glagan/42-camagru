@@ -8,12 +8,16 @@ abstract class Controller
 	protected $request;
 	protected $requestHeaders;
 	protected $input;
+	protected $auth;
+	protected $user;
 
-	public function __construct($request)
+	public function __construct($request, $auth)
 	{
 		$this->request = $request;
 		$this->requestHeaders = $request->getHeaders();
 		$this->input = $request->getInput();
+		$this->auth = $auth;
+		$this->user = $auth !== null ? $auth->getUser() : null;
 	}
 
 	/**

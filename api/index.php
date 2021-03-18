@@ -2,7 +2,7 @@
 
 \session_name('session');
 \session_set_cookie_params([
-	'lifetime' => 60 * 60 * 24 * 7, // 1 week
+	'lifetime' => time() + 60 * 60 * 24 * 7, // 1 week
 	'path' => '/',
 	'domain' => $_SERVER['HTTP_HOST'],
 	'secure' => true,
@@ -31,11 +31,11 @@ foreach (new DirectoryIterator('..' . DIRECTORY_SEPARATOR . 'config') as $file) 
 
 // All routes
 $router = new Camagru\Router('/api');
-$router->get('/status', 'Status@status');
-$router->get('/test-{id}', 'Status@test');
-$router->post('/login', 'Authentication@login');
-$router->post('/register', 'Authentication@register');
-$router->get('/{id}', 'Status@test');
+$router->get('/status', ['use' => 'Status@status']);
+$router->get('/test-{id}', ['use' => 'Status@test']);
+$router->post('/login', ['auth' => false, 'use' => 'Authentication@login']);
+$router->post('/register', ['auth' => false, 'use' => 'Authentication@register']);
+$router->get('/profile', ['auth' => true, 'use' => 'Profile@single']);
 
 // Create and start App
 //echo '<pre>';

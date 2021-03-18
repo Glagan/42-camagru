@@ -18,7 +18,13 @@ class Router
 	 * Add a route to the register routes.
 	 * $path format: "/any/path/{parameter}/{parameter:.*}"
 	 * 	If not regex is set for a parameter, "\d+" is assumed
-	 * $callback format: "Controller@function"
+	 * route keys
+	 * [
+	 * 	use: "Controller@function"
+	 * 	auth: boolean or null
+	 * ]
+	 * Auth set to true or false require be to logged in or not.
+	 * If Auth is omitted or null the login state is not checked.
 	 *
 	 * @param string $method
 	 * @param string $path
@@ -26,11 +32,14 @@ class Router
 	 *
 	 * @return void
 	 */
-	private function add(string $method, string $path, string $callback): void
+	private function add(string $method, string $path, array $route): void
 	{
-		$callback = \explode('@', $callback);
+		if (!isset($route['use'])) {
+			throw new Exception(); // TODO
+		}
+		$callback = \explode('@', $route['use']);
 		if (\count($callback) !== 2) {
-			throw new Exception();
+			throw new Exception(); // TODO
 		}
 		$path = \trim($path, '/');
 		$params = Router::pathParams($path);
@@ -39,6 +48,7 @@ class Router
 			'method' => $method,
 			'path' => $path,
 			'params' => $params,
+			'auth' => isset($route['auth']) ? $route['auth'] : null,
 			'regex' => Router::pathToRegex($path, $params),
 			'controller' => $callback[0],
 			'function' => $callback[1],
@@ -49,45 +59,45 @@ class Router
 	 * Add a GET route.
 	 * @see \Camagru\Router::add
 	 */
-	public function get(string $path, $callback)
+	public function get(string $path, array $route)
 	{
-		$this->add('GET', $path, $callback);
+		$this->add('GET', $path, $route);
 	}
 
 	/**
 	 * Add a POST route.
 	 * @see \Camagru\Router::add
 	 */
-	public function post(string $path, $callback)
+	public function post(string $path, array $route)
 	{
-		$this->add('POST', $path, $callback);
+		$this->add('POST', $path, $route);
 	}
 
 	/**
 	 * Add a PUT route.
 	 * @see \Camagru\Router::add
 	 */
-	public function put(string $path, $callback)
+	public function put(string $path, array $route)
 	{
-		$this->add('PUT', $path, $callback);
+		$this->add('PUT', $path, $route);
 	}
 
 	/**
 	 * Add a PATCH route.
 	 * @see \Camagru\Router::add
 	 */
-	public function patch(string $path, $callback)
+	public function patch(string $path, array $route)
 	{
-		$this->add('PATCH', $path, $callback);
+		$this->add('PATCH', $path, $route);
 	}
 
 	/**
 	 * Add a DELETE route.
 	 * @see \Camagru\Router::add
 	 */
-	public function delete(string $path, $callback)
+	public function delete(string $path, array $route)
 	{
-		$this->add('DELETE', $path, $callback);
+		$this->add('DELETE', $path, $route);
 	}
 
 	/**
