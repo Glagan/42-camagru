@@ -25,13 +25,13 @@ abstract class Controller
 	 * @param string $field
 	 * @return void
 	 */
-	private function inputFieldValue(string $field, $validator)
+	private function inputFieldValue(string $field)
 	{
 		$value = $this->input->get($field);
 		// The boolean false can't be received as a *real* value
 		//	since values in the input are received as string
 		if ($value === false) {
-			throw new ValidateException($this->request, $field, $validator);
+			throw new ValidateException($this->request, $field);
 		}
 		return $value;
 	}
@@ -56,9 +56,9 @@ abstract class Controller
 	{
 		foreach ($validators as $field => $validator) {
 			// If the validator is a simple key, only check for presence
-			if (empty($validator)) {
-				if (!$this->inputFieldValue($field, $validator)) {
-					throw new ValidateException($this->request, "Missing {$field}.");
+			if (empty($key)) {
+				if (!$this->inputFieldValue($validator)) {
+					throw new ValidateException($this->request, "Missing {$validator}.");
 				}
 			}
 			// If it's an array, check all parameters
