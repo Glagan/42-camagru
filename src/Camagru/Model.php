@@ -207,4 +207,15 @@ class Model
 		}
 		return false;
 	}
+
+	// TODO: Add defaults + hide hidden fields
+	public function toArray(array $fields = []): array
+	{
+		return $this->attributes;
+	}
+
+	public function __toString()
+	{
+		return \json_encode($this->toArray());
+	}
 }

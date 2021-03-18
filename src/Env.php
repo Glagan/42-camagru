@@ -19,7 +19,7 @@ class Env
 
 	public static function get(string $namespace, string $field, $default = false)
 	{
-		if (!isset(static::$config[$namespace][$field])) {
+		if (isset(static::$config[$namespace][$field])) {
 			return static::$config[$namespace][$field];
 		}
 		return $default;
@@ -27,6 +27,9 @@ class Env
 
 	public static function getNamespace(string $namespace)
 	{
-		return static::$config[$namespace];
+		if (isset(static::$config[$namespace])) {
+			return static::$config[$namespace];
+		}
+		return [];
 	}
 }

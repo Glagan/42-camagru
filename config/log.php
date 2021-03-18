@@ -1,5 +1,5 @@
 <?php
 
 return [
-	'folder' => __DIR__ . '/../storage/logs',
+	'folder' => __DIR__ . '/../storage/logs/',
 ];

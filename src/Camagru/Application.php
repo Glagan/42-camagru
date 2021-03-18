@@ -1,7 +1,9 @@
 <?php namespace Camagru;
 
+use Camagru\Auth;
 use Camagru\Http\Header;
 use Camagru\Http\Response;
+use Exception\AuthException;
 
 class Application
 {
@@ -34,8 +36,21 @@ class Application
 		// Try to match a route and render a response
 		$match = $this->router->match($request);
 		if ($match !== false) {
+			// Check if the route need authentication
+			$auth = null;
+			if (isset($match['auth']) && $match['auth'] !== null) {
+				$auth = new Auth();
+				if (($match['auth'] && !$auth->isLoggedIn()) || (!$match['auth'] && $auth->isLoggedIn())) {
+					$reason = $match['auth'] ?
+					'You need to be logged in to access this page.' :
+					'You need to be logged out to access this page.';
+					throw new AuthException($reason);
+				}
+			}
+
+			// Call the route
 			$controller = '\\Controller\\' . $match['controller'];
-			$controller = new $controller($request);
+			$controller = new $controller($request, $auth);
 			$response = \call_user_func([$controller, $match['function']], ...$match['foundParams']);
 			$response->render();
 		} else {
