@@ -8,7 +8,6 @@ class Profile extends Controller
 	{
 		return $this->json([
 			'user' => $this->user->toArray(),
-			'test' => $this->user->id,
 		]);
 	}
 }
