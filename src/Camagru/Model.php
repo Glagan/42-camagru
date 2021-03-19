@@ -13,16 +13,30 @@ class Model
 
 	public function __construct($attributes = [])
 	{
-		$this->attributes = $attributes;
+		$this->attributes = [];
+		foreach ($attributes as $name => $value) {
+			$this->__set($name, $value);
+		}
 		$this->dirty = [];
 	}
 
 	public function __set($name, $value)
 	{
-		if ($name != 'id' && \array_key_exists($name, $this->attributes)) {
-			if (!\in_array($name, $this->dirty) && $this->attributes[$name] != $value) {
-				$this->dirty[] = $name;
+		// Cast value if necessary
+		if (\array_key_exists($name, static::$casts)) {
+			$type = static::$casts[$name];
+			if ($type == 'bool') {
+				$value = !!$value;
+			} else if ($type == 'date') {
+				if (!\is_a($value, \DateTime::class)) {
+					$value = new \DateTime($value);
+				}
 			}
+		}
+		if ($name == 'id') {
+			$value = (int) $value;
+		} else if (\array_key_exists($name, $this->attributes) && !\in_array($name, $this->dirty) && $this->attributes[$name] != $value) {
+			$this->dirty[] = $name;
 		}
 		$this->attributes[$name] = $value;
 	}
@@ -80,7 +94,6 @@ class Model
 	 * @param array $selectors Array of selectors
 	 * @return \Model[]
 	 */
-	// TODO: Filter fields with static::$fields
 	public static function all(array $conditions, $order = [], $limit = -1): array
 	{
 		$query = static::select()
@@ -96,7 +109,6 @@ class Model
 	 * Return true if the Model was inserted or false if it was updated.
 	 * @return bool
 	 */
-	// TODO: Filter inserted and updated fields with static::$fields
 	public function persist(): bool
 	{
 		// If there is no ID we INSERT the model
@@ -178,9 +190,12 @@ class Model
 		return (new Query(Query::DELETE, static::getTable()));
 	}
 
-	// TODO: Add defaults + hide hidden fields
-	public function toArray(array $fields = []): array
+	public function toArray(array $pick = []): array
 	{
+		if (\count($pick) > 0) {
+			// @see https://stackoverflow.com/a/46843866/7794671
+			return \array_intersect_key($this->attributes, \array_flip($pick));
+		}
 		return $this->attributes;
 	}
 

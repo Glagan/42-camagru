@@ -24,7 +24,10 @@ class User extends Model
 
 	protected static $casts = [
 		'verified' => 'bool',
-		'theme' => ['light', 'dark'],
 		'receiveComments' => 'bool',
+	];
+
+	protected static $defaults = [
+		'theme' => 'light',
 	];
 }
