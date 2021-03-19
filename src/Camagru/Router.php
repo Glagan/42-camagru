@@ -3,7 +3,7 @@
 use Camagru\Http\Request;
 use Exception;
 
-class Router
+class Router implements Routable
 {
 	protected $basePath;
 	protected $routes;
@@ -25,11 +25,9 @@ class Router
 	 * ]
 	 * Auth set to true or false require be to logged in or not.
 	 * If Auth is omitted or null the login state is not checked.
-	 *
 	 * @param string $method
 	 * @param string $path
 	 * @param string $callback
-	 *
 	 * @return void
 	 */
 	private function add(string $method, string $path, array $route): void
@@ -56,7 +54,18 @@ class Router
 	}
 
 	/**
-	 * Add a GET route.
+	 * Create a RouterGroup and assign this router to create routes in a namespace.
+	 * @param string $controller
+	 * @param \Closure $callback
+	 * @return void
+	 */
+	public function group(string $controller, \Closure $callback)
+	{
+		$group = new RouteGroup($this, $controller);
+		$callback($group);
+	}
+
+	/**
 	 * @see \Camagru\Router::add
 	 */
 	public function get(string $path, array $route)
@@ -65,7 +74,6 @@ class Router
 	}
 
 	/**
-	 * Add a POST route.
 	 * @see \Camagru\Router::add
 	 */
 	public function post(string $path, array $route)
@@ -74,7 +82,6 @@ class Router
 	}
 
 	/**
-	 * Add a PUT route.
 	 * @see \Camagru\Router::add
 	 */
 	public function put(string $path, array $route)
@@ -83,7 +90,6 @@ class Router
 	}
 
 	/**
-	 * Add a PATCH route.
 	 * @see \Camagru\Router::add
 	 */
 	public function patch(string $path, array $route)
@@ -92,7 +98,6 @@ class Router
 	}
 
 	/**
-	 * Add a DELETE route.
 	 * @see \Camagru\Router::add
 	 */
 	public function delete(string $path, array $route)
