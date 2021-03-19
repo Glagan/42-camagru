@@ -4,6 +4,7 @@ use Camagru\Controller;
 use Models\User;
 use Models\UserSession;
 use SQL\Operator;
+use SQL\Value;
 
 class Authentication extends Controller
 {
@@ -97,16 +98,24 @@ class Authentication extends Controller
 			return $this->json(['error' => 'Invalid credentials.'], 400);
 		}
 
-		// Register the new valid session
+		// Clean previous invalid UserSession
 		$session = \session_id();
+		UserSession::delete()->where([
+			'user' => $user->id,
+			['issued', Operator::MORE_THAN, Value::make("(NOW() - INTERVAL 7 DAY)", true)],
+		])->execute();
+
+		// Register the new valid session or refresh the old one
 		$userSession = UserSession::first(['user' => $user->id, 'session' => $session]);
-		if (UserSession::first(['user' => $user->id, 'session' => $session]) === false) {
+		if ($userSession === false) {
 			$userSession = new UserSession([
 				'user' => $user->id,
 				'session' => $session,
 			]);
-			$userSession->persist();
+		} else {
+			$userSession->issued = new \DateTime();
 		}
+		$userSession->persist();
 
 		return $this->json(['success' => 'Logged in !']);
 	}
@@ -116,10 +125,9 @@ class Authentication extends Controller
 		if ($session === null) {
 			$session = \session_id();
 		}
-		$userSession = UserSession::first(['user' => $this->user->id, 'session' => $session]);
-		if ($userSession !== false) {
-			$userSession->delete();
-		}
+		UserSession::delete()->where([
+			'session' => $session,
+		])->execute();
 
 		return $this->json(['success' => 'Logged out, see you soon !']);
 	}
@@ -129,7 +137,7 @@ class Authentication extends Controller
 		$session = \session_id();
 		$userSessions = UserSession::all(['user' => $this->user->id, ['session', Operator::DIFFERENT, $session]]);
 		foreach ($userSessions as $userSession) {
-			$userSession->delete();
+			$userSession->remove();
 		}
 
 		return $this->json(['success' => 'Logged out on all other sessions !']);

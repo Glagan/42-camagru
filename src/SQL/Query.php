@@ -1,10 +1,10 @@
 <?php namespace SQL;
 
 use Database;
+use DateTime;
 use Exception\QueryException;
 use Exception\SQLException;
 use Log;
-use Value\Value;
 
 class Query
 {
@@ -91,12 +91,18 @@ class Query
 	public function select(array $fields): self
 	{
 		$this->fields = [];
+		$columns = [];
 		foreach ($fields as $key => $value) {
 			if (empty($key)) {
 				$this->fields[] = ['column' => $value];
+				$columns[] = $value;
 			} else {
 				$this->fields[] = ['column' => $key, 'alias' => $value];
+				$columns[] = $key;
 			}
+		}
+		if (!\in_array('id', $columns)) {
+			\array_unshift($this->fields, ['column' => 'id']);
 		}
 		return $this;
 	}
@@ -243,7 +249,7 @@ class Query
 			} else {
 				$sql .= \implode(', ', \array_map(function ($field) {
 					if (\is_a($field, Value::class)) {
-						return $field->value();
+						return $field->get();
 					} else {
 						$fieldValue = " {$field['column']}";
 						if (isset($field['alias'])) {
@@ -280,10 +286,7 @@ class Query
 					$currentGroup = [];
 					foreach ($group as $value) {
 						if (\is_a($value, Value::class)) {
-							$currentGroup[] = $value->placeholder();
-							if (!$value->isRaw()) {
-								$this->params[] = $value->value();
-							}
+							$currentGroup[] = $value->get();
 						} else {
 							$currentGroup[] = '?';
 							$this->params[] = $value;
@@ -316,10 +319,7 @@ class Query
 			$assignments = [];
 			foreach ($this->updates as $key => $value) {
 				if (\is_a($value, Value::class)) {
-					$assignments[] = "{$key} = {$value->placeholder()}";
-					if (!$value->isRaw()) {
-						$this->params[] = $value->value();
-					}
+					$assignments[] = "{$key} = {$value->get()}";
 				} else {
 					$assignments[] = "{$key} = ?";
 					$this->params[] = $value;
@@ -341,10 +341,7 @@ class Query
 					\array_push($this->params, ...\array_values($group['value']));
 				} else if ($operator != Operator::IS_NULL && $operator != Operator::IS_NOT_NULL) {
 					if (\is_a($group['value'], Value::class)) {
-						$conditions[] = "{$group['column']} {$group['operator']} {$group['value']->placeholder()}";
-						if (!$group['value']->isRaw()) {
-							$this->params[] = $group['value']->value();
-						}
+						$conditions[] = "{$group['column']} {$group['operator']} {$group['value']->get()}";
 					} else {
 						$conditions[] = "{$group['column']} {$group['operator']} ?";
 						$this->params[] = $group['value'];
@@ -387,7 +384,29 @@ class Query
 		if ($this->statement === false) {
 			throw new QueryException($this, 'Failed to prepare statement.');
 		}
-		$result = $this->statement->execute($this->params);
+		// Bind each parameters
+		$idx = 1;
+		foreach ($this->params as $param) {
+			// Convert value if necessary
+			$value = $param;
+			if (\is_a($param, \DateTime::class)) {
+				$value = $param->format('Y-m-d H:i:s');
+			}
+			// Find PDO type
+			$type = false;
+			if (\is_int($value)) {
+				$type = \PDO::PARAM_INT;
+			} elseif (\is_bool($value)) {
+				$type = \PDO::PARAM_BOOL;
+			} elseif (\is_null($value)) {
+				$type = \PDO::PARAM_NULL;
+			} elseif (\is_string($value)) {
+				$type = \PDO::PARAM_STR;
+			}
+			// Bind
+			$this->statement->bindValue($idx++, $value, $type);
+		}
+		$result = $this->statement->execute();
 		if ($result === false) {
 			throw new SQLException($this->statement);
 		}
