@@ -31,12 +31,14 @@ foreach (new DirectoryIterator('..' . DIRECTORY_SEPARATOR . 'config') as $file) 
 
 // All routes
 $router = new Camagru\Router('/api');
-$router->post('/register', ['auth' => false, 'use' => 'Authentication@register']);
-$router->post('/login', ['auth' => false, 'use' => 'Authentication@login']);
-$router->delete('/logout', ['auth' => true, 'use' => 'Authentication@logout']);
-$router->delete('/logout/all', ['auth' => true, 'use' => 'Authentication@logoutAll']);
-$router->delete('/logout/{session:.+}?', ['auth' => true, 'use' => 'Authentication@logout']);
-$router->get('/profile', ['auth' => true, 'use' => 'Profile@single']);
+
+$router->group(Controller\Authentication::class, function ($router) {
+	$router->post('/register', ['auth' => false, 'use' => 'register']);
+	$router->post('/login', ['auth' => false, 'use' => 'login']);
+	$router->delete('/logout', ['auth' => true, 'use' => 'logout']);
+	$router->delete('/logout/all', ['auth' => true, 'use' => 'logoutAll']);
+	$router->delete('/logout/{session:.+}?', ['auth' => true, 'use' => 'logout']);
+});
 
 // Create and start App
 //echo '<pre>';

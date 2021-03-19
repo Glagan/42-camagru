@@ -49,7 +49,7 @@ class Application
 			}
 
 			// Call the route
-			$controller = '\\Controller\\' . $match['controller'];
+			$controller = $match['controller'];
 			$controller = new $controller($request, $auth);
 			$response = \call_user_func([$controller, $match['function']], ...$match['foundParams']);
 			$response->render();
