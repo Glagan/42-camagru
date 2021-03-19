@@ -67,7 +67,7 @@ class Model
 	 */
 	public static function first(array $conditions, $order = [])
 	{
-		$query = (new Query(Query::SELECT, static::getTable()))
+		$query = static::select()
 			->where($conditions)
 			->orderBy($order)
 			->limit(1);
@@ -83,7 +83,7 @@ class Model
 	// TODO: Filter fields with static::$fields
 	public static function all(array $conditions, $order = [], $limit = -1): array
 	{
-		$query = (new Query(Query::SELECT, static::getTable()))
+		$query = static::select()
 			->where($conditions)
 			->orderBy($order)
 			->limit($limit);
@@ -101,8 +101,8 @@ class Model
 	{
 		// If there is no ID we INSERT the model
 		if ($this->id === null) {
-			$query = (new Query(Query::INSERT, static::getTable()))
-				->insert($this->toArray());
+			$query = static::insert()
+				->set($this->toArray());
 			$result = $query->execute();
 			if ($result) {
 				$this->id = Database::lastId();
@@ -115,9 +115,8 @@ class Model
 			foreach ($this->dirty as $field) {
 				$updates[$field] = $this->attributes[$field];
 			}
-			$query = (new Query(Query::UPDATE, static::getTable()))
+			$query = static::update()
 				->set($updates)
-				->insert($this->toArray())
 				->where(['id' => $this->id]);
 			$result = $query->execute();
 			if ($result) {
@@ -136,7 +135,7 @@ class Model
 	public function remove(): bool
 	{
 		if ($this->id) {
-			$query = (new Query(Query::DELETE, static::getTable()))
+			$query = static::delete()
 				->where(['id' => $this->id]);
 			return $query->execute();
 		}
@@ -149,34 +148,34 @@ class Model
 	 */
 	public static function select(): Query
 	{
-		return new Query(Query::SELECT, static::getTable());
+		return (new Query(Query::SELECT, static::getTable()));
 	}
 
 	/**
-	 * Return a new SELECT Query.
+	 * Return a new INSERT Query.
 	 * @return \SQL\Query
 	 */
 	public static function insert(): Query
 	{
-		return new Query(Query::SELECT, static::getTable());
+		return (new Query(Query::INSERT, static::getTable()));
 	}
 
 	/**
-	 * Return a new SELECT Query.
+	 * Return a new UPDATE Query.
 	 * @return \SQL\Query
 	 */
 	public static function update(): Query
 	{
-		return new Query(Query::SELECT, static::getTable());
+		return (new Query(Query::UPDATE, static::getTable()));
 	}
 
 	/**
-	 * Return a new SELECT Query.
+	 * Return a new DELETE Query.
 	 * @return \SQL\Query
 	 */
 	public static function delete(): Query
 	{
-		return new Query(Query::SELECT, static::getTable());
+		return (new Query(Query::DELETE, static::getTable()));
 	}
 
 	// TODO: Add defaults + hide hidden fields
