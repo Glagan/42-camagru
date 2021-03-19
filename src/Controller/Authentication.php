@@ -3,6 +3,7 @@
 use Camagru\Controller;
 use Models\User;
 use Models\UserSession;
+use SQL\Operator;
 
 class Authentication extends Controller
 {
@@ -98,7 +99,7 @@ class Authentication extends Controller
 		}
 
 		// Register the new valid session
-		$session = session_id();
+		$session = \session_id();
 		if (\count(UserSession::where([['user', $user->id], ['session', $session]])) == 0) {
 			$userSession = new UserSession([
 				'user' => $user->id,
@@ -108,5 +109,29 @@ class Authentication extends Controller
 		}
 
 		return $this->json(['success' => 'Logged in !']);
+	}
+
+	public function logout($session = null)
+	{
+		if ($session === null) {
+			$session = \session_id();
+		}
+		$userSession = UserSession::where([['user', $this->user->id], ['session', $session]]);
+		if (\count($userSession) == 1) {
+			$userSession[0]->delete();
+		}
+
+		return $this->json(['success' => 'Logged out, see you soon !']);
+	}
+
+	public function logoutAll()
+	{
+		$session = \session_id();
+		$userSessions = UserSession::where([['user', $this->user->id], ['session', Operator::DIFFERENT, $session]]);
+		foreach ($userSessions as $userSession) {
+			$userSession->delete();
+		}
+
+		return $this->json(['success' => 'Logged out on all other sessions !']);
 	}
 }

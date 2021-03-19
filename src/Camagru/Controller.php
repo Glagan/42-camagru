@@ -56,7 +56,7 @@ abstract class Controller
 	{
 		foreach ($validators as $field => $validator) {
 			// If the validator is a simple key, only check for presence
-			if (empty($key)) {
+			if (empty($field)) {
 				if (!$this->inputFieldValue($validator)) {
 					throw new ValidateException($this->request, "Missing {$validator}.");
 				}
