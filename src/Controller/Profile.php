@@ -7,7 +7,7 @@ class Profile extends Controller
 	public function single()
 	{
 		return $this->json([
-			'user' => $this->user->toArray(),
+			'user' => $this->user->toArray(['id', 'username', 'verified']),
 		]);
 	}
 }
