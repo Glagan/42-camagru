@@ -198,7 +198,7 @@ class Model
 		if ($this->id) {
 			$table = $this->getTable();
 			$query = "DELETE FROM {$table} WHERE id = ?";
-			$statement = Database::connection()->query($query);
+			$statement = Database::connection()->prepare($query);
 			if ($statement && $statement->execute([$this->id])) {
 				$this->id = null;
 				return true;

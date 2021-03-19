@@ -385,9 +385,7 @@ class Query
 		else {
 			$this->result = $this->statement->fetchAll(\PDO::FETCH_ASSOC);
 		}
-		if ($this->result === false) {
-			$this->result = [];
-		}
+		// PDO returns an empty array if no rows are found and throws on failure
 		return $this->result;
 	}
 }
