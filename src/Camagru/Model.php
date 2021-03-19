@@ -103,7 +103,11 @@ class Model
 		if ($this->id === null) {
 			$query = (new Query(Query::INSERT, static::getTable()))
 				->insert($this->toArray());
-			return $query->execute();
+			$result = $query->execute();
+			if ($result) {
+				$this->id = Database::lastId();
+			}
+			return $result;
 		}
 		// Else we only update dirty fields
 		else if (\count($this->dirty) > 0) {
@@ -114,7 +118,11 @@ class Model
 			$query = (new Query(Query::UPDATE, static::getTable()))
 				->set($updates)
 				->insert($this->toArray());
-			return $query->execute();
+			$result = $query->execute();
+			if ($result) {
+				$this->dirty = [];
+			}
+			return $result;
 		}
 		return true;
 	}

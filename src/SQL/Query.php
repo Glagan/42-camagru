@@ -4,6 +4,7 @@ use Database;
 use Exception\QueryException;
 use Exception\SQLException;
 use Log;
+use Value\Value;
 
 class Query
 {
@@ -24,7 +25,7 @@ class Query
 	private $order;
 	private $limit;
 	private $offset;
-	private $placeholders;
+	private $params;
 	private $statement;
 	private $result;
 
@@ -39,7 +40,7 @@ class Query
 		$this->order = [];
 		$this->limit = -1;
 		$this->offset = -1;
-		$this->placeholders = [];
+		$this->params = [];
 	}
 
 	public function setType(string $type): self
@@ -149,13 +150,15 @@ class Query
 				// Check if there is 2 or 3 arguments
 				// The operator is in the middle if there is 3 arguments
 				// Check if the value is an array for an IN condition if there is only 2 arguments
-				$hasOperator = \count($value) == 3;
-				$operator = $hasOperator ? $value[1] : Operator::EQUAL;
-				$conditionValue = $hasOperator ? $value[2] : $value[1];
-				if (!$hasOperator && \is_array($conditionValue)) {
-					$operator = Operator::IN;
+				if (\is_array($value)) {
+					$hasOperator = \count($value) == 3;
+					$operator = $hasOperator ? $value[1] : Operator::EQUAL;
+					$conditionValue = $hasOperator ? $value[2] : $value[1];
+					if (!$hasOperator && \is_array($conditionValue)) {
+						$operator = Operator::IN;
+					}
+					$this->conditions[] = ['column' => $value[0], 'operator' => $operator, 'value' => $conditionValue];
 				}
-				$this->conditions[] = ['column' => $value[0], 'operator' => $operator, 'value' => $conditionValue];
 			} else {
 				// Consider an array value as an IN condition
 				if (\is_array($value)) {
@@ -238,10 +241,15 @@ class Query
 			if (\count($this->fields) == 0) {
 				$sql .= " *";
 			} else {
-				$sql .= \implode(', ', \array_map(function (array $field) use ($sql) {
-					$sql .= " {$field['column']}";
-					if (isset($field['alias'])) {
-						$sql .= " AS {$field['alias']}";
+				$sql .= \implode(', ', \array_map(function ($field) {
+					if (\is_a($field, Value::class)) {
+						return $field->value();
+					} else {
+						$fieldValue = " {$field['column']}";
+						if (isset($field['alias'])) {
+							$fieldValue .= " AS {$field['alias']}";
+						}
+						return $fieldValue;
 					}
 				}, $this->fields));
 			}
@@ -259,33 +267,45 @@ class Query
 
 		// INSERT has the list of columns SET as a delimiter and the values inside parenthesis
 		//	A 2D array of array is expected the nested array representing a single group of values
-		$this->placeholders = [];
+		$this->params = [];
 		if ($this->type == self::INSERT && \count($this->inserts) > 0) {
-			$first = false;
+			$columnCount = -1;
 			$columns = [];
-			$validGroups = 0;
-			// Array of array of values
+			$groups = [];
+			// Generate each groups of the insert
 			foreach ($this->inserts as $group) {
-				// Skip if it's an empty array
 				if (\is_array($group) && \count($group) > 0) {
-					// Get a list of all the columns from the first set of values
-					if (!$first) {
-						foreach ($group as $key => $value) {
-							$columns[] = $key;
-							$this->placeholders[] = $value;
+					// Create a group of placeholders (or values)
+					$count = 0;
+					$currentGroup = [];
+					foreach ($group as $value) {
+						if (\is_a($value, Value::class)) {
+							$currentGroup[] = $value->placeholder();
+							if (!$value->isRaw()) {
+								$this->params[] = $value->value();
+							}
+						} else {
+							$currentGroup[] = '?';
+							$this->params[] = $value;
 						}
-						$first = true;
+						$count++;
 					}
-					$validGroups++;
+					// Count the number of columns to avoid missmatch
+					if ($columnCount < 0) {
+						$columnCount = $count;
+						$columns = \array_keys($group);
+					} else if ($columnCount != $count) {
+						throw new QueryException($this, "Invalid number of columns in INSERT.");
+					}
+					// Add the groupe to the list
+					$values = \implode(', ', $currentGroup);
+					$groups[] = "({$values})";
 				}
 			}
-			if ($validGroups > 0) {
-				$length = \count($columns);
+			// Generate the complete INSERT
+			if (\count($groups) > 0) {
 				$columns = \implode(', ', $columns);
-				// Generate array of question mark for placeholders
-				$placeholders = \implode(', ', \array_fill(0, $length, '?'));
-				// Generate the list of values group e.g (?, ?, ?), (?, ?, ?)
-				$values = \implode(', ', \array_fill(0, $validGroups, "({$placeholders})"));
+				$values = \implode(', ', $groups);
 				$sql .= " ({$columns}) VALUES {$values}";
 			}
 		}
@@ -295,8 +315,15 @@ class Query
 		if ($this->type == self::UPDATE && \count($this->updates) > 0) {
 			$assignments = [];
 			foreach ($this->updates as $key => $value) {
-				$assignments[] = "{$key} = ?";
-				$this->placeholders[] = $value;
+				if (\is_a($value, Value::class)) {
+					$assignments[] = "{$key} = {$value->placeholder()}";
+					if (!$value->isRaw()) {
+						$this->params[] = $value->value();
+					}
+				} else {
+					$assignments[] = "{$key} = ?";
+					$this->params[] = $value;
+				}
 			}
 			$assignments = \implode(', ', $assignments);
 			$sql .= " SET {$assignments}";
@@ -311,10 +338,17 @@ class Query
 					$length = \is_array($group['value']) ? \count($group['value']) : 1;
 					$placeholders = \implode(', ', \array_fill(0, $length, '?'));
 					$conditions[] = "{$group['column']} {$group['operator']} ({$placeholders})";
-					\array_push($this->placeholders, ...\array_values($group['value']));
+					\array_push($this->params, ...\array_values($group['value']));
 				} else if ($operator != Operator::IS_NULL && $operator != Operator::IS_NOT_NULL) {
-					$conditions[] = "{$group['column']} {$group['operator']} ?";
-					$this->placeholders[] = $group['value'];
+					if (\is_a($group['value'], Value::class)) {
+						$conditions[] = "{$group['column']} {$group['operator']} {$group['value']->placeholder()}";
+						if (!$group['value']->isRaw()) {
+							$this->params[] = $group['value']->value();
+						}
+					} else {
+						$conditions[] = "{$group['column']} {$group['operator']} ?";
+						$this->params[] = $group['value'];
+					}
 				} else {
 					$conditions[] = "{$group['column']} {$group['operator']}";
 				}
@@ -353,7 +387,7 @@ class Query
 		if ($this->statement === false) {
 			throw new QueryException($this, 'Failed to prepare statement.');
 		}
-		$result = $this->statement->execute($this->placeholders);
+		$result = $this->statement->execute($this->params);
 		if ($result === false) {
 			throw new SQLException($this->statement);
 		}
