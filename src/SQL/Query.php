@@ -306,12 +306,17 @@ class Query
 		if ($this->type != self::INSERT && \count($this->conditions) > 0) {
 			$conditions = [];
 			foreach ($this->conditions as $group) {
-				if (\is_a($group, Condition::class)) {
-					$conditions[] = $group->build();
-					\array_push($this->placeholders, ...$group->values());
-				} else {
+				$operator = $group['operator'];
+				if ($operator == Operator::IN || $operator == Operator::NOT_IN) {
+					$length = \is_array($group['value']) ? \count($group['value']) : 1;
+					$placeholders = \implode(', ', \array_fill(0, $length, '?'));
+					$conditions[] = "{$group['column']} {$group['operator']} ({$placeholders})";
+					\array_push($this->placeholders, ...\array_values($group['value']));
+				} else if ($operator != Operator::IS_NULL && $operator != Operator::IS_NOT_NULL) {
 					$conditions[] = "{$group['column']} {$group['operator']} ?";
 					$this->placeholders[] = $group['value'];
+				} else {
+					$conditions[] = "{$group['column']} {$group['operator']}";
 				}
 			}
 			$sql .= (' WHERE ' . \implode(' AND ', $conditions));
