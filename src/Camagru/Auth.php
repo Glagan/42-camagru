@@ -2,6 +2,8 @@
 
 use Models\User;
 use Models\UserSession;
+use SQL\Operator;
+use SQL\Value;
 
 class Auth
 {
@@ -10,9 +12,12 @@ class Auth
 	public function __construct()
 	{
 		// Check if there is an entry for the session in the UserSession table
-		//	Session issued only less than 7 days ago are valid
 		$session = \session_id();
-		$userSession = UserSession::first(['session' => $session/*, ['issued', '<', 'INTERVAL 7 DAY']*/]);
+		$userSession = UserSession::first([
+			'session' => $session,
+			// Session issued only less than 7 days ago are valid
+			['issued', Operator::MORE_THAN, Value::make("(NOW() - INTERVAL 7 DAY)")],
+		]);
 		if ($userSession !== false) {
 			$this->user = User::get($userSession->user);
 		}

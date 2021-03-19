@@ -117,7 +117,8 @@ class Model
 			}
 			$query = (new Query(Query::UPDATE, static::getTable()))
 				->set($updates)
-				->insert($this->toArray());
+				->insert($this->toArray())
+				->where(['id' => $this->id]);
 			$result = $query->execute();
 			if ($result) {
 				$this->dirty = [];
@@ -132,7 +133,7 @@ class Model
 	 * Return true if it was deleted or false if there is no ID.
 	 * @return boolean
 	 */
-	public function delete(): bool
+	public function remove(): bool
 	{
 		if ($this->id) {
 			$query = (new Query(Query::DELETE, static::getTable()))
@@ -140,6 +141,42 @@ class Model
 			return $query->execute();
 		}
 		return false;
+	}
+
+	/**
+	 * Return a new SELECT Query.
+	 * @return \SQL\Query
+	 */
+	public static function select(): Query
+	{
+		return new Query(Query::SELECT, static::getTable());
+	}
+
+	/**
+	 * Return a new SELECT Query.
+	 * @return \SQL\Query
+	 */
+	public static function insert(): Query
+	{
+		return new Query(Query::SELECT, static::getTable());
+	}
+
+	/**
+	 * Return a new SELECT Query.
+	 * @return \SQL\Query
+	 */
+	public static function update(): Query
+	{
+		return new Query(Query::SELECT, static::getTable());
+	}
+
+	/**
+	 * Return a new SELECT Query.
+	 * @return \SQL\Query
+	 */
+	public static function delete(): Query
+	{
+		return new Query(Query::SELECT, static::getTable());
 	}
 
 	// TODO: Add defaults + hide hidden fields
