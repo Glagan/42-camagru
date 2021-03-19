@@ -108,34 +108,25 @@ class Query
 	}
 
 	/**
-	 * Set the fields that will be updated in an UPDATE query.
+	 * Set the fields that will be updated or inserted in an UPDATE or INSERT query.
 	 * Format:
 	 * 	['column' => 'value']
 	 * @param array $updates
 	 * @return self
 	 */
-	public function set(array $updates): self
+	public function set(array $values): self
 	{
-		$this->updates = $updates;
-		return $this;
-	}
-
-	/**
-	 * Set the fields that will be updated in an UPDATE query.
-	 * Format:
-	 * 	['column' => 'value']
-	 * @param array $updates
-	 * @return self
-	 */
-	public function insert(array $values): self
-	{
-		$this->inserts = [];
-		if (\count($values) > 0 && \is_array($values[\array_key_first($values)])) {
-			foreach ($values as $group) {
-				$this->inserts[] = $group;
+		if ($this->type == Query::INSERT) {
+			$this->inserts = [];
+			if (\count($values) > 0 && \is_array($values[\array_key_first($values)])) {
+				foreach ($values as $group) {
+					$this->inserts[] = $group;
+				}
+			} else {
+				$this->inserts[] = $values;
 			}
 		} else {
-			$this->inserts[] = $values;
+			$this->updates = $values;
 		}
 		return $this;
 	}
