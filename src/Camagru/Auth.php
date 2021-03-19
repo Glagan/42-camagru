@@ -12,9 +12,9 @@ class Auth
 		// Check if there is an entry for the session in the UserSession table
 		//	Session issued only less than 7 days ago are valid
 		$session = \session_id();
-		$userSession = UserSession::where([['session', $session], ['issued', '<', 'INTERVAL 7 DAY']]);
-		if (\count($userSession) > 0) {
-			$this->user = User::get($userSession[0]->user);
+		$userSession = UserSession::first(['session' => $session/*, ['issued', '<', 'INTERVAL 7 DAY']*/]);
+		if ($userSession !== false) {
+			$this->user = User::get($userSession->user);
 		}
 	}
 

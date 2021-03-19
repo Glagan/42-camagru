@@ -1,9 +1,7 @@
 <?php namespace Camagru;
 
 use Database;
-use Exception\SQLException;
-use Log;
-use SQL\Operator;
+use SQL\Query;
 
 class Model
 {
@@ -58,83 +56,38 @@ class Model
 	 */
 	public static function get(int $id)
 	{
-		$table = static::getTable();
-		$query = "SELECT * FROM {$table} WHERE id = ?";
-		Log::debug('Executing ' . $query, [$id]);
-		$statement = Database::connection()->prepare($query);
-		if ($statement !== false) {
-			if ($statement->execute([$id])) {
-				$result = $statement->fetch(\PDO::FETCH_ASSOC);
-				$class = static::class;
-				return new $class($result);
-			}
-		}
-		return false;
+		return static::first(['id' => $id]);
+	}
+
+	/**
+	 * Return the first found row that meet the conditions.
+	 * @param array $conditions
+	 * @param int|null $order
+	 * @return \Model|false
+	 */
+	public static function first(array $conditions, $order = [])
+	{
+		$query = (new Query(Query::SELECT, static::getTable()))
+			->where($conditions)
+			->orderBy($order)
+			->limit(1);
+		return $query->first(static::class);
 	}
 
 	/**
 	 * Find all Models that match the given selectors in the Model table.
-	 * Selectors format:
-	 * 	['column', 'value']
-	 * 	['column', 'operator', 'value']
-	 * List of operators: =, !=, >, >=, <, <=, IN, NOT IN, IS NULL, IS NOT NULL
-	 * 	See SQL\Operator
-	 * IS_NULL and IS_NOT_NULL does not require a third parameter.
+	 * @see SQL\Query
 	 * @param array $selectors Array of selectors
 	 * @return \Model[]
 	 */
 	// TODO: Filter fields with static::$fields
-	public static function where(array $selectors = []): array
+	public static function all(array $conditions, $order = [], $limit = -1): array
 	{
-		// Build the $where array from each selectors
-		$where = [];
-		$placeholders = [];
-		$currentGroup = [];
-		foreach ($selectors as $selector) {
-			if (\is_array($selector)) {
-				$arguments = \count($selector);
-				// TODO: Check if $selector contains an array for a OR group
-				$column = $selector[0];
-				$operator = $selector[1];
-				if ($arguments == 2) {
-					if ($operator == Operator::IS_NULL || $operator == Operator::IS_NOT_NULL) {
-						$where[] = "{$column} {$operator}";
-					} else {
-						$where[] = "{$column} = ?";
-						// TODO: Casted values with static::$casts (for Dates)
-						$placeholders[] = $operator;
-					}
-				} else if ($operator == Operator::IN || $operator == Operator::NOT_IN) {
-					// TODO: handle array in $selector[2]
-				} else {
-					// TODO: Casted values with static::$casts (for Dates)
-					$where[] = "{$column} {$operator} ?";
-					$placeholders[] = $selector[2];
-				}
-			}
-		}
-		// Build the query
-		$table = static::getTable();
-		$query = "SELECT * FROM {$table}";
-		if (\count($where) > 0) {
-			$where = \implode(' AND ', $where);
-			$query = "{$query} WHERE {$where}";
-		}
-		Log::debug('Executing ' . $query, $placeholders);
-		// Execute the query
-		$statement = Database::connection()->prepare($query);
-		if ($statement !== false) {
-			if ($statement->execute($placeholders)) {
-				$results = $statement->fetchAll(\PDO::FETCH_ASSOC);
-				$classes = [];
-				foreach ($results as $result) {
-					$class = static::class;
-					$classes[] = new $class($result);
-				}
-				return $classes;
-			}
-		}
-		throw new SQLException($statement);
+		$query = (new Query(Query::SELECT, static::getTable()))
+			->where($conditions)
+			->orderBy($order)
+			->limit($limit);
+		return $query->all(static::class);
 	}
 
 	/**
@@ -146,46 +99,24 @@ class Model
 	// TODO: Filter inserted and updated fields with static::$fields
 	public function persist(): bool
 	{
-		$table = $this->getTable();
-		$retValue = false;
-		// INSERT if there is no 'id' attribute and the Model doesn't exists in the Database
-		if (!\array_key_exists('id', $this->attributes)) {
-			$columns = \implode(', ', \array_keys($this->attributes));
-			$placeholders = \implode(', ', \array_fill(0, \count($this->attributes), '?'));
-			$query = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-			// TODO: Casted values with static::$casts (for Dates)
-			$values = \array_values($this->attributes);
-			$statement = Database::connection()->prepare($query);
-			$result = $statement->execute($values);
-			if ($result) {
-				$this->id = Database::lastId();
-			}
-			$retValue = true;
+		// If there is no ID we INSERT the model
+		if ($this->id === null) {
+			$query = (new Query(Query::INSERT, static::getTable()))
+				->insert($this->toArray());
+			return $query->execute();
 		}
-		// Or only UPDATE if there is a least one dirty field
+		// Else we only update dirty fields
 		else if (\count($this->dirty) > 0) {
-			$fields = [];
-			$values = [];
+			$updates = [];
 			foreach ($this->dirty as $field) {
-				$values[] = $this->attributes[$field];
-				$fields[] = "{$field} = ?";
+				$updates[$field] = $this->attributes[$field];
 			}
-			$values[] = $this->id;
-			$fields = \implode(', ', $fields);
-			$placeholders = \implode(', ', \array_fill(0, \count($this->dirty), '?'));
-			$query = "UPDATE {$table} SET {$fields} WHERE id = ?";
-			$statement = Database::connection()->prepare($query);
-			// TODO: Casted values with static::$casts (for Dates)
-			$result = $statement->execute($values);
-			$retValue = false;
+			$query = (new Query(Query::UPDATE, static::getTable()))
+				->set($updates)
+				->insert($this->toArray());
+			return $query->execute();
 		}
-		// Remove dirty or throw if there was a query and it failed
-		if ($result) {
-			$this->dirty = [];
-		} else if ($statement) {
-			throw new SQLException($statement);
-		}
-		return $retValue;
+		return true;
 	}
 
 	/**
@@ -196,14 +127,9 @@ class Model
 	public function delete(): bool
 	{
 		if ($this->id) {
-			$table = $this->getTable();
-			$query = "DELETE FROM {$table} WHERE id = ?";
-			$statement = Database::connection()->prepare($query);
-			if ($statement && $statement->execute([$this->id])) {
-				$this->id = null;
-				return true;
-			}
-			throw new SQLException($statement);
+			$query = (new Query(Query::DELETE, static::getTable()))
+				->where(['id' => $this->id]);
+			return $query->execute();
 		}
 		return false;
 	}

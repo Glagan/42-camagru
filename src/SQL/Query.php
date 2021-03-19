@@ -3,6 +3,7 @@
 use Database;
 use Exception\QueryException;
 use Exception\SQLException;
+use Log;
 
 class Query
 {
@@ -121,6 +122,7 @@ class Query
 	 */
 	public function insert(array $values): self
 	{
+		$this->inserts = [];
 		if (\count($values) > 0 && \is_array($values[\array_key_first($values)])) {
 			foreach ($values as $group) {
 				$this->inserts[] = $group;
@@ -128,7 +130,6 @@ class Query
 		} else {
 			$this->inserts[] = $values;
 		}
-
 		return $this;
 	}
 
@@ -145,15 +146,23 @@ class Query
 		$this->conditions = [];
 		foreach ($conditions as $key => $value) {
 			if (empty($key)) {
-				if (\is_array($value)) {
-					if (\count($value) == 2) {
-						$this->conditions[] = ['column' => $value[0], 'operator' => Operator::EQUAL, 'value' => $value[1]];
-					} else {
-						$this->conditions[] = ['column' => $value[0], 'operator' => $value[1], 'value' => $value[2]];
-					}
+				// Check if there is 2 or 3 arguments
+				// The operator is in the middle if there is 3 arguments
+				// Check if the value is an array for an IN condition if there is only 2 arguments
+				$hasOperator = \count($value) == 3;
+				$operator = $hasOperator ? $value[1] : Operator::EQUAL;
+				$conditionValue = $hasOperator ? $value[2] : $value[1];
+				if (!$hasOperator && \is_array($conditionValue)) {
+					$operator = Operator::IN;
 				}
+				$this->conditions[] = ['column' => $value[0], 'operator' => $operator, 'value' => $conditionValue];
 			} else {
-				$this->conditions[] = ['column' => $key, 'operator' => Operator::EQUAL, 'value' => $value];
+				// Consider an array value as an IN condition
+				if (\is_array($value)) {
+					$this->conditions[] = ['column' => $key, 'operator' => Operator::IN, 'value' => $value];
+				} else {
+					$this->conditions[] = ['column' => $key, 'operator' => Operator::EQUAL, 'value' => $value];
+				}
 			}
 		}
 		return $this;
@@ -206,7 +215,7 @@ class Query
 					$this->order[] = ['column' => $key, 'direction' => $value];
 				}
 			}
-		} else {
+		} else if (!\is_null($order)) {
 			$this->order[] = ['column' => $order, 'direction' => $direction];
 		}
 		return $this;
@@ -248,10 +257,9 @@ class Query
 			return $ret;
 		}, $this->table));
 
-		// Add updates
-		$this->placeholders = [];
 		// INSERT has the list of columns SET as a delimiter and the values inside parenthesis
 		//	A 2D array of array is expected the nested array representing a single group of values
+		$this->placeholders = [];
 		if ($this->type == self::INSERT && \count($this->inserts) > 0) {
 			$first = false;
 			$columns = [];
@@ -264,6 +272,7 @@ class Query
 					if (!$first) {
 						foreach ($group as $key => $value) {
 							$columns[] = $key;
+							$this->placeholders[] = $value;
 						}
 						$first = true;
 					}
@@ -277,7 +286,7 @@ class Query
 				$placeholders = \implode(', ', \array_fill(0, $length, '?'));
 				// Generate the list of values group e.g (?, ?, ?), (?, ?, ?)
 				$values = \implode(', ', \array_fill(0, $validGroups, "({$placeholders})"));
-				$sql .= "({$columns}) SET {$values}";
+				$sql .= " ({$columns}) VALUES {$values}";
 			}
 		}
 
@@ -297,8 +306,13 @@ class Query
 		if ($this->type != self::INSERT && \count($this->conditions) > 0) {
 			$conditions = [];
 			foreach ($this->conditions as $group) {
-				$conditions[] = "{$group['column']} {$group['operator']} ?";
-				$this->placeholders[] = $group['value'];
+				if (\is_a($group, Condition::class)) {
+					$conditions[] = $group->build();
+					\array_push($this->placeholders, ...$group->values());
+				} else {
+					$conditions[] = "{$group['column']} {$group['operator']} ?";
+					$this->placeholders[] = $group['value'];
+				}
 			}
 			$sql .= (' WHERE ' . \implode(' AND ', $conditions));
 		}
@@ -326,9 +340,10 @@ class Query
 	 * Build, prepare and execute the query.
 	 * Returns the result of the execution.
 	 */
-	private function execute(): bool
+	public function execute(): bool
 	{
 		$query = $this->build();
+		Log::debug('Execute ' . $query);
 		$this->statement = Database::connection()->prepare($query);
 		if ($this->statement === false) {
 			throw new QueryException($this, 'Failed to prepare statement.');
@@ -353,7 +368,8 @@ class Query
 			if (\is_int($classOrMode)) {
 				$this->result = $this->statement->fetch($classOrMode);
 			} else {
-				$this->result = $this->statement->fetch(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, $classOrMode);
+				$this->statement->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, $classOrMode);
+				$this->result = $this->statement->fetch();
 			}
 		}
 		// If nothing is set we use FETCH_ASSOC instead of the default FETCH_BOTH
@@ -378,7 +394,8 @@ class Query
 			if (\is_int($classOrMode)) {
 				$this->result = $this->statement->fetchAll($classOrMode);
 			} else {
-				$this->result = $this->statement->fetchAll(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, $classOrMode);
+				$this->statement->setFetchMode(\PDO::FETCH_CLASS | \PDO::FETCH_PROPS_LATE, $classOrMode);
+				$this->result = $this->statement->fetchAll();
 			}
 		}
 		// If nothing is set we use FETCH_ASSOC instead of the default FETCH_BOTH

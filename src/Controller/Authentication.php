@@ -36,13 +36,13 @@ class Authentication extends Controller
 
 		// Check duplicates
 		$username = $this->input->get('username');
-		$usernameTaken = User::where([['username', $username]]);
-		if (\count($usernameTaken) > 0) {
+		$usernameTaken = User::first(['username' => $username]);
+		if ($usernameTaken !== false) {
 			return $this->json(['error' => 'Username taken !'], 400);
 		}
 		$email = $this->input->get('email');
-		$emailTaken = User::where([['email', $email]]);
-		if (\count($emailTaken) > 0) {
+		$emailTaken = User::first(['email' => $email]);
+		if ($emailTaken !== false) {
 			return $this->json(['error' => 'Email taken !'], 400);
 		}
 
@@ -83,9 +83,8 @@ class Authentication extends Controller
 
 		// Find User
 		$username = $this->input->get('username');
-		$users = User::where([['username', $username]]);
-		if (\count($users) === 1) {
-			$user = $users[0];
+		$user = User::first(['username' => $username]);
+		if ($user !== false) {
 			$password = $this->input->get('password');
 			if (!\password_verify($password, $user->password)) {
 				return $this->json(['error' => 'Invalid credentials.'], 400);
@@ -100,7 +99,8 @@ class Authentication extends Controller
 
 		// Register the new valid session
 		$session = \session_id();
-		if (\count(UserSession::where([['user', $user->id], ['session', $session]])) == 0) {
+		$userSession = UserSession::first(['user' => $user->id, 'session' => $session]);
+		if (UserSession::first(['user' => $user->id, 'session' => $session]) === false) {
 			$userSession = new UserSession([
 				'user' => $user->id,
 				'session' => $session,
@@ -116,9 +116,9 @@ class Authentication extends Controller
 		if ($session === null) {
 			$session = \session_id();
 		}
-		$userSession = UserSession::where([['user', $this->user->id], ['session', $session]]);
-		if (\count($userSession) == 1) {
-			$userSession[0]->delete();
+		$userSession = UserSession::first(['user' => $this->user->id, 'session' => $session]);
+		if ($userSession !== false) {
+			$userSession->delete();
 		}
 
 		return $this->json(['success' => 'Logged out, see you soon !']);
@@ -127,7 +127,7 @@ class Authentication extends Controller
 	public function logoutAll()
 	{
 		$session = \session_id();
-		$userSessions = UserSession::where([['user', $this->user->id], ['session', Operator::DIFFERENT, $session]]);
+		$userSessions = UserSession::all(['user' => $this->user->id, ['session', Operator::DIFFERENT, $session]]);
 		foreach ($userSessions as $userSession) {
 			$userSession->delete();
 		}
