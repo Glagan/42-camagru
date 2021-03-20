@@ -17,7 +17,7 @@ class ExceptionHandler
 		if (\method_exists($ex, 'render')) {
 			$ex->render();
 		} else {
-			if (Env::get('camagru', 'mode') == 'debug') {
+			if (Env::get('Camagru', 'mode') == 'debug') {
 				$response = new Response(
 					[
 						'error' => 'Uncatched exception',

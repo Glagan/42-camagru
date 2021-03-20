@@ -95,12 +95,12 @@ class Response
 		}
 
 		// Apply deflate or gzip compression when possible
-		if (Env::get('camagru', 'compress', false) && Env::get('camagru', 'mode') != 'debug' && \is_array($this->compressMethods)) {
+		if (Env::get('Camagru', 'compress', false) && Env::get('Camagru', 'mode') != 'debug' && \is_array($this->compressMethods)) {
 			$this->compress();
 		}
 
 		// Content-Length
-		if (Env::get('camagru', 'mode') != 'debug') {
+		if (Env::get('Camagru', 'mode') != 'debug') {
 			$contentLength = \mb_strlen($this->content);
 			$this->headers->add(Header::CONTENT_LENGTH, $contentLength);
 		}
