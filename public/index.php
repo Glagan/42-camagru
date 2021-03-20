@@ -46,6 +46,6 @@ $router->group(Controller\Image::class, function ($router) {
 
 // Create and start App
 //echo '<pre>';
-$app = new Camagru\Application($router, __DIR__);
+$app = new Camagru\Application($router, \dirname(__DIR__));
 $app->load()->run();
 //echo '</pre>';
