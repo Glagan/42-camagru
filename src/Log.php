@@ -25,7 +25,8 @@ class Log
 				\fclose($this->file);
 			}
 			$day = $date->format('Y_m_d');
-			$this->file = \fopen(Env::get('log', 'folder', '') . $day . '.log', 'a');
+			$folder = Env::get('Camagru', 'root') . '/' . Env::get('Log', 'folder', '/storage/logs/');
+			$this->file = \fopen($folder . $day . '.log', 'a');
 			$this->day = $day;
 		}
 	}
@@ -64,7 +65,7 @@ class Log
 
 	public static function debug(...$values)
 	{
-		if (Env::get('camagru', 'mode') == 'debug') {
+		if (Env::get('Camagru', 'mode') == 'debug') {
 			$log = static::getInstance();
 			$i = 0;
 			foreach ($values as $value) {

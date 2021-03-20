@@ -101,13 +101,13 @@ class Request
 	 */
 	public function resolveAllowedOrigin(): string
 	{
-		if (Env::get('camagru', 'origin_whitelist') !== false) {
-			$whitelist = Env::get('camagru', 'origin_whitelist', []);
+		if (Env::get('Camagru', 'origin_whitelist') !== false) {
+			$whitelist = Env::get('Camagru', 'origin_whitelist', []);
 			$origin = $this->headers->get('Origin');
 			if (\is_array($whitelist) && \in_array($origin, $whitelist)) {
 				return $origin;
 			}
 		}
-		return Env::get('camagru', 'url', '');
+		return Env::get('Camagru', 'url', '');
 	}
 }

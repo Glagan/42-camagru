@@ -15,20 +15,6 @@
 \set_exception_handler(["ExceptionHandler", "handle"]);
 \set_error_handler("ErrorHandler::handle");
 
-/**
- * Configuration files
- * 	Each file in the /config folder is a key in the $config object
- * 	With the value being the returned value in the configuration file
- */
-foreach (new DirectoryIterator('..' . DIRECTORY_SEPARATOR . 'config') as $file) {
-	// Skip . and ..
-	if ($file->getFilename() != '.' && $file->getFilename() != '..' && !$file->isDir()) {
-		// Filename without extension
-		$fileName = $file->getBasename('.' . $file->getExtension());
-		Env::setNamespace($fileName, include $file->getPathname());
-	}
-}
-
 // All routes
 $router = new Camagru\Router('/api');
 
@@ -60,6 +46,6 @@ $router->group(Controller\Image::class, function ($router) {
 
 // Create and start App
 //echo '<pre>';
-$app = new Camagru\Application($router);
-$app->run();
+$app = new Camagru\Application($router, __DIR__);
+$app->load()->run();
 //echo '</pre>';

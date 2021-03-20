@@ -13,8 +13,16 @@ class Database
 			'username' => $username,
 			'password' => $password,
 			'db' => $db,
-		] = Env::getNamespace('mysql');
-		$this->connection = new \PDO("mysql:host={$host};port={$port};dbname={$db}", $username, $password);
+			'charset' => $charset,
+		] = Env::getNamespace('MySQL');
+		$this->connection = new \PDO(
+			"mysql:host={$host};port={$port};dbname={$db};charset={$charset};",
+			$username, $password,
+			[
+				\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+				\PDO::ATTR_EMULATE_PREPARES => false,
+			]
+		);
 	}
 
 	/**

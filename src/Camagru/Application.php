@@ -3,18 +3,39 @@
 use Camagru\Auth;
 use Camagru\Http\Header;
 use Camagru\Http\Response;
+use Env;
 use Exception\AuthException;
 
 class Application
 {
 	private $router;
+	private $root;
 
-	public function __construct(Router $router)
+	public function __construct(Router $router, string $root)
 	{
 		$this->router = $router;
+		$this->root = \pathinfo($root, \PATHINFO_DIRNAME);
 	}
 
-	public function run(): void
+	public function load(): self
+	{
+		$iniFile = $this->root . '/config.ini';
+		if (!\file_exists($iniFile)) {
+			throw new \Exception('Missing config.ini file.');
+		}
+		$config = \parse_ini_file($this->root . '/config.ini', true);
+		if ($config === false) {
+			throw new \Exception('Error while reading config.ini file.');
+		}
+		foreach ($config as $key => $value) {
+			Env::setNamespace($key, $value);
+			Env::setNamespace(\mb_strtolower($key), $value);
+		}
+		Env::set('camagru', 'root', $this->root);
+		return $this;
+	}
+
+	public function run(): self
 	{
 		$request = new Http\Request;
 
@@ -30,7 +51,7 @@ class Application
 			])
 				->forRequest($request)
 				->render();
-			return;
+			return $this;
 		}
 
 		// Try to match a route and render a response
@@ -62,5 +83,6 @@ class Application
 			);
 			$response->render();
 		}
+		return $this;
 	}
 }

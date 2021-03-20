@@ -75,7 +75,7 @@ class JWT
 	 */
 	public static function sign(string $message): string
 	{
-		return \hash_hmac(static::ALGORITHM_FUNCTION, $message, Env::get('camagru', 'secret_key'), true);
+		return \hash_hmac(static::ALGORITHM_FUNCTION, $message, Env::get('Camagru', 'secret_key'), true);
 	}
 
 	/**
