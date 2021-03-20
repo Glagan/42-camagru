@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
+use Models\User;
 
 class Profile extends Controller
 {
@@ -46,6 +47,21 @@ class Profile extends Controller
 				'optional' => true,
 			],
 		]);
+		// TODO
 		return $this->json(['success' => 'Profile updated !']);
+	}
+
+	public function single($id)
+	{
+		if ($id < 1) {
+			return $this->json(['error' => 'Invalid Image ID.'], 400);
+		}
+		$user = User::get($id);
+		if ($user === false) {
+			return $this->json(['error' => 'User not found.'], 404);
+		}
+		$attributes = $user->toArray(['id', 'username', 'verified']);
+		// TODO: List of Images
+		return $this->json(['user' => $attributes]);
 	}
 }

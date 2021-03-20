@@ -9,7 +9,7 @@ use Camagru\Model;
  * @property \DateTime $at
  * @property string $message
  */
-class User extends Model
+class Comment extends Model
 {
 	protected static $fields = [
 		'image',

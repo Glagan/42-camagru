@@ -88,7 +88,7 @@ class Query
 	 * @param array $fields
 	 * @return self
 	 */
-	public function select(array $fields): self
+	public function columns(array $fields): self
 	{
 		$this->fields = [];
 		$columns = [];
