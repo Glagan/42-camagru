@@ -10,7 +10,10 @@ class Router implements Routable
 
 	public function __construct(string $basePath = '')
 	{
-		$this->basePath = $basePath;
+		$this->basePath = \trim($basePath, "/\r\n");
+		if (\strlen($this->basePath) > 0) {
+			$this->basePath .= '/';
+		}
 		$this->routes = [];
 	}
 
@@ -112,10 +115,10 @@ class Router implements Routable
 	 */
 	public function match(Request $request)
 	{
-		$localUri = $request->getLocalUri($this->basePath);
+		$uri = $request->getUri();
 		foreach ($this->routes as $route) {
 			$match = [];
-			if ($request->getMethod() === $route['method'] && \preg_match("#^{$route['regex']}$#", $localUri, $match)) {
+			if ($request->getMethod() === $route['method'] && \preg_match("#^{$this->basePath}{$route['regex']}$#", $uri, $match)) {
 				$route['foundParams'] = Router::cleanMatches($route['params'], $match);
 				return $route;
 			}

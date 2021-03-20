@@ -14,7 +14,7 @@ class Application
 	public function __construct(Router $router, string $root)
 	{
 		$this->router = $router;
-		$this->root = \pathinfo($root, \PATHINFO_DIRNAME);
+		$this->root = $root;
 	}
 
 	public function load(): self
