@@ -29,8 +29,10 @@ class AllTablesMigration
 
 		$queries[] = "CREATE TABLE `likes` (
 			`id` bigint unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
+			`user` int unsigned NOT NULL,
 			`image` int unsigned NOT NULL,
 			`at` datetime NOT NULL DEFAULT NOW(),
+			FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE,
 			FOREIGN KEY (`image`) REFERENCES `images` (`id`) ON DELETE CASCADE
 		) ENGINE='InnoDB';";
 

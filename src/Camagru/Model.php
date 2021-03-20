@@ -149,7 +149,11 @@ class Model
 		if ($this->id) {
 			$query = static::delete()
 				->where(['id' => $this->id]);
-			return $query->execute();
+			if ($query->execute()) {
+				$this->id = null;
+				$this->attributes = [];
+				return true;
+			}
 		}
 		return false;
 	}

@@ -10,7 +10,6 @@ class Authentication extends Controller
 {
 	public function register()
 	{
-		// Validate Form Data
 		$this->validate([
 			'username' => [
 				'min' => 4,
@@ -30,8 +29,6 @@ class Authentication extends Controller
 				],
 			],
 		]);
-
-		// Check password validity
 
 		// Check duplicates
 		$username = $this->input->get('username');
@@ -68,7 +65,6 @@ class Authentication extends Controller
 
 	public function login()
 	{
-		// Validate Form Data
 		$this->validate([
 			'username' => [
 				'min' => 4,
@@ -139,5 +135,23 @@ class Authentication extends Controller
 		}
 
 		return $this->json(['success' => 'Logged out on all other sessions !']);
+	}
+
+	public function sendVerification()
+	{
+		// TODO
+		return $this->json(['success' => 'An email with a new verification link has been sent.']);
+	}
+
+	public function resetPassword()
+	{
+		$this->validate([
+			'username' => [
+				'min' => 4,
+				'max' => 100,
+			],
+		]);
+		// TODO
+		return $this->json(['success' => 'An email with a link to reset your password has been sent.']);
 	}
 }
