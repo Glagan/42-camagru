@@ -64,26 +64,32 @@ abstract class Controller
 			// If it's an array, check all parameters
 			else if (\is_array($validator)) {
 				$optional = isset($validator['optional']) ? $validator['optional'] : false;
+				if (!$optional && isset($validator['requiredIf'])) {
+					$optional = $this->input->get($validator['requiredIf']) === false;
+				}
 				$value = $this->input->get($field);
 				// Presence
-				if ($value === false && !$optional) {
-					throw new ValidateException($this->request, "Missing {$field}.");
+				if ($value === false) {
+					if (!$optional) {
+						throw new ValidateException($this->request, "Missing {$field}.");
+					}
 				} else {
 					// Validity
-					if (\array_key_exists('validate', $validator)) {
+					if (isset($validator['validate'])) {
 						if (!\filter_var($value, $validator['validate'])) {
 							throw new ValidateException($this->request, "Invalid {$field}.");
 						}
-					} else if (\array_key_exists('match', $validator)) {
-						if (!\preg_match($validator['match'], $value)) {
-							throw new ValidateException($this->request, "Invalid {$field}.");
+					} else if (isset($validator['match'])) {
+						[$regex, $message] = $validator['match'];
+						if (!\preg_match($regex, $value)) {
+							throw new ValidateException($this->request, $message);
 						}
 					}
 					// Length
-					if (\array_key_exists('min', $validator) && \mb_strlen($value) < $validator['min']) {
+					if (isset($validator['min']) && \mb_strlen($value) < $validator['min']) {
 						throw new ValidateException($this->request, "{$field} is too short, must be longer than {$validator['min']}.");
 					}
-					if (\array_key_exists('max', $validator) && \mb_strlen($value) > $validator['max']) {
+					if (isset($validator['max']) && \mb_strlen($value) > $validator['max']) {
 						throw new ValidateException($this->request, "{$field} is too long, must be smaller than {$validator['max']}.");
 					}
 				}

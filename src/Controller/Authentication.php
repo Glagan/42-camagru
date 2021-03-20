@@ -19,21 +19,19 @@ class Authentication extends Controller
 			'email' => [
 				'validate' => \FILTER_VALIDATE_EMAIL,
 			],
-			// @see https://www.php.net/manual/en/function.password-hash.php
 			'password' => [
 				'min' => 8,
+				// @see https://www.php.net/manual/en/function.password-hash.php
 				'max' => 72,
+				// Must have at least 1 lower and 1 upper characters, 1 number and 1 special character
+				'match' => [
+					'/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/',
+					'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
+				],
 			],
 		]);
 
 		// Check password validity
-		//	Must have at least 1 lower and 1 upper characters, 1 number and 1 special character
-		$password = $this->input->get('password');
-		if (!\preg_match('/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/', $password)) {
-			return $this->json([
-				'error' => 'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
-			], 400);
-		}
 
 		// Check duplicates
 		$username = $this->input->get('username');
@@ -48,7 +46,7 @@ class Authentication extends Controller
 		}
 
 		// Hash password
-		$password = \password_hash($password, \PASSWORD_BCRYPT);
+		$password = \password_hash($this->input->get('password'), \PASSWORD_BCRYPT);
 
 		// Create the User
 		$user = new User([
