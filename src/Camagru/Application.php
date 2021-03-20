@@ -29,9 +29,8 @@ class Application
 		}
 		foreach ($config as $key => $value) {
 			Env::setNamespace($key, $value);
-			Env::setNamespace(\mb_strtolower($key), $value);
 		}
-		Env::set('camagru', 'root', $this->root);
+		Env::set('Camagru', 'root', $this->root);
 		return $this;
 	}
 
