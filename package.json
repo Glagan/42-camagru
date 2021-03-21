@@ -1,0 +1,29 @@
+{
+	"name": "42-camagru",
+	"version": "1.0.0",
+	"description": "Camagru project at 42.",
+	"main": "./resources/index.ts",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Glagan/42-camagru.git"
+	},
+	"keywords": [
+		"42",
+		"camagru"
+	],
+	"author": "Glagan",
+	"license": "GPL-3.0",
+	"bugs": {
+		"url": "https://github.com/Glagan/42-camagru/issues"
+	},
+	"homepage": "https://github.com/Glagan/42-camagru#readme",
+	"devDependencies": {
+		"typescript": "^4.2.3",
+		"tslib": "^2.1.0",
+		"rollup": "^2.42.1",
+		"rollup-plugin-typescript2": "^0.30.0"
+	}
+}
