@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
+use Camagru\Http\Response;
 use Models\User;
 use Models\UserSession;
 use SQL\Operator;
@@ -34,12 +35,12 @@ class Authentication extends Controller
 		$username = $this->input->get('username');
 		$usernameTaken = User::first(['username' => $username]);
 		if ($usernameTaken !== false) {
-			return $this->json(['error' => 'Username taken !'], 400);
+			return $this->json(['error' => 'Username taken !'], Response::BAD_REQUEST);
 		}
 		$email = $this->input->get('email');
 		$emailTaken = User::first(['email' => $email]);
 		if ($emailTaken !== false) {
-			return $this->json(['error' => 'Email taken !'], 400);
+			return $this->json(['error' => 'Email taken !'], Response::BAD_REQUEST);
 		}
 
 		// Hash password
@@ -82,14 +83,14 @@ class Authentication extends Controller
 		if ($user !== false) {
 			$password = $this->input->get('password');
 			if (!\password_verify($password, $user->password)) {
-				return $this->json(['error' => 'Invalid credentials.'], 400);
+				return $this->json(['error' => 'Invalid credentials.'], Response::BAD_REQUEST);
 			}
 			if (\password_needs_rehash($user->password, \PASSWORD_BCRYPT)) {
 				$user->password = \password_hash($password, \PASSWORD_BCRYPT);
 				$user->persist();
 			}
 		} else {
-			return $this->json(['error' => 'Invalid credentials.'], 400);
+			return $this->json(['error' => 'Invalid credentials.'], Response::BAD_REQUEST);
 		}
 
 		// Clean previous invalid UserSession

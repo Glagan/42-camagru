@@ -23,14 +23,11 @@ class Response
 	protected $headers;
 	protected $code;
 
-	public function __construct($content = '', $headers = [], $code = Response::OK, Request $request = null)
+	public function __construct(string $content = '', int $code = Response::OK, array $headers = [])
 	{
 		$this->content = $content;
-		$this->headers = new HeaderList($headers);
 		$this->code = $code;
-		if ($request !== null) {
-			$this->forRequest($request);
-		}
+		$this->headers = new HeaderList($headers);
 	}
 
 	public function setContent($content): self
@@ -59,7 +56,7 @@ class Response
 		return $this;
 	}
 
-	public function forRequest(Request $request): self
+	public function prepare(Request $request): self
 	{
 		$this->compressMethods = $request->getHeaders()->get(Header::ACCEPT_ENCODING);
 		return $this;
@@ -95,8 +92,8 @@ class Response
 		}
 
 		// Apply deflate or gzip compression when possible
-		if (Env::get('Camagru', 'compress', false) && Env::get('Camagru', 'mode') != 'debug' && \is_array($this->compressMethods)) {
-			$this->compress();
+		if (Env::get('Camagru', 'compress', false) && Env::get('Camagru', 'mode') != 'debug' && $this->compressMethods !== false) {
+			$this->compress($this->compressMethods);
 		}
 
 		// Content-Length

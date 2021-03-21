@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
+use Camagru\Http\Response;
 use Models\User;
 
 class Profile extends Controller
@@ -54,11 +55,11 @@ class Profile extends Controller
 	public function single($id)
 	{
 		if ($id < 1) {
-			return $this->json(['error' => 'Invalid Image ID.'], 400);
+			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
 		}
 		$user = User::get($id);
 		if ($user === false) {
-			return $this->json(['error' => 'User not found.'], 404);
+			return $this->json(['error' => 'User not found.'], Response::NOT_FOUND);
 		}
 		$attributes = $user->toArray(['id', 'username', 'verified']);
 		// TODO: List of Images

@@ -2,7 +2,7 @@
 
 use Log;
 
-class SQLException extends \Exception
+class SQLException extends \Exception implements LoggedException
 {
 	protected $statement;
 	protected $sqlStateError;
@@ -18,7 +18,7 @@ class SQLException extends \Exception
 		$this->driverErrorMessage = $errorInfo[2];
 	}
 
-	public function log()
+	public function log(): void
 	{
 		// We need to buffer the output since debugDumpParams doesn't write to a variable
 		\ob_start();

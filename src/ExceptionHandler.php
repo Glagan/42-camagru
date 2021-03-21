@@ -1,43 +1,44 @@
 <?php
 
+use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
+use Exception\HTTPException;
+use Exception\LoggedException;
 
 class ExceptionHandler
 {
 	public static function handle(\Throwable $ex)
 	{
 		// Log
-		if (\method_exists($ex, 'log')) {
+		if ($ex instanceof LoggedException) {
 			$ex->log();
 		} else {
 			Log::error($ex);
 		}
 
 		// Render
-		if (\method_exists($ex, 'render')) {
-			$ex->render();
+		if ($ex instanceof HTTPException) {
+			$response = $ex->getResponse(Env::get('Camagru', 'mode'));
 		} else {
 			if (Env::get('Camagru', 'mode') == 'debug') {
-				$response = new Response(
+				$response = new JSONResponse(
 					[
-						'error' => 'Uncatched exception',
+						'error' => 'Exception',
 						'message' => $ex->getMessage(),
 						'code' => $ex->getCode(),
 						'file' => $ex->getFile(),
 						'line' => $ex->getLine(),
 						'trace' => $ex->getTrace(),
 					],
-					[],
 					Response::INTERNAL_SERVER_ERROR
 				);
 			} else {
-				$response = new Response(
+				$response = new JSONResponse(
 					['error' => 'Server error. Retry later.'],
-					[],
 					Response::INTERNAL_SERVER_ERROR
 				);
 			}
-			$response->render();
 		}
+		$response->render();
 	}
 }
