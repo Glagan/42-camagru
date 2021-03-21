@@ -15,8 +15,10 @@ class RouteGroup implements Routable
 
 	private function updateRoute(&$path, array &$route): void
 	{
-		$route['use'] = "{$this->controller}@{$route['use']}";
-		$path = $this->prefix . $path;
+		if (isset($route['use'])) {
+			$route['use'] = "{$this->controller}@{$route['use']}";
+			$path = $this->prefix . $path;
+		}
 	}
 
 	public function get(string $path, array $route)

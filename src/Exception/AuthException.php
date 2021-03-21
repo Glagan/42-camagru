@@ -1,8 +1,9 @@
 <?php namespace Exception;
 
+use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 
-class AuthException extends \Exception
+class AuthException extends \Exception implements HTTPException
 {
 	protected $reason;
 
@@ -11,9 +12,8 @@ class AuthException extends \Exception
 		$this->reason = $reason;
 	}
 
-	public function render()
+	public function getResponse(string $mode): Response
 	{
-		$response = new Response(['error' => $this->reason], [], Response::UNAUTHORIZED);
-		$response->render();
+		return new JSONResponse(['error' => $this->reason], Response::UNAUTHORIZED);
 	}
 }

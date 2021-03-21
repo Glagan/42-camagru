@@ -15,6 +15,11 @@
 \set_exception_handler(["ExceptionHandler", "handle"]);
 \set_error_handler("ErrorHandler::handle");
 
+// Configuration
+$root = \dirname(__DIR__);
+Env::load($root . '/config.ini');
+Env::set('Camagru', 'root', $root);
+
 // All routes
 $router = new Camagru\Router('/api');
 
@@ -45,7 +50,8 @@ $router->group(Controller\Image::class, function ($router) {
 });
 
 // Create and start App
-//echo '<pre>';
-$app = new Camagru\Application($router, \dirname(__DIR__));
-$app->load()->run();
-//echo '</pre>';
+$request = Camagru\Http\Request::make();
+$app = new Camagru\Application($router, $root);
+$response = $app->run($request);
+$response->prepare($request);
+$response->render();

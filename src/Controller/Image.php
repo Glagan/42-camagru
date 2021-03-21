@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
+use Camagru\Http\Response;
 use Models\Comment;
 use Models\Image as ImageModel;
 use Models\Like;
@@ -30,11 +31,11 @@ class Image extends Controller
 	public function like($id)
 	{
 		if ($id < 0) {
-			return $this->json(['error' => 'Invalid Image ID.'], 400);
+			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
 		}
 		$image = ImageModel::get($id);
 		if ($image === false) {
-			return $this->json(['error' => 'Image not found.'], 404);
+			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
 		}
 		$like = Like::first(['user' => $this->user->id, 'image' => $id]);
 		if ($like === false) {
@@ -56,11 +57,11 @@ class Image extends Controller
 			],
 		]);
 		if ($id < 0) {
-			return $this->json(['error' => 'Invalid Image ID.'], 400);
+			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
 		}
 		$image = ImageModel::get($id);
 		if ($image === false) {
-			return $this->json(['error' => 'Image not found.'], 404);
+			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
 		}
 		$comment = new Comment([
 			'user' => $this->user->id,
@@ -73,11 +74,11 @@ class Image extends Controller
 	public function single($id)
 	{
 		if ($id < 1) {
-			return $this->json(['error' => 'Invalid Image ID.'], 400);
+			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
 		}
 		$image = ImageModel::get($id);
 		if ($image === false) {
-			return $this->json(['error' => 'Image not found.'], 404);
+			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
 		}
 		$attributes = $image->toArray(['id', 'user', 'path', 'at']);
 		// TODO: Linked user + Likes + Comments

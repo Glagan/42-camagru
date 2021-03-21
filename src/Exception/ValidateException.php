@@ -1,24 +1,19 @@
 <?php namespace Exception;
 
-use Camagru\Http\Request;
+use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 
-class ValidateException extends \Exception
+class ValidateException extends \Exception implements HTTPException
 {
-	protected $request;
-	protected $field;
-	protected $validator;
 	protected $reason;
 
-	public function __construct(Request $request, string $reason = '')
+	public function __construct(string $reason = '')
 	{
-		$this->request = $request;
 		$this->reason = $reason;
 	}
 
-	public function render()
+	public function getResponse(string $mode): Response
 	{
-		$response = new Response(['error' => $this->reason], [], Response::BAD_REQUEST, $this->request);
-		$response->render();
+		return new JSONResponse(['error' => $this->reason], Response::BAD_REQUEST);
 	}
 }

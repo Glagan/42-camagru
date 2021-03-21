@@ -3,7 +3,7 @@
 use Log;
 use SQL\Query;
 
-class QueryException extends \Exception
+class QueryException extends \Exception implements LoggedException
 {
 	protected $query;
 	protected $reason;
@@ -14,7 +14,7 @@ class QueryException extends \Exception
 		$this->reason = $reason;
 	}
 
-	public function log()
+	public function log(): void
 	{
 		Log::debug('Invalid Query', [
 			'reason' => $this->reason,

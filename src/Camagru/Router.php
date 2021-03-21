@@ -1,7 +1,7 @@
 <?php namespace Camagru;
 
 use Camagru\Http\Request;
-use Exception;
+use Log;
 
 class Router implements Routable
 {
@@ -36,11 +36,13 @@ class Router implements Routable
 	private function add(string $method, string $path, array $route): void
 	{
 		if (!isset($route['use'])) {
-			throw new Exception(); // TODO
+			Log::debug("Route without a Controller [{$method}] {$path}");
+			return;
 		}
 		$callback = \explode('@', $route['use']);
 		if (\count($callback) !== 2) {
-			throw new Exception(); // TODO
+			Log::debug("Route with invalid Controller [{$method}] {$path} {$route['use']}");
+			return;
 		}
 		$path = \trim($path, '/');
 		$params = Router::pathParams($path);

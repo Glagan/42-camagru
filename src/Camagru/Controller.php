@@ -1,5 +1,6 @@
 <?php namespace Camagru;
 
+use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 use Exception\ValidateException;
 
@@ -58,7 +59,7 @@ abstract class Controller
 			// If the validator is a simple key, only check for presence
 			if (empty($field)) {
 				if (!$this->inputFieldValue($validator)) {
-					throw new ValidateException($this->request, "Missing {$validator}.");
+					throw new ValidateException("Missing {$validator}.");
 				}
 			}
 			// If it's an array, check all parameters
@@ -71,26 +72,26 @@ abstract class Controller
 				// Presence
 				if ($value === false) {
 					if (!$optional) {
-						throw new ValidateException($this->request, "Missing {$field}.");
+						throw new ValidateException("Missing {$field}.");
 					}
 				} else {
 					// Validity
 					if (isset($validator['validate'])) {
 						if (!\filter_var($value, $validator['validate'])) {
-							throw new ValidateException($this->request, "Invalid {$field}.");
+							throw new ValidateException("Invalid {$field}.");
 						}
 					} else if (isset($validator['match'])) {
 						[$regex, $message] = $validator['match'];
 						if (!\preg_match($regex, $value)) {
-							throw new ValidateException($this->request, $message);
+							throw new ValidateException($message);
 						}
 					}
 					// Length
 					if (isset($validator['min']) && \mb_strlen($value) < $validator['min']) {
-						throw new ValidateException($this->request, "{$field} is too short, must be longer than {$validator['min']}.");
+						throw new ValidateException("{$field} is too short, must be longer than {$validator['min']}.");
 					}
 					if (isset($validator['max']) && \mb_strlen($value) > $validator['max']) {
-						throw new ValidateException($this->request, "{$field} is too long, must be smaller than {$validator['max']}.");
+						throw new ValidateException("{$field} is too long, must be smaller than {$validator['max']}.");
 					}
 				}
 			}
@@ -98,7 +99,7 @@ abstract class Controller
 			else {
 				$value = $this->inputFieldValue($field, $validator);
 				if ($value !== $validator) {
-					throw new ValidateException($this->request, "{$field} does not match.");
+					throw new ValidateException("{$field} does not match.");
 				}
 
 			}
@@ -113,16 +114,8 @@ abstract class Controller
 	 * @param integer $code
 	 * @return Http\Response
 	 */
-	protected function json($body, $headersOrCode = null, $code = Response::OK): Response
+	protected function json($body, $code = Response::OK, $headers = []): Response
 	{
-		$headers = [];
-		if ($headersOrCode !== null) {
-			if (\is_array($headersOrCode)) {
-				$headers = $headersOrCode;
-			} else {
-				$code = $headersOrCode;
-			}
-		}
-		return new Response($body, $headers, $code, $this->request);
+		return new JSONResponse($body, $code, $headers);
 	}
 }

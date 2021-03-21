@@ -1,9 +1,10 @@
 <?php namespace Exception;
 
+use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 use Log;
 
-class JWTException extends \Exception
+class JWTException extends \Exception implements HTTPException, LoggedException
 {
 	protected $token;
 	protected $reason;
@@ -14,7 +15,7 @@ class JWTException extends \Exception
 		$this->reason = $reason;
 	}
 
-	public function log()
+	public function log(): void
 	{
 		Log::debug('Invalid JWT Token:', [
 			'token' => $this->token,
@@ -22,9 +23,8 @@ class JWTException extends \Exception
 		]);
 	}
 
-	public function render()
+	public function getResponse(string $mode): Response
 	{
-		$response = new Response(['error' => $this->reason], [], Response::BAD_REQUEST);
-		$response->render();
+		return new JSONResponse(['error' => $this->reason], Response::BAD_REQUEST);
 	}
 }

@@ -1,8 +1,9 @@
 <?php namespace Exception;
 
+use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 
-class JSONException extends \Exception
+class JSONException extends \Exception implements HTTPException
 {
 	protected $errorCode;
 	protected $reason;
@@ -26,9 +27,8 @@ class JSONException extends \Exception
 		}
 	}
 
-	public function render()
+	public function getResponse(string $mode): Response
 	{
-		$response = new Response(['error' => $this->reason], [], Response::BAD_REQUEST);
-		$response->render();
+		return new JSONResponse(['error' => $this->reason], Response::BAD_REQUEST);
 	}
 }

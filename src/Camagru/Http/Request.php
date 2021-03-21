@@ -19,11 +19,11 @@ class Request
 
 	public function __construct()
 	{
-		$this->method = \strtoupper(\filter_input(INPUT_SERVER, 'REQUEST_METHOD'));
-		$this->uri = \filter_input(INPUT_SERVER, 'REQUEST_URI');
+		$this->method = \strtoupper(\filter_input(\INPUT_SERVER, 'REQUEST_METHOD'));
+		$this->uri = \filter_input(\INPUT_SERVER, 'REQUEST_URI');
 		$this->uri = \trim(\parse_url($this->uri)['path'], '/');
 		$this->headers = new HeaderList;
-		$headers = \filter_var_array(\apache_request_headers(), FILTER_DEFAULT);
+		$headers = \filter_var_array(\apache_request_headers(), \FILTER_DEFAULT);
 		foreach ($headers as $name => $value) {
 			$this->headers->add($name, $value);
 		}
@@ -31,6 +31,11 @@ class Request
 		$this->isSecure =
 			(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 			|| $_SERVER['SERVER_PORT'] == 443;
+	}
+
+	public static function make(): Request
+	{
+		return new Request;
 	}
 
 	public function getMethod(): string

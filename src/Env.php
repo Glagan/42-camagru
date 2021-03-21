@@ -4,6 +4,18 @@ class Env
 {
 	static $config = [];
 
+	public static function load(string $iniFile): void
+	{
+		$config = \parse_ini_file($iniFile, true);
+		if ($config === false) {
+			Log::debug('Could not read config.ini.');
+		} else {
+			foreach ($config as $key => $value) {
+				Env::setNamespace($key, $value);
+			}
+		}
+	}
+
 	public static function set(string $namespace, string $field, $value): void
 	{
 		if (!isset(static::$config[$namespace])) {
