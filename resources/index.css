@@ -1,3 +1,44 @@
 @tailwind base;
 @tailwind components;
-/*@tailwind utilities;*/
+@tailwind utilities;
+
+.header {
+	min-width: 33.33%;
+}
+
+.content {
+	min-width: 66.67%;
+}
+
+.card {
+	@apply transition transform shadow-md rounded cursor-pointer z-10 hover:shadow-lg hover:scale-125;
+}
+
+.card:hover {
+	z-index: 10;
+}
+
+.card img {
+	@apply rounded;
+}
+
+button {
+	@apply transition rounded-md border p-1 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
+	min-width: 5rem;
+}
+
+button.primary {
+	@apply bg-blue-500 text-white hover:bg-blue-700;
+}
+
+button.success {
+	@apply bg-green-500 text-white hover:bg-green-700;
+}
+
+button.error {
+	@apply bg-red-500 text-white hover:bg-red-700;
+}
+
+button.secondary {
+	@apply bg-gray-500 text-white hover:bg-gray-700;
+}
