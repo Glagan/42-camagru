@@ -3,13 +3,7 @@
 @tailwind utilities;
 
 #nav {
-	@apply flex-1 text-center p-4 h-screen sticky top-4;
-	min-width: 33.33%;
-}
-
-#content {
-	@apply flex-grow flex-shrink-0 min-h-screen p-4;
-	min-width: 66.67%;
+	@apply flex-1 text-center p-4 h-auto md:h-screen relative md:sticky top-0 w-full md:w-4/12;
 }
 
 .badge {
@@ -72,6 +66,14 @@ button.secondary {
 	@apply bg-gray-500 text-white border-gray-800 hover:bg-gray-700;
 }
 
+#content {
+	@apply flex-grow flex-shrink-0 p-4 w-full md:w-8/12;
+}
+
+.header {
+	@apply sticky z-20 top-0 py-2 text-2xl bg-gray-100 text-gray-800 border-b border-gray-800  dark:bg-gray-600 dark:text-gray-100 dark:border-gray-100;
+}
+
 .card {
 	@apply transition transform shadow-md rounded cursor-pointer z-10 hover:shadow-lg hover:scale-125;
 }
@@ -82,4 +84,45 @@ button.secondary {
 
 .card img {
 	@apply rounded;
+}
+
+form {
+	@apply mt-2;
+}
+
+form .footer {
+	@apply flex flex-row-reverse flex-nowrap justify-between;
+}
+
+label {
+	@apply cursor-pointer mb-1;
+}
+
+input {
+	@apply transition cursor-pointer mb-2 rounded border border-gray-600 p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
+}
+
+.like {
+	@apply transition text-pink-400;
+	fill: none;
+}
+
+.like.active {
+	fill: rgb(244, 114, 182); /* pink-400 */
+}
+
+.like:hover {
+	fill: rgba(244, 114, 182, 0.5); /* pink-400 */
+}
+
+.comment {
+	@apply rounded-md border border-gray-200 mt-2 overflow-hidden;
+}
+
+.comment p {
+	@apply p-2 bg-gray-100 dark:bg-gray-500;
+}
+
+.comment .footer {
+	@apply p-1 italic bg-gray-300 text-gray-700 border-t dark:bg-gray-700 dark:text-gray-300;
 }
