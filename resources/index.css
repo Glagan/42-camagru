@@ -8,14 +8,14 @@
 
 .badge {
 	display: inline-block;
-	padding: 4px;
+	padding: 1px;
 	border-radius: 50%;
-	font-size: 16px;
-	width: 20px;
-	height: 20px;
+	font-size: 20px;
+	width: 24px;
+	height: 24px;
 	vertical-align: middle;
 	text-align: center;
-	line-height: 10px;
+	line-height: 12px;
 	user-select: none;
 }
 
@@ -46,8 +46,15 @@
 }
 
 button {
-	@apply transition rounded-md border p-1 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
-	min-width: 5rem;
+	@apply inline-flex items-center transition rounded-md border py-1 px-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
+}
+
+button svg {
+	@apply mr-2;
+}
+
+button svg:last-child {
+	@apply mr-0;
 }
 
 button.primary {
