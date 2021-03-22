@@ -32,6 +32,7 @@ $router->group(Controller\Authentication::class, function ($router) {
 	$router->delete('/logout/{session:.+}?', ['auth' => true, 'use' => 'logout']);
 	$router->patch('/send-verification', ['auth' => true, 'use' => 'sendVerification']);
 	$router->patch('/reset-password', ['auth' => false, 'use' => 'resetPassword']);
+	$router->get('/status', ['use' => 'status']);
 });
 
 // Profile

@@ -174,4 +174,20 @@ class Authentication extends Controller
 		// TODO
 		return $this->json(['success' => 'An email with a link to reset your password has been sent.']);
 	}
+
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function status(): Response
+	{
+		if ($this->auth->isLoggedIn()) {
+			$user = $this->auth->getUser();
+			if ($user !== false) {
+				return $this->json([
+					'user' => $user->toArray(['id', 'username', 'email', 'verified', 'theme', 'receiveComments']),
+				]);
+			}
+		}
+		return $this->json(['error' => 'Logged out.'], Response::UNAUTHORIZED);
+	}
 }
