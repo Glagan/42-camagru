@@ -4,17 +4,28 @@ use Env;
 
 /**
  * Find and normalize all requested inputs from a received request.
- * @property string $method
- * @property string $uri
- * @property \Camagru\Http\HeaderList $headers
- * @property \Camagru\Http\RequestInput $input
  */
 class Request
 {
+	/**
+	 * @var string
+	 */
 	protected $method;
+	/**
+	 * @var string
+	 */
 	protected $uri;
+	/**
+	 * @var \Camagru\Http\HeaderList
+	 */
 	protected $headers;
+	/**
+	 * @var \Camagru\Http\RequestInput
+	 */
 	protected $input;
+	/**
+	 * @var bool
+	 */
 	protected $isSecure;
 
 	public function __construct()
@@ -33,31 +44,57 @@ class Request
 			|| $_SERVER['SERVER_PORT'] == 443;
 	}
 
+	/**
+	 * Create a Request object from globals.
+	 * @return Request
+	 */
 	public static function make(): Request
 	{
 		return new Request;
 	}
 
+	/**
+	 * Request method.
+	 * GET POST PUT PATCH DELETE
+	 * @return string
+	 */
 	public function getMethod(): string
 	{
 		return $this->method;
 	}
 
+	/**
+	 * Request URI.
+	 * @return string
+	 */
 	public function getUri(): string
 	{
 		return $this->uri;
 	}
 
-	public function getLocalUri($basePath): string
+	/**
+	 * Request URI without the given basePath
+	 * @param string $basePath
+	 * @return string
+	 */
+	public function getLocalUri(string $basePath): string
 	{
 		return \str_replace($basePath, '', $this->uri);
 	}
 
+	/**
+	 * Request Headers as an HeaderList
+	 * @return HeaderList
+	 */
 	public function getHeaders(): HeaderList
 	{
 		return $this->headers;
 	}
 
+	/**
+	 * Request input from all sources.
+	 * @return RequestInput
+	 */
 	public function getInput(): RequestInput
 	{
 		return $this->input;

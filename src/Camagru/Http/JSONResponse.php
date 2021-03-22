@@ -9,6 +9,12 @@ class JSONResponse extends Response
 		$this->setContent($content);
 	}
 
+	/**
+	 * Set the content of the Response.
+	 * Automatically add the Content-Type Header and json_encode the body.
+	 * @param array $content
+	 * @return self
+	 */
 	public function setContent($content): self
 	{
 		$this->content = \json_encode($content);

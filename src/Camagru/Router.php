@@ -5,7 +5,13 @@ use Log;
 
 class Router implements Routable
 {
+	/**
+	 * @var string
+	 */
 	protected $basePath;
+	/**
+	 * @var array
+	 */
 	protected $routes;
 
 	public function __construct(string $basePath = '')
@@ -71,41 +77,61 @@ class Router implements Routable
 	}
 
 	/**
+	 * Add a GET route.
 	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
 	 */
-	public function get(string $path, array $route)
+	public function get(string $path, array $route): void
 	{
 		$this->add('GET', $path, $route);
 	}
 
 	/**
+	 * Add a POST route.
 	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
 	 */
-	public function post(string $path, array $route)
+	public function post(string $path, array $route): void
 	{
 		$this->add('POST', $path, $route);
 	}
 
 	/**
+	 * Add a PUT route.
 	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
 	 */
-	public function put(string $path, array $route)
+	public function put(string $path, array $route): void
 	{
 		$this->add('PUT', $path, $route);
 	}
 
 	/**
+	 * Add a PATCH route.
 	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
 	 */
-	public function patch(string $path, array $route)
+	public function patch(string $path, array $route): void
 	{
 		$this->add('PATCH', $path, $route);
 	}
 
 	/**
+	 * Add a DELETE route.
 	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
 	 */
-	public function delete(string $path, array $route)
+	public function delete(string $path, array $route): void
 	{
 		$this->add('DELETE', $path, $route);
 	}
@@ -114,6 +140,7 @@ class Router implements Routable
 	 * Loop trough all added routes and check them against the Request::uri.
 	 * Returns the found route or false on error.
 	 * Returned route has a 'foundParams' key with all matched parameters in the URI.
+	 * @return array|false
 	 */
 	public function match(Request $request)
 	{

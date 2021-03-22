@@ -7,6 +7,9 @@ use SQL\Value;
 
 class Auth
 {
+	/**
+	 * @var \Models\User|null
+	 */
 	private $user = null;
 
 	public function __construct()
@@ -23,6 +26,9 @@ class Auth
 		}
 	}
 
+	/**
+	 * @return \Models\User|false
+	 */
 	public function getUser()
 	{
 		if ($this->user !== null) {
@@ -31,6 +37,9 @@ class Auth
 		return false;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	public function isLoggedIn(): bool
 	{
 		return $this->user !== null;

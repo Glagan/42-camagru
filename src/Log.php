@@ -2,8 +2,17 @@
 
 class Log
 {
+	/**
+	 * @var Log
+	 */
 	private static $instance = null;
+	/**
+	 * @var string
+	 */
 	private $day = null;
+	/**
+	 * @var string
+	 */
 	private $file = null;
 
 	private function __construct()
@@ -14,7 +23,7 @@ class Log
 	/**
 	 * Create the file if it doesn't exists
 	 * 	Or if the Date changed
-	 *
+	 * @param \DateTIme $date
 	 * @return void
 	 */
 	private function checkFile(\DateTime $date)
@@ -31,6 +40,9 @@ class Log
 		}
 	}
 
+	/**
+	 * @return Log
+	 */
 	private static function getInstance(): Log
 	{
 		if (static::$instance == null) {
@@ -39,7 +51,13 @@ class Log
 		return static::$instance;
 	}
 
-	private function addLine($prefix, $line)
+	/**
+	 * Write a line to the log file.
+	 * @param string $prefix
+	 * @param string|array $line
+	 * @return void
+	 */
+	private function addLine(string $prefix, $line): void
 	{
 		if (\is_array($line)) {
 			// substr remove "Array\n" and line ending
@@ -50,20 +68,35 @@ class Log
 		\fwrite(static::$instance->file, $line);
 	}
 
-	private function line($line)
+	/**
+	 * Check if the opened file is the correct one and call addLine.
+	 * @param string|array $line
+	 * @return void
+	 */
+	private function line($line): void
 	{
 		$date = (new DateTime());
 		$this->checkFile($date);
 		$this->addLine($date->format('Y-m-d H:i:s.v') . ' ', $line);
 	}
 
-	private function continueLine($line)
+	/**
+	 * Check if the opened file is the correct one and call addLine without a prefix.
+	 * @param string|array $line
+	 * @return void
+	 */
+	private function continueLine($line): void
 	{
 		$this->checkFile(new DateTime());
 		$this->addLine('', $line);
 	}
 
-	public static function debug(...$values)
+	/**
+	 * Log all the given values.
+	 * @param (string|array)[] $values
+	 * @return void
+	 */
+	public static function debug(...$values): void
 	{
 		if (Env::get('Camagru', 'mode') == 'debug') {
 			$log = static::getInstance();
@@ -79,6 +112,11 @@ class Log
 		}
 	}
 
+	/**
+	 * Log all the given Exceptions.
+	 * @param \Throwable[] $values
+	 * @return void
+	 */
 	public static function error(...$exceptions)
 	{
 		$log = static::getInstance();

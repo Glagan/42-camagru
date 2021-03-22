@@ -2,6 +2,9 @@
 
 class HeaderList
 {
+	/**
+	 * @var string[]
+	 */
 	protected $list;
 
 	public function __construct($list = [])
@@ -9,12 +12,25 @@ class HeaderList
 		$this->list = $list;
 	}
 
-	public function add($name, $value)
+	/**
+	 * Add the Header to the list.
+	 * @param string $name
+	 * @param string $value
+	 * @return void
+	 */
+	public function add(string $name, string $value): void
 	{
 		$this->list[\mb_strtolower($name)] = $value;
 	}
 
-	public function has($name, $value = null)
+	/**
+	 * Check if the Header is present in the list.
+	 * If value is different to null, it's equality is also checked.
+	 * @param string $name
+	 * @param string|null $value
+	 * @return boolean
+	 */
+	public function has(string $name, $value = null): bool
 	{
 		$name = \mb_strtolower($name);
 		$exists = \array_key_exists($name, $this->list);
@@ -24,7 +40,12 @@ class HeaderList
 		return $exists;
 	}
 
-	public function get($name)
+	/**
+	 * Check if the Header exists (case insensitive) and return it's value or false.
+	 * @param string $name
+	 * @return string|false
+	 */
+	public function get(string $name)
 	{
 		$name = \mb_strtolower($name);
 		if (\array_key_exists($name, $this->list)) {
@@ -33,7 +54,12 @@ class HeaderList
 		return false;
 	}
 
-	public function all()
+	/**
+	 * Return all Headers as a raw array.
+	 * Names are capitalized.
+	 * @return string[]
+	 */
+	public function all(): array
 	{
 		$headers = [];
 		foreach ($this->list as $name => $value) {

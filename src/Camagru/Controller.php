@@ -6,10 +6,25 @@ use Exception\ValidateException;
 
 abstract class Controller
 {
+	/**
+	 * @var \Camagru\Http\Request
+	 */
 	protected $request;
+	/**
+	 * @var \Camagru\Http\HeaderList
+	 */
 	protected $requestHeaders;
+	/**
+	 * @var \Camagru\Http\RequestInput
+	 */
 	protected $input;
+	/**
+	 * @var \Camagru\Auth
+	 */
 	protected $auth;
+	/**
+	 * @var \Models\User|null
+	 */
 	protected $user;
 
 	public function __construct($request, $auth)
@@ -32,7 +47,7 @@ abstract class Controller
 		// The boolean false can't be received as a *real* value
 		//	since values in the input are received as string
 		if ($value === false) {
-			throw new ValidateException($this->request, $field);
+			throw new ValidateException($field);
 		}
 		return $value;
 	}
@@ -110,11 +125,11 @@ abstract class Controller
 	/**
 	 * Returns a JSON Response with $body as it's content.
 	 * @param array $body
-	 * @param array|int|null $headersOrCode An array of Headers or an HTTP Response Code
-	 * @param integer $code
+	 * @param int $code An HTTP Response Code
+	 * @param array $headers
 	 * @return Http\Response
 	 */
-	protected function json($body, $code = Response::OK, $headers = []): Response
+	protected function json(array $body, $code = Response::OK, $headers = []): Response
 	{
 		return new JSONResponse($body, $code, $headers);
 	}

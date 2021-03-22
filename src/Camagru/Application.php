@@ -11,15 +11,21 @@ use Exception\LoggedException;
 
 class Application
 {
+	/**
+	 * @var \Camagru\Router
+	 */
 	private $router;
-	private $root;
 
-	public function __construct(Router $router, string $root)
+	public function __construct(Router $router)
 	{
 		$this->router = $router;
-		$this->root = $root;
 	}
 
+	/**
+	 * Process the Request and return a Response.
+	 * @param \Camagru\Http\Request $request
+	 * @return \Camagru\Http\JSONResponse
+	 */
 	public function run(Request $request): Response
 	{
 		try {
@@ -40,15 +46,13 @@ class Application
 			$match = $this->router->match($request);
 			if ($match !== false) {
 				// Check if the route need authentication
-				$auth = null;
-				if (isset($match['auth']) && $match['auth'] !== null) {
-					$auth = new Auth();
-					if (($match['auth'] && !$auth->isLoggedIn()) || (!$match['auth'] && $auth->isLoggedIn())) {
-						$reason = $match['auth'] ?
-						'You need to be logged in to access this page.' :
-						'You need to be logged out to access this page.';
-						throw new AuthException($reason);
-					}
+				$auth = new Auth();
+				if (isset($match['auth']) && $match['auth'] != null && (($match['auth'] && !$auth->isLoggedIn()) || (!$match['auth'] && $auth->isLoggedIn()))) {
+					$reason = $match['auth'] ?
+					'You need to be logged in to access this page.' :
+					'You need to be logged out to access this page.';
+					throw new AuthException($reason);
+
 				}
 
 				// Call the route

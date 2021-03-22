@@ -7,7 +7,12 @@ use Exception\LoggedException;
 
 class ExceptionHandler
 {
-	public static function handle(\Throwable $ex)
+	/**
+	 * Log the received Throwable (Exception)
+	 * @param \Throwable $ex
+	 * @return void
+	 */
+	public static function handle(\Throwable $ex): void
 	{
 		// Log
 		if ($ex instanceof LoggedException) {
