@@ -2,12 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
-.header {
+#nav {
+	@apply flex-1 text-center p-4 h-screen sticky top-4;
 	min-width: 33.33%;
 }
 
-.content {
+#content {
+	@apply flex-grow flex-shrink-0 min-h-screen p-4;
 	min-width: 66.67%;
+}
+
+.badge {
+	display: inline-block;
+	padding: 4px;
+	border-radius: 50%;
+	font-size: 16px;
+	width: 20px;
+	height: 20px;
+	vertical-align: middle;
+	text-align: center;
+	line-height: 10px;
+	user-select: none;
+}
+
+.badge.warning {
+	@apply border border-yellow-700 bg-yellow-500 text-yellow-700;
+}
+
+.badge.success {
+	@apply border border-green-700 bg-green-500 text-green-700;
+}
+
+#user {
+	@apply mb-2;
+}
+
+#manage {
+	@apply flex flex-col flex-wrap items-center;
+}
+
+#manage button {
+	@apply mb-2;
+	max-width: 80%;
+	width: 20rem;
+}
+
+#manage button:last-of-type {
+	@apply mb-0;
+}
+
+button {
+	@apply transition rounded-md border p-1 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
+	min-width: 5rem;
+}
+
+button.primary {
+	@apply bg-blue-500 text-white border-blue-800 hover:bg-blue-700;
+}
+
+button.success {
+	@apply bg-green-500 text-white border-green-800 hover:bg-green-700;
+}
+
+button.error {
+	@apply bg-red-500 text-white border-red-800 hover:bg-red-700;
+}
+
+button.secondary {
+	@apply bg-gray-500 text-white border-gray-800 hover:bg-gray-700;
 }
 
 .card {
@@ -20,25 +82,4 @@
 
 .card img {
 	@apply rounded;
-}
-
-button {
-	@apply transition rounded-md border p-1 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
-	min-width: 5rem;
-}
-
-button.primary {
-	@apply bg-blue-500 text-white hover:bg-blue-700;
-}
-
-button.success {
-	@apply bg-green-500 text-white hover:bg-green-700;
-}
-
-button.error {
-	@apply bg-red-500 text-white hover:bg-red-700;
-}
-
-button.secondary {
-	@apply bg-gray-500 text-white hover:bg-gray-700;
 }
