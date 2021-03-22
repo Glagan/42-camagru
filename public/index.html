@@ -7,9 +7,9 @@
 	<title>camagru</title>
 	<link rel="stylesheet" type="text/css" media="screen" href="/assets/index.css" />
 </head>
-<body class="transition min-h-screen bg-gray-100 text-gray-800 dark:bg-gray-600 dark:text-gray-100">
-	<div class="container mx-auto w-full lg:w-4/5 xl:w-4/6">
-		<div class="flex flex-column xl:flex-row flex-wrap xl:flex-nowrap justify-between">
+<body class="transition min-h-screen bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-100">
+	<div class="container mx-auto w-full md:w-4/5 xl:w-4/6">
+		<div class="flex flex-column md:flex-row flex-wrap md:flex-nowrap justify-between">
 			<div id="nav">
 				<h1 class="text-6xl pb-4">camagru</h1>
 				<div id="session">
@@ -19,13 +19,16 @@
 					<div id="manage">
 						<button class="primary">Create</button>
 						<button class="success">Login</button>
+						<button class="success">Register</button>
 						<button class="secondary">Preferences</button>
 						<button class="error">Logout</button>
+						<button class="secondary">Back Home</button>
 					</div>
 				</div>
 			</div>
 			<div id="content">
-				<h1 class="sticky z-20 top-0 text-xl bg-gray-100 text-gray-800 border-b border-gray-800  dark:bg-gray-600 dark:text-gray-100 dark:border-gray-100"># All</h1>
+				<!--
+				<h1 class="header"># All</h1>
 				<div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 auto-rows-min justify-items-center p-4">
 					<div class="card">
 						<img src="https://via.placeholder.com/150" width="150" height="150" />
@@ -42,175 +45,90 @@
 					<div class="card">
 						<img src="https://via.placeholder.com/150" width="150" height="150" />
 					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
+				</div>
+				-->
+				<!--
+				<h1 class="header">Login</h1>
+				<form class="flex flex-col flex-wrap items-stretch">
+					<label for="login-username">Username</label>
+					<input type="text" id="login-username" name="username" placeholder="Username" />
+					<label for="login-password">Password</label>
+					<input type="password" id="login-password" name="password" placeholder="Password" />
+					<div class="footer">
+						<button class="primary" type="submit">Login</button>
+						<button class="secondary">Forgot Password</button>
 					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
+				</form>
+				<h1 class="header">Register</h1>
+				<form class="flex flex-col flex-wrap items-stretch">
+					<label for="register-username">Username</label>
+					<input type="text" id="register-username" name="username" placeholder="Username" />
+					<label for="register-email">Email</label>
+					<input type="email" id="register-email" name="email" placeholder="Email" />
+					<label for="register-password">Password</label>
+					<input type="password" id="register-password" name="password" placeholder="Password" />
+					<label for="register-password-confirm">Confirm Password</label>
+					<input type="password" id="register-password-confirm" name="password-confirm" placeholder="Password" />
+					<div class="footer">
+						<button class="primary" type="submit">Register</button>
 					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
+				</form>
+				-->
+				<!--
+				<h1 class="header"># 123</h1>
+				<img src="https://via.placeholder.com/900x450" width="900" height="450" />
+				<div class="flex flex-row flex-nowrap justify-evenly mt-2">
+					<div class="text-center cursor-pointer">
+						<svg class="like w-10 h-10" data-hero-icon="heart" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+						123
 					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
-					</div>
-					<div class="card">
-						<img src="https://via.placeholder.com/150" width="150" height="150" />
+					<div class="text-center">
+						<svg class="text-gray-200 w-10 h-10" fill="none" data-hero-icon="chat" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+						123
 					</div>
 				</div>
+				<form class="flex flex-col flex-wrap items-stretch">
+					<label for="comment-message">Comment</label>
+					<div class="flex flex-row flex-nowrap items-stretch">
+						<input class="flex-grow mb-0 rounded-tr-none rounded-br-none border-r-0" type="text" id="comment-message" name="message" placeholder="Say what you think !" />
+						<button class="primary flex-shrink-0 rounded-tl-none rounded-bl-none" type="submit">Submit</button>
+					</div>
+				</form>
+				<div class="flex flex-col flex-wrap">
+					<div class="comment">
+						<p class="break-words">Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.</p>
+						<div class="footer">Conscientious User - 22 March 2021 at 15:03</div>
+					</div>
+					<div class="comment">
+						<p class="break-words">Sadly, this is quite bad.</p>
+						<div class="footer">Anonymous - 22 March 2021 at 15:03</div>
+					</div>
+					<div class="comment">
+						<p class="break-words">Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.</p>
+						<div class="footer">Anonymous - 22 March 2021 at 15:03</div>
+					</div>
+					<div class="comment">
+						<p class="break-words">Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.</p>
+						<div class="footer">Anonymous - 22 March 2021 at 15:03</div>
+					</div>
+					<div class="comment">
+						<p class="break-words">Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.</p>
+						<div class="footer">Anonymous - 22 March 2021 at 15:03</div>
+					</div>
+					<div class="comment">
+						<p class="break-words">Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.</p>
+						<div class="footer">Anonymous - 22 March 2021 at 15:03</div>
+					</div>
+					<div class="comment">
+						<p class="break-words">Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.</p>
+						<div class="footer">Anonymous - 22 March 2021 at 15:03</div>
+					</div>
+					<div class="comment">
+						<p class="break-words">Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.</p>
+						<div class="footer">Anonymous - 22 March 2021 at 15:03</div>
+					</div>
+				</div>
+				-->
 			</div>
 		</div>
 	</div>
