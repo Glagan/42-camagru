@@ -2,7 +2,13 @@
 
 class Database
 {
+	/**
+	 * @var Database
+	 */
 	private static $instance = null;
+	/**
+	 * @var \PDO
+	 */
 	private $connection = null;
 
 	public function __construct()
@@ -39,7 +45,7 @@ class Database
 
 	/**
 	 * Last inserted ID.
-	 * @return integer
+	 * @return int
 	 */
 	public static function lastId(): int
 	{

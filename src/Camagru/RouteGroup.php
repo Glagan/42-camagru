@@ -2,8 +2,17 @@
 
 class RouteGroup implements Routable
 {
+	/**
+	 * @var Router
+	 */
 	private $router;
+	/**
+	 * @var string
+	 */
 	private $controller;
+	/**
+	 * @var string
+	 */
 	private $prefix;
 
 	public function __construct(Router $router, string $controller, string $prefix = '')
@@ -13,7 +22,13 @@ class RouteGroup implements Routable
 		$this->prefix = $prefix;
 	}
 
-	private function updateRoute(&$path, array &$route): void
+	/**
+	 * Update the route path and ['use'] attribute to add the prefix and Controller.
+	 * @param string $path
+	 * @param array $route
+	 * @return void
+	 */
+	private function updateRoute(string &$path, array &$route): void
 	{
 		if (isset($route['use'])) {
 			$route['use'] = "{$this->controller}@{$route['use']}";
@@ -21,31 +36,66 @@ class RouteGroup implements Routable
 		}
 	}
 
-	public function get(string $path, array $route)
+	/**
+	 * Add a GET route to the router.
+	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
+	 */
+	public function get(string $path, array $route): void
 	{
 		$this->updateRoute($path, $route);
 		$this->router->get($path, $route);
 	}
 
-	public function post(string $path, array $route)
+	/**
+	 * Add a POST route to the router.
+	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
+	 */
+	public function post(string $path, array $route): void
 	{
 		$this->updateRoute($path, $route);
 		$this->router->post($path, $route);
 	}
 
-	public function put(string $path, array $route)
+	/**
+	 * Add a PUT route to the router.
+	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
+	 */
+	public function put(string $path, array $route): void
 	{
 		$this->updateRoute($path, $route);
 		$this->router->put($path, $route);
 	}
 
-	public function patch(string $path, array $route)
+	/**
+	 * Add a PATCH route to the router.
+	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
+	 */
+	public function patch(string $path, array $route): void
 	{
 		$this->updateRoute($path, $route);
 		$this->router->patch($path, $route);
 	}
 
-	public function delete(string $path, array $route)
+	/**
+	 * Add a DELETE route to the router.
+	 * @see \Camagru\Router::add
+	 * @param string $path
+	 * @param array $route
+	 * @return void
+	 */
+	public function delete(string $path, array $route): void
 	{
 		$this->updateRoute($path, $route);
 		$this->router->delete($path, $route);

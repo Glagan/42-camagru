@@ -8,13 +8,20 @@ use Models\Like;
 
 class Image extends Controller
 {
-	public function upload()
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function upload(): Response
 	{
 		// TODO
 		return $this->json(['success' => 'Creation uploaded.']);
 	}
 
-	function list($page = 1) {
+	/**
+	 * @param int $page The page number > 0
+	 * @return \Camagru\Http\Response
+	 */
+	function list(int $page = 1): Response {
 		if ($page < 1) {
 			$page = 1;
 		}
@@ -28,7 +35,11 @@ class Image extends Controller
 		return $this->json(['images' => $images]);
 	}
 
-	public function like($id)
+	/**
+	 * @param int $id Image ID
+	 * @return \Camagru\Http\Response
+	 */
+	public function like(int $id): Response
 	{
 		if ($id < 0) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
@@ -48,7 +59,11 @@ class Image extends Controller
 		return $this->json(['success' => $message]);
 	}
 
-	public function comment($id)
+	/**
+	 * @param int $id Image ID
+	 * @return \Camagru\Http\Response
+	 */
+	public function comment(int $id): Response
 	{
 		$this->validate([
 			'comment' => [
@@ -71,7 +86,11 @@ class Image extends Controller
 		return $this->json(['success' => 'Comment added.']);
 	}
 
-	public function single($id)
+	/**
+	 * @param int $id Image ID
+	 * @return \Camagru\Http\Response
+	 */
+	public function single(int $id): Response
 	{
 		if ($id < 1) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);

@@ -5,7 +5,13 @@ use Camagru\Http\Response;
 
 class JSONException extends \Exception implements HTTPException
 {
+	/**
+	 * @var int
+	 */
 	protected $errorCode;
+	/**
+	 * @var string
+	 */
 	protected $reason;
 
 	public function __construct(int $errorCode)
@@ -27,6 +33,10 @@ class JSONException extends \Exception implements HTTPException
 		}
 	}
 
+	/**
+	 * @param string $mode
+	 * @return \Camagru\Http\Response
+	 */
 	public function getResponse(string $mode): Response
 	{
 		return new JSONResponse(['error' => $this->reason], Response::BAD_REQUEST);

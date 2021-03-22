@@ -5,13 +5,28 @@ use SQL\Query;
 
 class Model
 {
+	/**
+	 * @var array
+	 */
 	protected $attributes;
+	/**
+	 * @var array
+	 */
 	protected $dirty;
+	/**
+	 * @var array
+	 */
 	protected static $fields = [];
+	/**
+	 * @var array
+	 */
 	protected static $defaults = [];
+	/**
+	 * @var array
+	 */
 	protected static $casts = [];
 
-	public function __construct($attributes = [])
+	public function __construct(array $attributes = [])
 	{
 		$this->attributes = [];
 		foreach ($attributes as $name => $value) {
@@ -20,7 +35,14 @@ class Model
 		$this->dirty = [];
 	}
 
-	public function __set($name, $value)
+	/**
+	 * Set the associated value to the name column.
+	 * If there is a cast, the value is casted before being assigned.
+	 * If there is already a value associated with name, the column is added to the dirty list.
+	 * @param string $name
+	 * @param mixed $value
+	 */
+	public function __set(string $name, $value)
 	{
 		// Cast value if necessary
 		if (\array_key_exists($name, static::$casts)) {
@@ -41,7 +63,12 @@ class Model
 		$this->attributes[$name] = $value;
 	}
 
-	public function __get($name)
+	/**
+	 * Return the column value, if it doesn't exists it's default value if there is one, or else null.
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function __get(string $name)
 	{
 		if (\array_key_exists($name, $this->attributes)) {
 			return $this->attributes[$name];
@@ -76,7 +103,7 @@ class Model
 	/**
 	 * Return the first found row that meet the conditions.
 	 * @param array $conditions
-	 * @param int|null $order
+	 * @param array|string $order
 	 * @return \Model|false
 	 */
 	public static function first(array $conditions, $order = [])
@@ -91,7 +118,9 @@ class Model
 	/**
 	 * Find all Models that match the given selectors in the Model table.
 	 * @see SQL\Query
-	 * @param array $selectors Array of selectors
+	 * @param array $conditions Array of selectors
+	 * @param array|string $order
+	 * @param int $limit
 	 * @return \Model[]
 	 */
 	public static function all(array $conditions, $order = [], $limit = -1): array
@@ -142,7 +171,7 @@ class Model
 	/**
 	 * Delete the model from the Database.
 	 * Return true if it was deleted or false if there is no ID.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function remove(): bool
 	{
@@ -203,7 +232,11 @@ class Model
 		return $this->attributes;
 	}
 
-	public function __toString()
+	/**
+	 * JSON encode the Model attributes.
+	 * @return string
+	 */
+	public function __toString(): string
 	{
 		return \json_encode($this->toArray());
 	}

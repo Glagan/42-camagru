@@ -2,6 +2,9 @@
 
 class Value
 {
+	/**
+	 * @var string
+	 */
 	private $value;
 
 	public function __construct(string $value)
@@ -9,12 +12,21 @@ class Value
 		$this->value = $value;
 	}
 
-	public function get()
+	/**
+	 * Get the raw value.
+	 * @return string
+	 */
+	public function get(): string
 	{
 		return $this->value;
 	}
 
-	public static function make(string $value)
+	/**
+	 * Helper function to create a new Value instance.
+	 * @param string $value
+	 * @return Value
+	 */
+	public static function make(string $value): Value
 	{
 		return new Value($value);
 	}

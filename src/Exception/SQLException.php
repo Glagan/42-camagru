@@ -4,9 +4,21 @@ use Log;
 
 class SQLException extends \Exception implements LoggedException
 {
+	/**
+	 * @var \PDOStatement
+	 */
 	protected $statement;
+	/**
+	 * @var int
+	 */
 	protected $sqlStateError;
+	/**
+	 * @var int
+	 */
 	protected $driverErrorCode;
+	/**
+	 * @var string
+	 */
 	protected $driverErrorMessage;
 
 	public function __construct(\PDOStatement $statement)
@@ -18,6 +30,9 @@ class SQLException extends \Exception implements LoggedException
 		$this->driverErrorMessage = $errorInfo[2];
 	}
 
+	/**
+	 * @return void
+	 */
 	public function log(): void
 	{
 		// We need to buffer the output since debugDumpParams doesn't write to a variable

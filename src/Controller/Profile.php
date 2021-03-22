@@ -6,7 +6,10 @@ use Models\User;
 
 class Profile extends Controller
 {
-	public function update()
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function update(): Response
 	{
 		$passwordMatch = [
 			'/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/',
@@ -52,7 +55,11 @@ class Profile extends Controller
 		return $this->json(['success' => 'Profile updated !']);
 	}
 
-	public function single($id)
+	/**
+	 * @param int $id User ID
+	 * @return \Camagru\Http\Response
+	 */
+	public function single($id): Response
 	{
 		if ($id < 1) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);

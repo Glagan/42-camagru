@@ -9,7 +9,10 @@ use SQL\Value;
 
 class Authentication extends Controller
 {
-	public function register()
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function register(): Response
 	{
 		$this->validate([
 			'username' => [
@@ -64,7 +67,10 @@ class Authentication extends Controller
 		return $this->json(['success' => 'Registered !']);
 	}
 
-	public function login()
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function login(): Response
 	{
 		$this->validate([
 			'username' => [
@@ -115,7 +121,11 @@ class Authentication extends Controller
 		return $this->json(['success' => 'Logged in !']);
 	}
 
-	public function logout($session = null)
+	/**
+	 * @param string|null $session A PHP Session unique ID
+	 * @return \Camagru\Http\Response
+	 */
+	public function logout($session = null): Response
 	{
 		if ($session === null) {
 			$session = \session_id();
@@ -127,7 +137,10 @@ class Authentication extends Controller
 		return $this->json(['success' => 'Logged out, see you soon !']);
 	}
 
-	public function logoutAll()
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function logoutAll(): Response
 	{
 		$session = \session_id();
 		$userSessions = UserSession::all(['user' => $this->user->id, ['session', Operator::DIFFERENT, $session]]);
@@ -138,13 +151,19 @@ class Authentication extends Controller
 		return $this->json(['success' => 'Logged out on all other sessions !']);
 	}
 
-	public function sendVerification()
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function sendVerification(): Response
 	{
 		// TODO
 		return $this->json(['success' => 'An email with a new verification link has been sent.']);
 	}
 
-	public function resetPassword()
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function resetPassword(): Response
 	{
 		$this->validate([
 			'username' => [

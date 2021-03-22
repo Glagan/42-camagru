@@ -16,19 +16,59 @@ class Query
 	public const ASC = "ASC";
 	public const DESC = "DESC";
 
+	/**
+	 * @var string
+	 */
 	private $type;
+	/**
+	 * @var array
+	 */
 	private $table;
+	/**
+	 * @var array
+	 */
 	private $fields;
+	/**
+	 * @var array
+	 */
 	private $updates;
+	/**
+	 * @var array
+	 */
 	private $inserts;
+	/**
+	 * @var array
+	 */
 	private $conditions;
+	/**
+	 * @var array
+	 */
 	private $order;
+	/**
+	 * @var int
+	 */
 	private $limit;
+	/**
+	 * @var int
+	 */
 	private $offset;
+	/**
+	 * @var array
+	 */
 	private $params;
+	/**
+	 * @var \PDOStatement
+	 */
 	private $statement;
+	/**
+	 * @var mixed
+	 */
 	private $result;
 
+	/**
+	 * @param string $type
+	 * @param string|array $table
+	 */
 	public function __construct(string $type, $table)
 	{
 		$this->setType($type)
@@ -43,6 +83,10 @@ class Query
 		$this->params = [];
 	}
 
+	/**
+	 * @param string $type
+	 * @return self
+	 */
 	public function setType(string $type): self
 	{
 		if ($type == self::SELECT ||
@@ -139,7 +183,7 @@ class Query
 	 * @param array $conditions
 	 * @return self
 	 */
-	public function where($conditions): self
+	public function where(array $conditions): self
 	{
 		$this->conditions = [];
 		foreach ($conditions as $key => $value) {
@@ -170,8 +214,8 @@ class Query
 
 	/**
 	 * Set the limit and optional offset of the query.
-	 * @param integer $limit
-	 * @param integer $offset
+	 * @param int $limit
+	 * @param int $offset
 	 * @return self
 	 */
 	public function limit(int $limit, int $offset = -1): self
@@ -183,8 +227,8 @@ class Query
 
 	/**
 	 * Set the limit and offset for a given page in a pagination with perPage elements.
-	 * @param integer $page
-	 * @param integer $perPage
+	 * @param int $page
+	 * @param int $perPage
 	 * @return self
 	 */
 	public function page(int $page, int $perPage): self
@@ -200,7 +244,7 @@ class Query
 	 * Format:
 	 * 	['column'] with a default ASC direction
 	 * 	['column' => 'direction']
-	 * @param mixed $order
+	 * @param string|array $order
 	 * @param string $direction
 	 * @return self
 	 */
@@ -221,6 +265,10 @@ class Query
 		return $this;
 	}
 
+	/**
+	 * Build the SQL Query with placeholders and returns it.
+	 * @return string
+	 */
 	public function build(): string
 	{
 		// Query statement
@@ -366,6 +414,7 @@ class Query
 	/**
 	 * Build, prepare and execute the query.
 	 * Returns the result of the execution.
+	 * @return bool
 	 */
 	public function execute(): bool
 	{
@@ -406,7 +455,7 @@ class Query
 
 	/**
 	 * Execute the Query and return the first returned row or false if it does not exists.
-	 * @param string|int $classOrMode A PDO mode or a Classname
+	 * @param string|int|null $classOrMode A PDO mode or a Classname
 	 * @return mixed
 	 */
 	public function first($classOrMode = null)
@@ -432,7 +481,7 @@ class Query
 
 	/**
 	 * Execute the Query and return all matching rows or false if it does not exists.
-	 * @param string|int $classOrMode A PDO mode or a Classname
+	 * @param string|int|null $classOrMode A PDO mode or a Classname
 	 * @return mixed
 	 */
 	public function all($classOrMode = null)

@@ -13,6 +13,9 @@ use Camagru\Model;
  */
 class User extends Model
 {
+	/**
+	 * @var array
+	 */
 	protected static $fields = [
 		'username',
 		'email',
@@ -22,11 +25,17 @@ class User extends Model
 		'receiveComments',
 	];
 
+	/**
+	 * @var array
+	 */
 	protected static $casts = [
 		'verified' => 'bool',
 		'receiveComments' => 'bool',
 	];
 
+	/**
+	 * @var array
+	 */
 	protected static $defaults = [
 		'theme' => 'light',
 	];

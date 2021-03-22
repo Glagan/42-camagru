@@ -11,6 +11,9 @@ use Camagru\Model;
  */
 class Comment extends Model
 {
+	/**
+	 * @var array
+	 */
 	protected static $fields = [
 		'image',
 		'user',
@@ -18,6 +21,9 @@ class Comment extends Model
 		'message',
 	];
 
+	/**
+	 * @var array
+	 */
 	protected static $casts = [
 		'image' => Image::class,
 		'user' => User::class,

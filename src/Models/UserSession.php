@@ -10,11 +10,17 @@ use Camagru\Model;
  */
 class UserSession extends Model
 {
+	/**
+	 * @var array
+	 */
 	protected static $fields = [
 		'user',
 		'session',
 	];
 
+	/**
+	 * @var array
+	 */
 	protected static $casts = [
 		'user' => User::class,
 	];

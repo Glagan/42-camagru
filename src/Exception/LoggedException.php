@@ -2,5 +2,8 @@
 
 interface LoggedException
 {
+	/**
+	 * @return void
+	 */
 	public function log(): void;
 }

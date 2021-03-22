@@ -2,6 +2,9 @@
 
 class RequestInput
 {
+	/**
+	 * @var array
+	 */
 	protected $values;
 
 	public function __construct(string $method, HeaderList $headers)
