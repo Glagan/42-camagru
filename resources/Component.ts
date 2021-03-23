@@ -2,8 +2,7 @@ import { Application } from './Application';
 
 export interface Component {
 	data?(): Promise<void>;
-	created?(): void;
-	render?(): void;
+	destroy?(): void;
 }
 
 export abstract class Component {
@@ -18,6 +17,11 @@ export abstract class Component {
 		} else {
 			this.parent = document.createElement('div');
 		}
-		if (this.created) this.created();
+		this.create();
+		this.bind();
 	}
+
+	abstract create(): void;
+	abstract bind(): void;
+	abstract render(): void;
 }

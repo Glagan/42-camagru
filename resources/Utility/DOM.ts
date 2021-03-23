@@ -19,7 +19,8 @@ export type HeroIcon =
 	| 'heart'
 	| 'chat'
 	| 'upload'
-	| 'plus-circle';
+	| 'plus-circle'
+	| 'user';
 export type IconPath = {
 	'stroke-linecap'?: 'round';
 	'stroke-linejoin'?: 'round';
@@ -153,6 +154,8 @@ export class DOM {
 			DOM.createIcon([{ d: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12' }], options),
 		'plus-circle': (options) =>
 			DOM.createIcon([{ d: 'M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z' }], options),
+		user: (options) =>
+			DOM.createIcon([{ d: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' }], options),
 	};
 
 	static icon(name: HeroIcon, options?: IconOptions): SVGSVGElement {
