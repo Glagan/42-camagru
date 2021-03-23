@@ -18,7 +18,8 @@ export class Router {
 
 	match(location: string): Route | undefined {
 		for (const route of this.routes) {
-			if (route.path.match(location)) {
+			if (location.match(route.path)) {
+				// TODO: found params
 				return route;
 			}
 		}
