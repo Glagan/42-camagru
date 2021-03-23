@@ -1,22 +1,30 @@
 import { Application } from './Application';
-import { Navigation } from './Components/Navigation';
+import { Theme } from './Utility/Theme';
+import { Router } from './Router';
+import { SingleImage } from './Components/SingleImage';
+import { SingleUser } from './Components/SingleUser';
+import { Create } from './Components/Create';
+import { Preferences } from './Components/Preferences';
+import { Register } from './Components/Register';
+import { Login } from './Components/Login';
+import { List } from './Components/List';
+import { ForgotPassword } from './Components/ForgotPassword';
 
 // Set Dark theme
-function setTheme(theme: 'light' | 'dark') {
-	document.documentElement.classList.remove('light', 'dark');
-	document.documentElement.classList.add(theme);
-	localStorage.setItem('theme', theme);
-}
-let theme = localStorage.getItem('theme') as 'light' | 'dark' | null;
-if (!theme) {
-	theme = window?.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-setTheme(theme);
+Theme.initialize();
+
+// Map URLs to Components
+const location = `${window.location.pathname}${window.location.search}`;
+const router = new Router();
+router.add('login', Login);
+router.add('register', Register);
+router.add('forgot-password', ForgotPassword);
+router.add('preferences', Preferences);
+router.add('create', Create);
+router.add('user\\/(\\d+)', SingleUser);
+router.add('(\\d+)', SingleImage);
+router.add('', List);
 
 // Application
-const app = new Application();
-const navigation = new Navigation(app, document.getElementById('nav')!);
-(async () => {
-	await navigation.data();
-	navigation.render();
-})();
+const app = new Application(router);
+app.navigate(location);
