@@ -58,6 +58,7 @@ export class DOM {
 		svg.setAttribute('fill', opts.fill);
 		svg.setAttribute('stroke', opts.stroke);
 		svg.setAttribute('viewBox', opts.viewBox);
+		svg.classList.add(...opts.classes);
 		// Create the paths
 		for (const definition of paths) {
 			const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -162,13 +163,15 @@ export class DOM {
 		return DOM.heroIcons[name](options);
 	}
 
-	static button(type: ButtonType, iconName: HeroIcon, textContent: string): HTMLButtonElement {
+	static button(type: ButtonType, iconName: HeroIcon, textContent?: string): HTMLButtonElement {
 		const button = document.createElement('button');
 		button.classList.add(type);
 		button.appendChild(DOM.icon(iconName));
-		const content = document.createElement('span');
-		content.textContent = textContent;
-		button.appendChild(content);
+		if (textContent) {
+			const content = document.createElement('span');
+			content.textContent = textContent;
+			button.appendChild(content);
+		}
 		return button;
 	}
 

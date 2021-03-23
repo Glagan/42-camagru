@@ -46,10 +46,25 @@ export class Navigation extends Component {
 		this.preferences = DOM.button('secondary', 'cog', 'Preferences');
 		this.logout = DOM.button('error', 'logout', 'Logout');
 		this.back = DOM.button('secondary', 'chevron-left', 'Back Home');
-		// TODO: Add Event listeners
 	}
 
-	bind() {}
+	private link(node: HTMLButtonElement, location: string): void {
+		node.addEventListener('click', (event) => {
+			event.preventDefault();
+			this.application.navigate(location);
+		});
+	}
+
+	bind() {
+		this.link(this.createButton, '/create');
+		this.link(this.sendVerification, '/send-verification');
+		this.link(this.login, '/login');
+		this.link(this.register, '/register');
+		this.link(this.account, '/account');
+		this.link(this.preferences, '/preferences');
+		this.link(this.back, '/');
+		// Logout
+	}
 
 	async data() {
 		if (this.application.auth.pendingStatus) {
@@ -71,24 +86,24 @@ export class Navigation extends Component {
 		const auth = this.application.auth;
 		DOM.clear(this.user);
 		DOM.clear(this.links);
-		if (this.application.page != List.name) {
-			this.links.appendChild(this.back);
-		}
 		if (auth.loggedIn) {
 			this.displayLoggedInUser();
-			if (this.application.page !== Create.name) {
-				this.links.appendChild(this.createButton);
-			}
 			if (!auth.user.verified) {
 				DOM.append(this.links, this.sendVerification);
 			}
 			if (this.application.page !== Create.name) {
 				this.links.appendChild(this.createButton);
 			}
+			if (this.application.page !== List.name) {
+				this.links.appendChild(this.back);
+			}
 			DOM.append(this.links, this.account, this.preferences, this.logout);
 		} else {
 			if (this.application.page !== Create.name) {
 				this.links.appendChild(this.createButton);
+			}
+			if (this.application.page !== List.name) {
+				this.links.appendChild(this.back);
 			}
 			DOM.append(this.links, this.login, this.register, this.preferences);
 		}
