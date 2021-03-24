@@ -9,6 +9,7 @@ export abstract class Component {
 	application: Application;
 	parent: HTMLElement;
 	trigger: { [key: string]: (payload?: object) => void } = {};
+	static auth: boolean | undefined = undefined;
 
 	constructor(application: Application, parent?: HTMLElement) {
 		this.application = application;

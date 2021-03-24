@@ -2,6 +2,8 @@ import { Component } from '../Component';
 import { DOM } from '../Utility/DOM';
 
 export class Create extends Component {
+	static auth = true;
+
 	container!: HTMLElement;
 	preview!: HTMLImageElement;
 	actions!: HTMLElement;
