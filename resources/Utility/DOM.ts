@@ -7,22 +7,28 @@ interface DOMProperties {
 export type ButtonType = 'primary' | 'success' | 'secondary' | 'error';
 
 export type HeroIcon =
-	| 'exclamation'
-	| 'check'
-	| 'camera'
-	| 'login'
-	| 'user-add'
-	| 'cog'
-	| 'logout'
-	| 'chevron-left'
 	| 'at-symbol'
-	| 'heart'
+	| 'camera'
 	| 'chat'
-	| 'upload'
+	| 'check'
+	| 'check-circle'
+	| 'chevron-left'
+	| 'cog'
+	| 'exclamation'
+	| 'exclamation-circle'
+	| 'heart'
+	| 'information-circle'
+	| 'login'
+	| 'logout'
+	| 'moon'
 	| 'plus-circle'
-	| 'user'
+	| 'question-mark-circle'
+	| 'save'
 	| 'sun'
-	| 'moon';
+	| 'upload'
+	| 'user'
+	| 'user-add'
+	| 'x-circle';
 export type IconPath = {
 	'stroke-linecap'?: 'round';
 	'stroke-linejoin'?: 'round';
@@ -174,6 +180,44 @@ export class DOM {
 				[{ d: 'M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z' }],
 				options
 			),
+		save: (options) =>
+			DOM.createIcon(
+				[{ d: 'M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4' }],
+				options
+			),
+		'question-mark-circle': (options) =>
+			DOM.createIcon(
+				[
+					{
+						d:
+							'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+					},
+				],
+				options
+			),
+		'information-circle': (options) =>
+			DOM.createIcon(
+				[
+					{
+						d:
+							'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+					},
+				],
+				options
+			),
+		'x-circle': (options) =>
+			DOM.createIcon(
+				[
+					{
+						d:
+							'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+					},
+				],
+				options
+			),
+		'check-circle': (options) => DOM.createIcon([{ d: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' }], options),
+		'exclamation-circle': (options) =>
+			DOM.createIcon([{ d: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' }], options),
 	};
 
 	static icon(name: HeroIcon, options?: IconOptions): SVGSVGElement {
