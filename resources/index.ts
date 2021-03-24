@@ -9,6 +9,7 @@ import { Register } from './Components/Register';
 import { Login } from './Components/Login';
 import { List } from './Components/List';
 import { ForgotPassword } from './Components/ForgotPassword';
+import { Account } from './Components/Account';
 
 // Set Dark theme
 Theme.initialize();
@@ -21,6 +22,7 @@ router.add('/register$', Register);
 router.add('/forgot-password$', ForgotPassword);
 router.add('/preferences$', Preferences);
 router.add('/create$', Create);
+router.add('/account$', Account);
 router.add('/user/(\\d+)$', SingleUser);
 router.add('/(\\d+)$', SingleImage);
 router.add('/', List);

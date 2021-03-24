@@ -11,8 +11,12 @@ export class Preferences extends Component {
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: 'Preferences' });
-		// TODO: Default state from Theme
-		const { label, checkbox } = Toggle.make('Theme');
+		const checked = Theme.value == 'dark';
+		const { label, checkbox } = Toggle.make('Theme', {
+			checked,
+			prefix: DOM.icon('sun'),
+			suffix: DOM.icon('moon'),
+		});
 		this.themeLabel = label;
 		this.themeToggle = checkbox;
 		this.themeToggle.addEventListener('change', (event) => {
