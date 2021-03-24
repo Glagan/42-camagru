@@ -2,6 +2,8 @@ import { Component } from '../Component';
 import { DOM } from '../Utility/DOM';
 
 export class ForgotPassword extends Component {
+	static auth = false;
+
 	header!: HTMLElement;
 	form!: HTMLFormElement;
 	labelEmail!: HTMLLabelElement;

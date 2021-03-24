@@ -2,6 +2,8 @@ import { Component } from '../Component';
 import { DOM } from '../Utility/DOM';
 
 export class Login extends Component {
+	static auth = false;
+
 	header!: HTMLElement;
 	form!: HTMLFormElement;
 	labelUsername!: HTMLLabelElement;
