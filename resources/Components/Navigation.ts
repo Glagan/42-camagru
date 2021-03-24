@@ -27,12 +27,12 @@ export class Navigation extends Component {
 		this.user = DOM.create('div', { className: 'mb-2' });
 		this.warningBadge = DOM.create('span', {
 			className: 'badge warning',
-			childs: [DOM.icon('exclamation', { width: 5, height: 5 })],
+			childs: [DOM.icon('exclamation', { width: 'w-5', height: 'h-5' })],
 			title: 'Not Verified',
 		});
 		this.verifiedBadge = DOM.create('span', {
 			className: 'badge success',
-			childs: [DOM.icon('check', { width: 5, height: 5 })],
+			childs: [DOM.icon('check', { width: 'w-5', height: 'h-5' })],
 			title: 'Verified',
 		});
 		this.links = DOM.create('div', {
@@ -46,13 +46,6 @@ export class Navigation extends Component {
 		this.preferences = DOM.button('secondary', 'cog', 'Preferences');
 		this.logout = DOM.button('error', 'logout', 'Logout');
 		this.back = DOM.button('secondary', 'chevron-left', 'Back Home');
-	}
-
-	private link(node: HTMLButtonElement, location: string): void {
-		node.addEventListener('click', (event) => {
-			event.preventDefault();
-			this.application.navigate(location);
-		});
 	}
 
 	bind() {

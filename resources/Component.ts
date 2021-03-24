@@ -21,6 +21,13 @@ export abstract class Component {
 		this.bind();
 	}
 
+	protected link(node: HTMLButtonElement, location: string): void {
+		node.addEventListener('click', (event) => {
+			event.preventDefault();
+			this.application.navigate(location);
+		});
+	}
+
 	abstract create(): void;
 	abstract bind(): void;
 	abstract render(): void;

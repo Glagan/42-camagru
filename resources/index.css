@@ -63,7 +63,7 @@ button.secondary {
 }
 
 .header {
-	@apply sticky z-20 top-0 py-2 text-2xl bg-gray-100 text-gray-800 border-b border-gray-800  dark:bg-gray-600 dark:text-gray-100 dark:border-gray-100;
+	@apply transition sticky z-20 top-0 py-2 text-2xl bg-gray-200 text-gray-800 border-b border-gray-800  dark:bg-gray-600 dark:text-gray-100 dark:border-gray-100;
 }
 
 .card {
@@ -92,6 +92,19 @@ label {
 
 input {
 	@apply transition cursor-pointer mb-2 rounded border border-gray-600 p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
+}
+
+.toggle .circle {
+	top: 0.2rem;
+	left: 0.25rem;
+}
+
+.toggle input:checked ~ .path {
+	background-color: #81e6d9;
+}
+
+.toggle input:checked ~ .circle {
+	transform: translateX(100%);
 }
 
 .like {
