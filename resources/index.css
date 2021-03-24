@@ -107,6 +107,18 @@ input {
 	transform: translateX(100%);
 }
 
+.toggle .relative {
+	@apply mx-1;
+}
+
+.toggle .relative:nth-child(2) {
+	@apply ml-0;
+}
+
+.toggle .relative:last-child {
+	@apply mr-0;
+}
+
 .like {
 	@apply transition text-pink-400;
 	fill: none;
