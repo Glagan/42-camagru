@@ -27,12 +27,12 @@ export class SingleImage extends Component {
 		this.likeCount = DOM.create('span', { textContent: '123' });
 		this.likes = DOM.create('div', {
 			className: 'text-center cursor-pointer',
-			childs: [DOM.icon('heart', { classes: 'like', width: 10, height: 10 }), this.likeCount],
+			childs: [DOM.icon('heart', { classes: 'like', width: 'w-10', height: 'h-10' }), this.likeCount],
 		});
 		this.commentCount = DOM.create('span', { textContent: '123' });
 		this.comments = DOM.create('div', {
 			className: 'text-center cursor-pointer',
-			childs: [DOM.icon('chat', { classes: 'text-gray-200', width: 10, height: 10 }), this.commentCount],
+			childs: [DOM.icon('chat', { classes: 'text-gray-400', width: 'w-10', height: 'h-10' }), this.commentCount],
 		});
 		this.stats = DOM.create('div', {
 			className: 'flex flex-row flex-nowrap justify-evenly mt-2',

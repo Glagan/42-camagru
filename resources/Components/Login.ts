@@ -14,7 +14,6 @@ export class Login extends Component {
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: 'Login' });
-		this.form = DOM.create('form', { className: 'flex flex-col flex-wrap items-stretch' });
 		this.labelUsername = DOM.create('label', {
 			htmlFor: 'login-username',
 			textContent: 'Username',
@@ -35,16 +34,20 @@ export class Login extends Component {
 			name: 'password',
 			placeholder: 'Password',
 		});
-		this.footer = DOM.create('div', { className: 'footer' });
 		this.forgotPassword = DOM.button('secondary', 'at-symbol', 'Forgot Password');
 		this.submit = DOM.button('primary', 'login', 'Login');
+		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit, this.forgotPassword] });
+		this.form = DOM.create('form', {
+			className: 'flex flex-col flex-wrap items-stretch',
+			childs: [this.labelUsername, this.username, this.labelPassword, this.password, this.footer],
+		});
 	}
 
-	bind(): void {}
+	bind(): void {
+		this.link(this.forgotPassword, '/forgot-password');
+	}
 
 	render(): void {
-		DOM.append(this.footer, this.submit, this.forgotPassword);
-		DOM.append(this.form, this.labelUsername, this.username, this.labelPassword, this.password, this.footer);
 		DOM.append(this.parent, this.header, this.form);
 	}
 }

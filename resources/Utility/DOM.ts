@@ -28,8 +28,8 @@ export type IconPath = {
 	d: string;
 };
 export type IconOptions = {
-	width?: number;
-	height?: number;
+	width?: string;
+	height?: string;
 	classes?: string | string[];
 	fill?: string;
 	stroke?: string;
@@ -40,8 +40,8 @@ export class DOM {
 	private static createIcon(paths: IconPath[], options?: IconOptions): SVGSVGElement {
 		// Default options
 		const opts = {
-			width: 6,
-			height: 6,
+			width: 'w-6',
+			height: 'h-6',
 			classes: '',
 			fill: 'none',
 			stroke: 'currentColor',
@@ -53,11 +53,11 @@ export class DOM {
 		}
 		// Create wrapper
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-		svg.classList.add(`w-${opts.width}`, `h-${opts.height}`); //, ...opts.classes);
 		svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 		svg.setAttribute('fill', opts.fill);
 		svg.setAttribute('stroke', opts.stroke);
 		svg.setAttribute('viewBox', opts.viewBox);
+		svg.classList.add(opts.width, opts.height);
 		svg.classList.add(...opts.classes);
 		// Create the paths
 		for (const definition of paths) {

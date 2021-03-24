@@ -17,7 +17,6 @@ export class Register extends Component {
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: 'Register' });
-		this.form = DOM.create('form', { className: 'flex flex-col flex-wrap items-stretch' });
 		this.labelUsername = DOM.create('label', {
 			htmlFor: 'register-username',
 			textContent: 'Username',
@@ -58,26 +57,27 @@ export class Register extends Component {
 			name: 'confirm-password',
 			placeholder: 'Confirm Password',
 		});
-		this.footer = DOM.create('div', { className: 'footer' });
 		this.submit = DOM.button('primary', 'user-add', 'Register');
+		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit] });
+		this.form = DOM.create('form', {
+			className: 'flex flex-col flex-wrap items-stretch',
+			childs: [
+				this.labelUsername,
+				this.username,
+				this.labelEmail,
+				this.email,
+				this.labelPassword,
+				this.password,
+				this.labelConfirmPassword,
+				this.confirmPassword,
+				this.footer,
+			],
+		});
 	}
 
 	bind(): void {}
 
 	render(): void {
-		DOM.append(this.footer, this.submit);
-		DOM.append(
-			this.form,
-			this.labelUsername,
-			this.username,
-			this.labelEmail,
-			this.email,
-			this.labelPassword,
-			this.password,
-			this.labelConfirmPassword,
-			this.confirmPassword,
-			this.footer
-		);
 		DOM.append(this.parent, this.header, this.form);
 	}
 }
