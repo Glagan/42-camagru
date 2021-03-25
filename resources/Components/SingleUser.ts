@@ -2,6 +2,7 @@ import { Component } from '../Component';
 import { DOM } from '../Utility/DOM';
 
 export class SingleUser extends Component {
+	id: number = 0;
 	header!: HTMLElement;
 	grid!: HTMLElement;
 	cards!: HTMLElement[];
@@ -13,9 +14,25 @@ export class SingleUser extends Component {
 		});
 	}
 
+	async data(params: RegExpMatchArray) {
+		const id = parseInt(params[1]);
+		if (!isNaN(id) && id > 0) {
+			this.id = id;
+		}
+	}
+
 	bind(): void {}
 
 	render(): void {
+		if (this.id < 1) {
+			DOM.append(
+				this.parent,
+				DOM.create('h1', { className: 'text-center text-6xl', textContent: '404' }),
+				DOM.create('h2', { className: 'text-center text-4xl', textContent: 'User not Found' }),
+				DOM.create('div', { className: 'text-center', textContent: 'How did you get there ?' })
+			);
+			return;
+		}
 		for (let index = 0; index < 10; index++) {
 			const card = DOM.create('div', {
 				className: 'card',

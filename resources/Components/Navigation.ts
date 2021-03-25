@@ -50,7 +50,6 @@ export class Navigation extends Component {
 
 	bind() {
 		this.link(this.createButton, '/create');
-		this.link(this.sendVerification, '/send-verification');
 		this.link(this.login, '/login');
 		this.link(this.register, '/register');
 		this.link(this.account, '/account');
@@ -59,7 +58,7 @@ export class Navigation extends Component {
 		// Logout
 	}
 
-	async data() {
+	async data(_params: RegExpMatchArray) {
 		if (this.application.auth.pendingStatus) {
 			await this.application.auth.pendingStatus;
 		}

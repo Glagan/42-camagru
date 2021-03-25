@@ -42,11 +42,12 @@ export class Application {
 	}
 
 	async navigate(location: string): Promise<void> {
-		const route = this.router.match(location);
-		if (route === undefined) {
+		const match = this.router.match(location);
+		if (match === undefined) {
 			this.renderComponent(this.pageNotFound);
 			return;
 		}
+		const { route, params } = match;
 		// TODO: Loading
 		const _class = route.component;
 		if (_class.auth !== undefined) {
@@ -59,7 +60,7 @@ export class Application {
 		/// @ts-ignore route.component is NOT abstract
 		const component: Component = new _class(this, this.main);
 		if (component.data) {
-			await component.data();
+			await component.data(params);
 		}
 		// Clear and render
 		this.renderComponent(component);
