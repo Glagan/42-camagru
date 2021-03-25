@@ -99,9 +99,6 @@ export class Navigation extends Component {
 			}
 			DOM.append(this.links, this.account, this.preferences, this.logout);
 		} else {
-			if (this.application.page !== Create.name) {
-				this.links.appendChild(this.createButton);
-			}
 			if (this.application.page !== List.name) {
 				this.links.appendChild(this.back);
 			}
