@@ -1,7 +1,7 @@
 import { Application } from './Application';
 
 export interface Component {
-	data?(): Promise<void>;
+	data?(params: RegExpMatchArray): Promise<void>;
 	destroy?(): void;
 }
 

@@ -16,11 +16,11 @@ export class Router {
 		this.routes.push({ path, component });
 	}
 
-	match(location: string): Route | undefined {
+	match(location: string): { route: Route; params: RegExpMatchArray } | undefined {
 		for (const route of this.routes) {
-			if (location.match(route.path)) {
-				// TODO: found params
-				return route;
+			const match = location.match(route.path);
+			if (match) {
+				return { route, params: match };
 			}
 		}
 		return undefined;
