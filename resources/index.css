@@ -94,6 +94,10 @@ input {
 	@apply transition cursor-pointer mb-2 rounded border border-gray-600 p-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
 }
 
+input.error {
+	@apply border-red-500 border-transparent ring-2 ring-red-500;
+}
+
 .toggle .circle {
 	top: 0.2rem;
 	left: 0.25rem;
@@ -142,4 +146,38 @@ input {
 
 .comment .footer {
 	@apply p-1 italic bg-gray-300 text-gray-700 border-t dark:bg-gray-700 dark:text-gray-300;
+}
+
+.alert {
+	@apply border-l-4 rounded-r px-4 py-3 shadow-md;
+}
+
+.notifications {
+	@apply fixed top-0 right-0 bottom-0 left-0 pointer-events-none flex flex-col flex-nowrap justify-end items-start z-50;
+}
+
+.notification {
+	@apply transition relative flex-shrink-0 flex items-center shadow-md rounded overflow-hidden m-4 cursor-pointer max-w-md p-4;
+	pointer-events: all;
+	min-width: 10rem;
+}
+
+.alert.info,
+.notification.info {
+	@apply bg-blue-100 border-blue-500 text-blue-900;
+}
+
+.alert.success,
+.notification.success {
+	@apply bg-green-100 border-green-500 text-green-900;
+}
+
+.alert.danger,
+.notification.danger {
+	@apply bg-red-100 border-red-500 text-red-900;
+}
+
+.alert.warning,
+.notification.warning {
+	@apply bg-yellow-100 border-yellow-500 text-yellow-900;
 }

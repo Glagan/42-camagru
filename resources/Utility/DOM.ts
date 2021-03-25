@@ -272,4 +272,17 @@ export class DOM {
 			node.removeChild(node.firstChild);
 		}
 	}
+
+	static validateInput(node: HTMLInputElement, validator: (value: string) => boolean): void {
+		let timeout = 0;
+		node.addEventListener('input', (event) => {
+			node.classList.remove('error');
+			clearTimeout(timeout);
+			timeout = setTimeout(() => {
+				if (!validator(node.value)) {
+					node.classList.add('error');
+				}
+			}, 100);
+		});
+	}
 }

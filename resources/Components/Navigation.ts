@@ -1,5 +1,7 @@
+import { Auth } from '../Auth';
 import { Component } from '../Component';
 import { DOM } from '../Utility/DOM';
+import { Http } from '../Utility/Http';
 import { Create } from './Create';
 import { List } from './List';
 
@@ -55,7 +57,13 @@ export class Navigation extends Component {
 		this.link(this.account, '/account');
 		this.link(this.preferences, '/preferences');
 		this.link(this.back, '/');
-		// Logout
+		this.logout.addEventListener('click', async (event) => {
+			event.preventDefault();
+			const response = await Http.delete('/api/logout');
+			if (response.ok) {
+				this.application.loggedOut();
+			}
+		});
 	}
 
 	async data(_params: RegExpMatchArray) {

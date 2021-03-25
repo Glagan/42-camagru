@@ -1,6 +1,6 @@
 import { Http, HttpResponse } from './Utility/Http';
 
-interface User {
+export interface User {
 	id: number;
 	username: string;
 	email: string;
@@ -29,6 +29,15 @@ export class Auth {
 	}
 
 	constructor() {
+		this.default();
+	}
+
+	login(user: User) {
+		this.loggedIn = true;
+		this.user = user;
+	}
+
+	logout() {
 		this.default();
 	}
 

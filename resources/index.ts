@@ -10,9 +10,11 @@ import { Login } from './Components/Login';
 import { List } from './Components/List';
 import { ForgotPassword } from './Components/ForgotPassword';
 import { Account } from './Components/Account';
+import { Notification } from './UI/Notification';
 
 // Set Dark theme
 Theme.initialize();
+Notification.initialize();
 
 // Map URLs to Components
 const location = `${window.location.pathname}${window.location.search}`;
