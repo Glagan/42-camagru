@@ -1,10 +1,11 @@
-import { Auth } from './Auth';
+import { User, Auth } from './Auth';
 import { Component } from './Component';
 import { Navigation } from './Components/Navigation';
 import { PageNotFound } from './Components/PageNotFound';
 import { Unauthorized } from './Components/Unauthorized';
 import { Router } from './Router';
 import { DOM } from './Utility/DOM';
+import { Theme } from './Utility/Theme';
 
 export class Application {
 	navigation: Navigation;
@@ -30,6 +31,17 @@ export class Application {
 		this.unauthorized = new Unauthorized(this, this.main);
 	}
 
+	loggedIn(user: User): void {
+		this.auth.login(user);
+		Theme.set(user.theme);
+		this.navigate('/');
+	}
+
+	loggedOut(): void {
+		this.auth.logout();
+		this.navigate('/');
+	}
+
 	private renderComponent(component: Component) {
 		DOM.clear(this.main);
 		if (this.currentComponent && this.currentComponent.destroy) {
@@ -42,7 +54,9 @@ export class Application {
 	}
 
 	async navigate(location: string): Promise<void> {
+		console.log('navigating to', location);
 		const match = this.router.match(location);
+		console.log('found route', match);
 		if (match === undefined) {
 			this.renderComponent(this.pageNotFound);
 			return;

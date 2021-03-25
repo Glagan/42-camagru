@@ -14,6 +14,11 @@ class Authentication extends Controller
 	 */
 	public function register(): Response
 	{
+		// Must have at least 1 lower and 1 upper characters, 1 number and 1 special character
+		$passwordMatch = [
+			'/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/',
+			'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
+		];
 		$this->validate([
 			'username' => [
 				'min' => 4,
@@ -26,11 +31,17 @@ class Authentication extends Controller
 				'min' => 8,
 				// @see https://www.php.net/manual/en/function.password-hash.php
 				'max' => 72,
-				// Must have at least 1 lower and 1 upper characters, 1 number and 1 special character
-				'match' => [
-					'/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/',
-					'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
-				],
+				'match' => $passwordMatch,
+			],
+			'confirmPassword' => [
+				'name' => 'confirm password',
+				'min' => 8,
+				'max' => 72,
+				'match' => $passwordMatch,
+			],
+			'theme' => [
+				'optional' => true,
+				'match' => ['/^(light|dark)$/', 'Theme can only be `light` or `dark`.'],
 			],
 		]);
 
@@ -46,13 +57,27 @@ class Authentication extends Controller
 			return $this->json(['error' => 'Email taken !'], Response::BAD_REQUEST);
 		}
 
-		// Hash password
+		// Check and Hash password
+		$password = $this->input->get('password');
+		$confirmPassword = $this->input->get('confirmPassword');
+		if ($password !== $confirmPassword) {
+			return $this->json(['error' => 'Password does not match.'], Response::BAD_REQUEST);
+		}
 		$password = \password_hash($this->input->get('password'), \PASSWORD_BCRYPT);
+
+		// Preferences
+		$theme = $this->input->get('theme');
+		if ($theme === false) {
+			$theme = 'light';
+		}
 
 		// Create the User
 		$user = new User([
 			'username' => $username,
 			'email' => $email,
+			'verified' => false,
+			'receiveComments' => true,
+			'theme' => $theme,
 			'password' => $password,
 		]);
 		$user->persist();
@@ -64,7 +89,10 @@ class Authentication extends Controller
 		]);
 		$userSession->persist();
 
-		return $this->json(['success' => 'Registered !']);
+		return $this->json([
+			'success' => 'Registered !',
+			'user' => $user->toArray(['id', 'username', 'email', 'verified', 'theme', 'receiveComments']),
+		]);
 	}
 
 	/**
@@ -118,7 +146,10 @@ class Authentication extends Controller
 		}
 		$userSession->persist();
 
-		return $this->json(['success' => 'Logged in !']);
+		return $this->json([
+			'success' => 'Logged in !',
+			'user' => $user->toArray(['id', 'username', 'email', 'verified', 'theme', 'receiveComments']),
+		]);
 	}
 
 	/**

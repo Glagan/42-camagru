@@ -1,5 +1,8 @@
+import { User } from '../Auth';
 import { Component } from '../Component';
+import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
+import { Http } from '../Utility/Http';
 
 export class Login extends Component {
 	static auth = false;
@@ -25,6 +28,8 @@ export class Login extends Component {
 			id: 'login-username',
 			name: 'username',
 			placeholder: 'Username',
+			min: '4',
+			max: '100',
 		});
 		this.labelPassword = DOM.create('label', {
 			htmlFor: 'login-password',
@@ -35,6 +40,8 @@ export class Login extends Component {
 			id: 'login-password',
 			name: 'password',
 			placeholder: 'Password',
+			min: '8',
+			max: '72',
 		});
 		this.forgotPassword = DOM.button('secondary', 'at-symbol', 'Forgot Password');
 		this.submit = DOM.button('primary', 'login', 'Login');
@@ -47,6 +54,33 @@ export class Login extends Component {
 
 	bind(): void {
 		this.link(this.forgotPassword, '/forgot-password');
+		DOM.validateInput(this.username, (value) => {
+			return value.length >= 4;
+		});
+		DOM.validateInput(this.password, (value) => {
+			return value.length >= 8;
+		});
+		this.form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			if (this.username.value.length < 4) {
+				this.username.classList.add('error');
+				return;
+			}
+			if (this.password.value.length < 8) {
+				this.password.classList.add('error');
+				return;
+			}
+			const response = await Http.post<{ user: User }, { error: string }>('/api/login', {
+				username: this.username.value,
+				password: this.password.value,
+			});
+			if (response.ok) {
+				Notification.show('success', 'Logged in !');
+				this.application.loggedIn(response.body.user);
+			} else {
+				Notification.show('danger', `Error: ${response.body.error}`);
+			}
+		});
 	}
 
 	render(): void {
