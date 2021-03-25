@@ -3,6 +3,7 @@ import { Component } from '../Component';
 import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
 import { Http } from '../Utility/Http';
+import { Validator } from '../Utility/Validator';
 
 export class Login extends Component {
 	static auth = false;
@@ -50,26 +51,23 @@ export class Login extends Component {
 			className: 'flex flex-col flex-wrap items-stretch',
 			childs: [this.labelUsername, this.username, this.labelPassword, this.password, this.footer],
 		});
+		this.validators.username = new Validator(this.username, (value) => {
+			return value.length < 4 ? 'Username is too short.' : true;
+		});
+		this.validators.password = new Validator(this.password, (value) => {
+			return value.length < 8
+				? 'Password is too short (at least 8 characters).'
+				: value.match(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/) == null
+				? 'Password must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.'
+				: true;
+		});
 	}
 
 	bind(): void {
 		this.link(this.forgotPassword, '/forgot-password');
-		DOM.validateInput(this.username, (value) => {
-			return value.length >= 4;
-		});
-		DOM.validateInput(this.password, (value) => {
-			return value.length >= 8;
-		});
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			if (this.username.value.length < 4) {
-				this.username.classList.add('error');
-				return;
-			}
-			if (this.password.value.length < 8) {
-				this.password.classList.add('error');
-				return;
-			}
+			if (!this.validate()) return;
 			const response = await Http.post<{ user: User }, { error: string }>('/api/login', {
 				username: this.username.value,
 				password: this.password.value,

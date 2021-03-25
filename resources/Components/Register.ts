@@ -4,6 +4,7 @@ import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
 import { Http } from '../Utility/Http';
 import { Theme } from '../Utility/Theme';
+import { Validator } from '../Utility/Validator';
 
 export class Register extends Component {
 	header!: HTMLElement;
@@ -84,48 +85,32 @@ export class Register extends Component {
 				this.footer,
 			],
 		});
+		this.validators.username = new Validator(this.username, (value) => {
+			return value.length < 4 ? 'Username is too short.' : true;
+		});
+		this.validators.password = new Validator(this.password, (value) => {
+			return value.length < 8
+				? 'Password is too short (at least 8 characters).'
+				: value.match(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/) == null
+				? 'Password must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.'
+				: true;
+		});
+		this.validators.email = new Validator(this.email, (value) => {
+			return value.match(
+				/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g
+			) == null
+				? 'Invalid email.'
+				: true;
+		});
+		this.validators.confirmPassword = new Validator(this.confirmPassword, (value) => {
+			return value === this.password.value ? 'Password does not match.' : true;
+		});
 	}
 
 	bind(): void {
-		DOM.validateInput(this.username, (value) => {
-			return value.length >= 4;
-		});
-		DOM.validateInput(this.password, (value) => {
-			return value.length >= 8;
-		});
-		DOM.validateInput(this.email, (value) => {
-			return (
-				value.match(
-					/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g
-				) != null
-			);
-		});
-		DOM.validateInput(this.confirmPassword, (value) => {
-			return value.length >= 8 && value === this.password.value;
-		});
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			if (this.username.value.length < 4) {
-				this.username.classList.add('error');
-				return;
-			}
-			// @see regexr.com/2rhq7
-			if (
-				this.email.value.match(
-					/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g
-				) == null
-			) {
-				this.email.classList.add('error');
-				return;
-			}
-			if (this.password.value.length < 8) {
-				this.password.classList.add('error');
-				return;
-			}
-			if (this.password.value !== this.confirmPassword.value) {
-				this.confirmPassword.classList.add('error');
-				return;
-			}
+			if (!this.validate()) return;
 			const response = await Http.post<{ user: User }>('/api/register', {
 				username: this.username.value,
 				email: this.email.value,
