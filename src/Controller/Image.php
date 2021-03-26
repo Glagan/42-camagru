@@ -99,6 +99,9 @@ class Image extends Controller
 		if ($image === false) {
 			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
 		}
+		if ($image->private && (!$this->auth->isLoggedIn() || $this->user->id != $image->user)) {
+			return $this->json(['error' => 'Private Image.'], Response::UNAUTHORIZED);
+		}
 		$attributes = $image->toArray(['id', 'user', 'path', 'at']);
 		// TODO: Linked user + Likes + Comments
 		return $this->json(['image' => $attributes]);

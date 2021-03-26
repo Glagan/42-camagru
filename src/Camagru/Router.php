@@ -61,6 +61,7 @@ class Router implements Routable
 			'regex' => Router::pathToRegex($path, $params),
 			'controller' => $callback[0],
 			'function' => $callback[1],
+			'noPrefix' => isset($route['noPrefix']) ? $route['noPrefix'] : false,
 		];
 	}
 
@@ -147,7 +148,12 @@ class Router implements Routable
 		$uri = $request->getUri();
 		foreach ($this->routes as $route) {
 			$match = [];
-			if ($request->getMethod() === $route['method'] && \preg_match("#^{$this->basePath}{$route['regex']}$#", $uri, $match)) {
+			if ($route['noPrefix']) {
+				$regex = "#^{$route['regex']}$#";
+			} else {
+				$regex = "#^{$this->basePath}{$route['regex']}$#";
+			}
+			if ($request->getMethod() === $route['method'] && \preg_match($regex, $uri, $match)) {
 				$route['foundParams'] = Router::cleanMatches($route['params'], $match);
 				return $route;
 			}

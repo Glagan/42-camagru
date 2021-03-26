@@ -134,7 +134,7 @@ class Response
 		// Convert body to a string if it's an array
 		if (\is_array($this->content)) {
 			$this->content = \json_encode($this->content);
-			$this->headers->add(Header::CONTENT_TYPE, 'application/json; charset=utf-8');
+			$this->headers->add(Header::CONTENT_TYPE, Header::JSON_TYPE_UTF8);
 		}
 
 		// Apply deflate or gzip compression when possible
@@ -144,7 +144,7 @@ class Response
 
 		// Content-Length
 		if (Env::get('Camagru', 'mode') != 'debug') {
-			$contentLength = \mb_strlen($this->content);
+			$contentLength = \strlen($this->content);
 			$this->headers->add(Header::CONTENT_LENGTH, $contentLength);
 		}
 

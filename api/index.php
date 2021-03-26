@@ -41,6 +41,11 @@ $router->group(Controller\Profile::class, function ($router) {
 	$router->get('/profile/{id}', ['use' => 'single']);
 });
 
+// Uploads
+$router->group(Controller\Upload::class, function ($router) {
+	$router->get('/uploads/{id}', ['noPrefix' => true, 'use' => 'single']);
+});
+
 // Image
 $router->group(Controller\Image::class, function ($router) {
 	$router->post('/upload', ['auth' => true, 'use' => 'upload']);

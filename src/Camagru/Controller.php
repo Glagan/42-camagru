@@ -1,5 +1,6 @@
 <?php namespace Camagru;
 
+use Camagru\Http\FileResponse;
 use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 use Exception\ValidateException;
@@ -127,10 +128,22 @@ abstract class Controller
 	 * @param array $body
 	 * @param int $code An HTTP Response Code
 	 * @param array $headers
-	 * @return Http\Response
+	 * @return Http\JSONResponse
 	 */
 	protected function json(array $body, $code = Response::OK, $headers = []): Response
 	{
 		return new JSONResponse($body, $code, $headers);
+	}
+
+	/**
+	 * Returns a File Response with $body as the file content with the correct Content-Type
+	 * @param array $body
+	 * @param int $code An HTTP Response Code
+	 * @param array $headers
+	 * @return Http\FileResponse
+	 */
+	protected function file(string $path, $code = Response::OK, $headers = []): Response
+	{
+		return new FileResponse($path, $code, $headers);
 	}
 }
