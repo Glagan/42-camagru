@@ -21,7 +21,7 @@ class AllTablesMigration
 		$queries[] = "CREATE TABLE `images` (
 			`id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
 			`user` int unsigned NOT NULL,
-			`path` varchar(250) NOT NULL,
+			`name` varchar(250) NOT NULL,
 			`private` tinyint NOT NULL DEFAULT '0',
 			`at` datetime NOT NULL DEFAULT NOW(),
 			FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE

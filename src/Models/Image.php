@@ -5,7 +5,7 @@ use Camagru\Model;
 /**
  * @property int $id
  * @property User $user
- * @property string $path
+ * @property string $name
  * @property bool $private
  */
 class Image extends Model
@@ -15,7 +15,7 @@ class Image extends Model
 	 */
 	protected static $fields = [
 		'user',
-		'path',
+		'name',
 		'private',
 	];
 
