@@ -3,6 +3,13 @@ import { Alert } from '../UI/Alert';
 import { DOM } from '../Utility/DOM';
 import { Http, InvalidHttpResponse } from '../Utility/Http';
 
+type SingleImageResponse = {
+	image: ImageModel;
+	user: PublicUser;
+	likes: number;
+	comments: ImageComment[];
+};
+
 export class SingleImage extends Component {
 	id: number = 0;
 
@@ -20,7 +27,7 @@ export class SingleImage extends Component {
 	submit!: HTMLButtonElement;
 	commentList!: HTMLElement;
 
-	image: ImageModel | undefined;
+	response: SingleImageResponse | undefined;
 	dataError: InvalidHttpResponse<{ error: string }> | undefined;
 
 	create(): void {
@@ -65,9 +72,10 @@ export class SingleImage extends Component {
 		if (!isNaN(id) && id > 0) {
 			this.id = id;
 		}
-		const response = await Http.get<{ image: ImageModel }>(`/api/${this.id}`);
+		const response = await Http.get<SingleImageResponse>(`/api/${this.id}`);
 		if (response.ok) {
-			this.image = response.body.image;
+			this.response = response.body;
+			this;
 		} else {
 			this.dataError = response;
 		}
@@ -97,32 +105,30 @@ export class SingleImage extends Component {
 			return;
 		}
 		// Display
-		if (!this.image) return;
-		this.imageSlot.src = `/uploads/${this.image.id}`;
-		this.likeCount.textContent = '0';
-		this.commentCount.textContent = '0';
+		if (!this.response) return;
+		this.header.textContent = `# ${this.response.image.id}`;
+		this.imageSlot.src = `/uploads/${this.response.image.id}`;
+		this.likeCount.textContent = `${this.response.likes}`;
+		this.commentCount.textContent = `${this.response.comments.length}`;
 		// Empty coment message if there is no comments
-		// this.image.comments.length == 0
-		if (true) {
+		if (this.response.comments.length == 0) {
 			const alert = Alert.make('info', 'No comments yet, post the first one !');
 			alert.classList.add('mt-2');
 			this.commentList.appendChild(alert);
 		} else {
-			// TODO: Add comments
-			/*for (let index = 0; index < 10; index++) {
-				const comment = DOM.create('div', {
+			for (const comment of this.response.comments) {
+				const node = DOM.create('div', {
 					className: 'comment',
 					childs: [
 						DOM.create('p', {
 							className: 'break-words',
-							textContent:
-								'Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.',
+							textContent: comment.message,
 						}),
-						DOM.create('div', { className: 'footer', textContent: 'Anonymous - 22 March 2021 at 15:03' }),
+						DOM.create('div', { className: 'footer', textContent: `${comment.user} - ${comment.at}` }),
 					],
 				});
-				this.commentList.appendChild(comment);
-			}*/
+				this.commentList.appendChild(node);
+			}
 		}
 		DOM.append(this.parent, this.header, this.imageSlot, this.stats, this.form, this.commentList);
 	}

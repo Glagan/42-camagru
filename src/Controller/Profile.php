@@ -2,6 +2,7 @@
 
 use Camagru\Controller;
 use Camagru\Http\Response;
+use Models\Image;
 use Models\User;
 
 class Profile extends Controller
@@ -93,12 +94,24 @@ class Profile extends Controller
 		if ($id < 1) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
 		}
+
+		// User
 		$user = User::get($id);
 		if ($user === false) {
 			return $this->json(['error' => 'User not found.'], Response::NOT_FOUND);
 		}
-		$attributes = $user->toArray(['id', 'username', 'verified']);
-		// TODO: List of Images
-		return $this->json(['user' => $attributes]);
+		$private = $this->auth->isLoggedIn() && $this->user->id == $id;
+
+		// Images
+		$images = Image::all(['user' => $user->id, 'private' => $private]);
+		$foundImages = [];
+		foreach ($images as $image) {
+			$foundImages[] = $image->toArray(['id', 'user', 'name', 'at']);
+		}
+
+		return $this->json([
+			'user' => $user->toArray(['id', 'username', 'verified']),
+			'images' => $foundImages,
+		]);
 	}
 }

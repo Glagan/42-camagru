@@ -2,6 +2,7 @@
 
 use Database;
 use SQL\Query;
+use SQL\Value;
 
 class Model
 {
@@ -50,7 +51,7 @@ class Model
 			if ($type == 'bool') {
 				$value = !!$value;
 			} else if ($type == 'date') {
-				if (!\is_a($value, \DateTime::class)) {
+				if (!($value instanceof \DateTime)) {
 					$value = new \DateTime($value);
 				}
 			}
@@ -130,6 +131,21 @@ class Model
 			->orderBy($order)
 			->limit($limit);
 		return $query->all(static::class);
+	}
+
+	/**
+	 * Count the number of Models that match the given selectors in the Model table.
+	 * @see SQL\Query
+	 * @param array $conditions Array of selectors
+	 * @return int
+	 */
+	public static function count(array $conditions): int
+	{
+		$query = static::select()
+			->columns(['totalCount' => Value::make('COUNT(*)')])
+			->where($conditions);
+		$total = $query->first();
+		return $total['totalCount'];
 	}
 
 	/**

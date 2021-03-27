@@ -67,8 +67,18 @@ class Authentication extends Controller
 		]);
 		$userSession->persist();
 
+		// Generate a token for the email verification link
+		$token = UserToken::first(['user' => $user->id, 'scope' => 'verification']);
+		if ($token !== false) {
+			$token->remove();
+		}
+		$token = UserToken::generate($user->id, 'verification');
+		$token->persist();
+
+		// TODO: Send mail
+
 		return $this->json([
-			'success' => 'Registered !',
+			'success' => 'Registered ! A link was sent to your email to verify it. You have 24hours to validate it.',
 			'user' => $user->toArray(['id', 'username', 'email', 'verified', 'receiveComments']),
 		]);
 	}

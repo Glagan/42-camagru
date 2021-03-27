@@ -5,6 +5,7 @@ use Camagru\Http\Response;
 use Models\Comment;
 use Models\Image as ImageModel;
 use Models\Like;
+use Models\User;
 
 class Image extends Controller
 {
@@ -32,14 +33,9 @@ class Image extends Controller
 			->all(ImageModel::class);
 		$result = [];
 		foreach ($images as $image) {
-			$result[] = [
-				'id' => $image->id,
-				'user' => $image->user,
-				'name' => $image->name,
-				'at' => $image->at,
-			];
+			$result[] = $image->toArray(['id', 'user', 'name', 'at']);
 		}
-		// TODO: Linked User + Like count + Comments count
+		// ? TODO: Linked User + Like count + Comments count
 		return $this->json(['images' => $result]);
 	}
 
@@ -52,10 +48,15 @@ class Image extends Controller
 		if ($id < 0) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
 		}
+
 		$image = ImageModel::get($id);
 		if ($image === false) {
 			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
 		}
+		if ($image->private && $this->user->id !== $image->user) {
+			return $this->json(['error' => 'Private Image.'], Response::UNAUTHORIZED);
+		}
+
 		$like = Like::first(['user' => $this->user->id, 'image' => $id]);
 		if ($like === false) {
 			$like = new Like(['user' => $this->user->id, 'image' => $id]);
@@ -63,6 +64,7 @@ class Image extends Controller
 		} else {
 			$like->remove();
 		}
+
 		$message = $like->id == null ? 'Like removed.' : 'Like added.';
 		return $this->json(['success' => $message]);
 	}
@@ -82,15 +84,21 @@ class Image extends Controller
 		if ($id < 0) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
 		}
+
 		$image = ImageModel::get($id);
 		if ($image === false) {
 			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
 		}
+		if ($image->private && $this->user->id !== $image->user) {
+			return $this->json(['error' => 'Private Image.'], Response::UNAUTHORIZED);
+		}
+
 		$comment = new Comment([
 			'user' => $this->user->id,
 			'message' => $this->input->get('message'),
 		]);
 		$comment->persist();
+
 		return $this->json(['success' => 'Comment added.']);
 	}
 
@@ -103,6 +111,8 @@ class Image extends Controller
 		if ($id < 1) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
 		}
+
+		// Image
 		$image = ImageModel::get($id);
 		if ($image === false) {
 			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
@@ -110,8 +120,30 @@ class Image extends Controller
 		if ($image->private && (!$this->auth->isLoggedIn() || $this->user->id != $image->user)) {
 			return $this->json(['error' => 'Private Image.'], Response::UNAUTHORIZED);
 		}
-		$attributes = $image->toArray(['id', 'user', 'at']);
-		// TODO: Linked user + Likes + Comments
-		return $this->json(['image' => $attributes]);
+
+		// User
+		if ($this->auth->isLoggedIn() && $this->user == $image->user) {
+			$user = $this->user;
+		} else {
+			$user = User::first(['id' => $image->user]);
+		}
+
+		// Likes
+		$likeCount = Like::count(['image' => $image->id]);
+
+		// Comments
+		// TODO: comment->user->username
+		$comments = Comment::all(['image' => $image->id, 'deleted' => false]);
+		$foundComments = [];
+		foreach ($comments as $comment) {
+			$foundComments[] = $comment->toArray(['id', 'user', 'message', 'at']);
+		}
+
+		return $this->json([
+			'image' => $image->toArray(['id', 'user', 'name', 'at']),
+			'user' => $user->toArray(['id', 'username', 'verified']),
+			'likes' => $likeCount,
+			'comments' => $foundComments,
+		]);
 	}
 }
