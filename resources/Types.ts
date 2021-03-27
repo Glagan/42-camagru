@@ -11,7 +11,7 @@ interface User extends PublicUser {
 
 interface ImageComment {
 	id: number;
-	user: number;
+	user: PublicUser;
 	at: string;
 	message: string;
 }

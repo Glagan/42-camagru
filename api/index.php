@@ -38,7 +38,7 @@ $router->group(Controller\Authentication::class, function ($router) {
 // Profile
 $router->group(Controller\Profile::class, function ($router) {
 	$router->patch('/profile/update', ['auth' => true, 'use' => 'update']);
-	$router->get('/profile/{id}', ['use' => 'single']); // TODO
+	$router->get('/profile/{id}', ['use' => 'single']);
 });
 
 // Uploads
@@ -50,8 +50,8 @@ $router->group(Controller\Upload::class, function ($router) {
 $router->group(Controller\Image::class, function ($router) {
 	$router->post('/upload', ['auth' => true, 'use' => 'upload']); // TODO
 	$router->get('/list(?:/{page})?', ['use' => 'list']); // TODO
-	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']); // TODO
-	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']); // TODO
+	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']);
+	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']);
 	$router->get('/{id}', ['use' => 'single']);
 });
 

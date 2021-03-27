@@ -243,7 +243,14 @@ class Model
 	{
 		if (\count($pick) > 0) {
 			// @see https://stackoverflow.com/a/46843866/7794671
-			return \array_intersect_key($this->attributes, \array_flip($pick));
+			$result = \array_intersect_key($this->attributes, \array_flip($pick));
+			// Casts Date to string
+			foreach ($result as $key => $value) {
+				if ($value instanceof \DateTime) {
+					$result[$key] = $value->format(\DateTime::ISO8601);
+				}
+			}
+			return $result;
 		}
 		return $this->attributes;
 	}

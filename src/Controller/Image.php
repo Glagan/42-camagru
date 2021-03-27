@@ -6,6 +6,7 @@ use Models\Comment;
 use Models\Image as ImageModel;
 use Models\Like;
 use Models\User;
+use SQL\Query;
 
 class Image extends Controller
 {
@@ -26,6 +27,7 @@ class Image extends Controller
 		if ($page < 1) {
 			$page = 1;
 		}
+
 		$images = ImageModel::select()
 			->columns(['id', 'user', 'name', 'at'])
 			->where(['private' => false])
@@ -35,6 +37,7 @@ class Image extends Controller
 		foreach ($images as $image) {
 			$result[] = $image->toArray(['id', 'user', 'name', 'at']);
 		}
+
 		// ? TODO: Linked User + Like count + Comments count
 		return $this->json(['images' => $result]);
 	}
@@ -53,6 +56,9 @@ class Image extends Controller
 		if ($image === false) {
 			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
 		}
+		if ($this->user->id == $image->user) {
+			return $this->json(['error' => 'You can\'t like your own Image.'], Response::BAD_REQUEST);
+		}
 		if ($image->private && $this->user->id !== $image->user) {
 			return $this->json(['error' => 'Private Image.'], Response::UNAUTHORIZED);
 		}
@@ -65,8 +71,14 @@ class Image extends Controller
 			$like->remove();
 		}
 
-		$message = $like->id == null ? 'Like removed.' : 'Like added.';
-		return $this->json(['success' => $message]);
+		$total = Like::count(['image' => $image->id]);
+		$likePresent = $like->id !== null;
+		$message = $likePresent ? 'Like added.' : 'Like removed.';
+		return $this->json([
+			'success' => $message,
+			'total' => $total,
+			'liked' => $likePresent,
+		]);
 	}
 
 	/**
@@ -76,7 +88,7 @@ class Image extends Controller
 	public function comment(int $id): Response
 	{
 		$this->validate([
-			'comment' => [
+			'message' => [
 				'min' => 1,
 				'max' => 16384,
 			],
@@ -94,12 +106,13 @@ class Image extends Controller
 		}
 
 		$comment = new Comment([
+			'image' => $id,
 			'user' => $this->user->id,
 			'message' => $this->input->get('message'),
 		]);
 		$comment->persist();
 
-		return $this->json(['success' => 'Comment added.']);
+		return $this->json(['success' => 'Comment added.', 'id' => $comment->id]);
 	}
 
 	/**
@@ -122,27 +135,55 @@ class Image extends Controller
 		}
 
 		// User
-		if ($this->auth->isLoggedIn() && $this->user == $image->user) {
+		if ($this->auth->isLoggedIn() && $this->user->id == $image->user) {
 			$user = $this->user;
 		} else {
-			$user = User::first(['id' => $image->user]);
+			$user = User::get($image->user);
 		}
 
 		// Likes
 		$likeCount = Like::count(['image' => $image->id]);
+		$liked = false;
+		if ($this->auth->isLoggedIn() && $this->user->id != $image->user) {
+			$liked = Like::first(['image' => $image->id, 'user' => $this->user->id]) !== false;
+		}
 
 		// Comments
-		// TODO: comment->user->username
-		$comments = Comment::all(['image' => $image->id, 'deleted' => false]);
+		$comments = Comment::all(
+			['image' => $image->id, 'deleted' => false],
+			['id' => Query::DESC]
+		);
+		// Find all Users associated to each comments
+		$userIDs = \array_unique(
+			\array_reduce($comments, function (array $carry, Comment $comment): array{
+				$carry[] = $comment->user;
+				return $carry;
+			}, [])
+		);
 		$foundComments = [];
-		foreach ($comments as $comment) {
-			$foundComments[] = $comment->toArray(['id', 'user', 'message', 'at']);
+		if (\count($userIDs) > 0) {
+			$users = User::all(['id' => $userIDs]);
+			foreach ($comments as $comment) {
+				$foundUser = null;
+				foreach ($users as $commentUser) {
+					if ($commentUser->id == $comment->user) {
+						$foundUser = $commentUser;
+						break;
+					}
+				}
+				if ($foundUser !== null) {
+					$foundComment = $comment->toArray(['id', 'user', 'message', 'at']);
+					$foundComment['user'] = $foundUser->toArray(['id', 'username', 'verified']);
+					$foundComments[] = $foundComment;
+				}
+			}
 		}
 
 		return $this->json([
 			'image' => $image->toArray(['id', 'user', 'name', 'at']),
 			'user' => $user->toArray(['id', 'username', 'verified']),
 			'likes' => $likeCount,
+			'liked' => $liked,
 			'comments' => $foundComments,
 		]);
 	}
