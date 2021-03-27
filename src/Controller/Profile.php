@@ -28,16 +28,10 @@ class Profile extends Controller
 				'max' => 100,
 			],
 			'password' => [
-				'min' => 8,
-				'max' => 72,
-				'requiredIf' => 'newPassword',
-				'match' => $passwordMatch,
-			],
-			'newPassword' => [
 				'name' => 'new password',
 				'min' => 8,
 				'max' => 72,
-				'requiredIf' => 'password',
+				'optional' => true,
 				'match' => $passwordMatch,
 			],
 			'theme' => [
@@ -50,9 +44,51 @@ class Profile extends Controller
 			'receiveComments' => [
 				'optional' => true,
 			],
+			'currentPassword' => [
+				'min' => 8,
+				'max' => 72,
+				'match' => $passwordMatch,
+			],
 		]);
-		// TODO
-		return $this->json(['success' => 'Profile updated !']);
+
+		// Check password first
+		$currentPassword = $this->input->get('currentPassword');
+		if ($currentPassword === false) {
+			return $this->json(['error' => 'You need your current password to update your profile !'], Response::UNAUTHORIZED);
+		}
+		if (!\password_verify($currentPassword, $this->user->password)) {
+			return $this->json(['error' => 'Invalid credentials.'], Response::UNAUTHORIZED);
+		}
+
+		// Username, check if it's present and not already taken by *another* user
+		$username = $this->input->get('username');
+		if ($username !== false && $username != $this->user->username) {
+			$exists = User::first(['username' => $username]);
+			if ($exists !== false) {
+				return $this->json(['error' => 'Username taken !'], Response::BAD_REQUEST);
+			}
+			$this->user->username = $username;
+		}
+
+		// Email, if updated reset verified to false
+		$email = $this->input->get('email');
+		if ($email !== false && $email != $this->user->email) {
+			$exists = User::first(['email' => $email]);
+			if ($exists !== false) {
+				return $this->json(['error' => 'Email taken !'], Response::BAD_REQUEST);
+			}
+			$this->user->email = $email;
+			$this->user->verified = false;
+		}
+
+		// Password
+		$password = $this->input->get('password');
+		if ($password !== false && !\password_verify($password, $this->user->password)) {
+			$this->user->password = \password_hash($password, \PASSWORD_BCRYPT);
+		}
+
+		$this->user->persist();
+		return $this->json(['success' => 'Profile updated !', 'verified' => $this->user->verified]);
 	}
 
 	/**

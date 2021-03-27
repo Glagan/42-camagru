@@ -67,7 +67,7 @@ button.secondary {
 }
 
 .card {
-	@apply transition transform shadow-md rounded cursor-pointer z-10 hover:shadow-lg hover:scale-125;
+	@apply transition shadow-md cursor-pointer hover:shadow-lg;
 }
 
 .card:hover {

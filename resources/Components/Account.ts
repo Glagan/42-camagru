@@ -1,7 +1,10 @@
 import { Component } from '../Component';
 import { Alert } from '../UI/Alert';
+import { Notification } from '../UI/Notification';
 import { Toggle } from '../UI/Toggle';
 import { DOM } from '../Utility/DOM';
+import { Http } from '../Utility/Http';
+import { Validator } from '../Utility/Validator';
 
 export class Account extends Component {
 	static auth = true;
@@ -14,6 +17,8 @@ export class Account extends Component {
 	email!: HTMLInputElement;
 	labelPassword!: HTMLLabelElement;
 	password!: HTMLInputElement;
+	labelConfirmPassword!: HTMLLabelElement;
+	confirmPassword!: HTMLInputElement;
 	labelCurrentPassword!: HTMLLabelElement;
 	currentPassword!: HTMLInputElement;
 	receiveCommentsToggle!: { label: HTMLLabelElement; checkbox: HTMLInputElement };
@@ -52,6 +57,16 @@ export class Account extends Component {
 			name: 'password',
 			placeholder: 'Password',
 		});
+		this.labelConfirmPassword = DOM.create('label', {
+			htmlFor: 'update-confirm-password',
+			textContent: 'Confirm Password',
+		});
+		this.confirmPassword = DOM.create('input', {
+			type: 'password',
+			id: 'update-confirm-password',
+			name: 'confirm-password',
+			placeholder: 'Confirm new Password',
+		});
 		this.labelCurrentPassword = DOM.create('label', {
 			htmlFor: 'current-password',
 			textContent: 'Current Password',
@@ -78,17 +93,79 @@ export class Account extends Component {
 				this.email,
 				this.labelPassword,
 				this.password,
+				this.labelConfirmPassword,
+				this.confirmPassword,
 				this.receiveCommentsToggle.label,
 				this.labelCurrentPassword,
 				this.currentPassword,
 				this.footer,
 			],
 		});
+		this.validators.user = new Validator(this.username, Validator.username);
+		this.validators.email = new Validator(this.email, Validator.email);
+		this.validators.password = new Validator(this.password, Validator.password);
+		this.validators.confirmPassword = new Validator(this.confirmPassword, (value) => {
+			return value !== this.password.value ? 'Password does not match.' : true;
+		});
+		this.validators.currentPassword = new Validator(this.currentPassword, Validator.password);
 	}
 
-	bind(): void {}
+	bind(): void {
+		this.form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			// We need to check each fields individually since they are not all required
+			if (this.username.value != '' && !this.validators.user.validate()) {
+				return;
+			}
+			if (this.email.value != '' && !this.validators.email.validate()) {
+				return;
+			}
+			if (
+				this.password.value != '' &&
+				(!this.validators.password.validate() || !this.validators.confirmPassword.validate())
+			) {
+				return;
+			}
+			if (!this.validators.currentPassword.validate()) {
+				return;
+			}
+			// Construct
+			const body: Partial<Pick<User, 'username' | 'email' | 'verified' | 'receiveComments'>> & {
+				password?: string;
+				currentPassword: string;
+			} = { currentPassword: this.currentPassword.value };
+			if (this.username.value != this.application.auth.user.username) {
+				body.username = this.username.value;
+			}
+			if (this.email.value != this.application.auth.user.email) {
+				body.email = this.email.value;
+			}
+			if (this.password.value != '') {
+				body.password = this.password.value;
+			}
+			if (this.receiveCommentsToggle.checkbox.checked != this.application.auth.user.receiveComments) {
+				body.receiveComments = this.receiveCommentsToggle.checkbox.checked;
+			}
+			// Send the request
+			const response = await Http.patch<{ success: string; verified: boolean }>('/api/profile/update', body);
+			if (response.ok) {
+				this.application.auth.user.username = this.username.value;
+				this.application.auth.user.email = this.email.value;
+				this.application.auth.user.receiveComments = this.receiveCommentsToggle.checkbox.checked;
+				this.application.auth.user.verified = response.body.verified;
+				// Update the navigation now
+				this.application.navigation.render();
+				Notification.show('success', response.body.success);
+			} else {
+				Notification.show('danger', `Error: ${response.body.error}`);
+			}
+		});
+	}
 
 	render(): void {
+		this.username.value = this.application.auth.user.username;
+		this.email.value = this.application.auth.user.email;
+		this.receiveCommentsToggle.checkbox.checked = this.application.auth.user.receiveComments;
 		DOM.append(this.parent, this.header, this.form);
 	}
 }

@@ -1,4 +1,4 @@
-import { User, Auth } from './Auth';
+import { Auth } from './Auth';
 import { Component } from './Component';
 import { Navigation } from './Components/Navigation';
 import { PageNotFound } from './Components/PageNotFound';

@@ -14,11 +14,6 @@ class Authentication extends Controller
 	 */
 	public function register(): Response
 	{
-		// Must have at least 1 lower and 1 upper characters, 1 number and 1 special character
-		$passwordMatch = [
-			'/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/',
-			'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
-		];
 		$this->validate([
 			'username' => [
 				'min' => 4,
@@ -27,17 +22,15 @@ class Authentication extends Controller
 			'email' => [
 				'validate' => \FILTER_VALIDATE_EMAIL,
 			],
+			// Must have at least 1 lower and 1 upper characters, 1 number and 1 special character
 			'password' => [
 				'min' => 8,
 				// @see https://www.php.net/manual/en/function.password-hash.php
 				'max' => 72,
-				'match' => $passwordMatch,
-			],
-			'confirmPassword' => [
-				'name' => 'confirm password',
-				'min' => 8,
-				'max' => 72,
-				'match' => $passwordMatch,
+				'match' => [
+					'/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/',
+					'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
+				],
 			],
 			'theme' => [
 				'optional' => true,
@@ -58,11 +51,6 @@ class Authentication extends Controller
 		}
 
 		// Check and Hash password
-		$password = $this->input->get('password');
-		$confirmPassword = $this->input->get('confirmPassword');
-		if ($password !== $confirmPassword) {
-			return $this->json(['error' => 'Password does not match.'], Response::BAD_REQUEST);
-		}
 		$password = \password_hash($this->input->get('password'), \PASSWORD_BCRYPT);
 
 		// Preferences
@@ -117,14 +105,14 @@ class Authentication extends Controller
 		if ($user !== false) {
 			$password = $this->input->get('password');
 			if (!\password_verify($password, $user->password)) {
-				return $this->json(['error' => 'Invalid credentials.'], Response::BAD_REQUEST);
+				return $this->json(['error' => 'Invalid credentials.'], Response::UNAUTHORIZED);
 			}
 			if (\password_needs_rehash($user->password, \PASSWORD_BCRYPT)) {
 				$user->password = \password_hash($password, \PASSWORD_BCRYPT);
 				$user->persist();
 			}
 		} else {
-			return $this->json(['error' => 'Invalid credentials.'], Response::BAD_REQUEST);
+			return $this->json(['error' => 'Invalid credentials.'], Response::UNAUTHORIZED);
 		}
 
 		// Clean previous invalid UserSession

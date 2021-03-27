@@ -1,13 +1,4 @@
-import { Http, HttpResponse } from './Utility/Http';
-
-export interface User {
-	id: number;
-	username: string;
-	email: string;
-	verified: boolean;
-	theme: 'light' | 'dark';
-	receiveComments: boolean;
-}
+import { Http } from './Utility/Http';
 
 type StatusResponse = { user: User } | { error: string };
 

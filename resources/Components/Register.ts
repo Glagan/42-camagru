@@ -1,4 +1,3 @@
-import { User } from '../Auth';
 import { Component } from '../Component';
 import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
@@ -85,25 +84,11 @@ export class Register extends Component {
 				this.footer,
 			],
 		});
-		this.validators.username = new Validator(this.username, (value) => {
-			return value.length < 4 ? 'Username is too short.' : true;
-		});
-		this.validators.password = new Validator(this.password, (value) => {
-			return value.length < 8
-				? 'Password is too short (at least 8 characters).'
-				: value.match(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/) == null
-				? 'Password must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.'
-				: true;
-		});
-		this.validators.email = new Validator(this.email, (value) => {
-			return value.match(
-				/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g
-			) == null
-				? 'Invalid email.'
-				: true;
-		});
+		this.validators.username = new Validator(this.username, Validator.username);
+		this.validators.password = new Validator(this.password, Validator.password);
+		this.validators.email = new Validator(this.email, Validator.email);
 		this.validators.confirmPassword = new Validator(this.confirmPassword, (value) => {
-			return value === this.password.value ? 'Password does not match.' : true;
+			return value !== this.password.value ? 'Password does not match.' : true;
 		});
 	}
 
@@ -115,7 +100,6 @@ export class Register extends Component {
 				username: this.username.value,
 				email: this.email.value,
 				password: this.password.value,
-				confirmPassword: this.confirmPassword.value,
 				theme: Theme.value,
 			});
 			if (response.ok) {

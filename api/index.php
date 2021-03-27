@@ -49,7 +49,7 @@ $router->group(Controller\Upload::class, function ($router) {
 // Image
 $router->group(Controller\Image::class, function ($router) {
 	$router->post('/upload', ['auth' => true, 'use' => 'upload']);
-	$router->get('/list/{page}?', ['use' => 'list']);
+	$router->get('/list(?:/{page})?', ['use' => 'list']);
 	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']);
 	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']);
 	$router->get('/{id}', ['use' => 'single']);
