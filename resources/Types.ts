@@ -3,7 +3,6 @@ interface User {
 	username: string;
 	email: string;
 	verified: boolean;
-	theme: 'light' | 'dark';
 	receiveComments: boolean;
 }
 

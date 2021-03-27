@@ -14,7 +14,6 @@ export class Auth {
 			username: '',
 			email: '',
 			verified: false,
-			theme: 'dark',
 			receiveComments: true,
 		};
 	}
