@@ -32,10 +32,6 @@ class Authentication extends Controller
 					'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
 				],
 			],
-			'theme' => [
-				'optional' => true,
-				'match' => ['/^(light|dark)$/', 'Theme can only be `light` or `dark`.'],
-			],
 		]);
 
 		// Check duplicates
@@ -53,19 +49,12 @@ class Authentication extends Controller
 		// Check and Hash password
 		$password = \password_hash($this->input->get('password'), \PASSWORD_BCRYPT);
 
-		// Preferences
-		$theme = $this->input->get('theme');
-		if ($theme === false) {
-			$theme = 'light';
-		}
-
 		// Create the User
 		$user = new User([
 			'username' => $username,
 			'email' => $email,
 			'verified' => false,
 			'receiveComments' => true,
-			'theme' => $theme,
 			'password' => $password,
 		]);
 		$user->persist();
@@ -79,7 +68,7 @@ class Authentication extends Controller
 
 		return $this->json([
 			'success' => 'Registered !',
-			'user' => $user->toArray(['id', 'username', 'email', 'verified', 'theme', 'receiveComments']),
+			'user' => $user->toArray(['id', 'username', 'email', 'verified', 'receiveComments']),
 		]);
 	}
 

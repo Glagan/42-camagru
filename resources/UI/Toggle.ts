@@ -22,10 +22,8 @@ export class Toggle {
 			className: 'hidden',
 			checked: options?.checked,
 		});
-		const path = DOM.create('div', { className: 'path transition bg-gray-200 w-9 h-5 rounded-full shadow-inner' });
-		const circle = DOM.create('div', {
-			className: 'circle transition absolute w-3.5 h-3.5 bg-white rounded-full shadow inset-y-0 left-0',
-		});
+		const path = DOM.create('div', { className: 'path' });
+		const circle = DOM.create('div', { className: 'circle' });
 		const container = DOM.create('div', { className: 'relative', childs: [checkbox, path, circle] });
 		const label = DOM.create('label', {
 			htmlFor: id,

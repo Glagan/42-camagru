@@ -33,7 +33,6 @@ export class Application {
 
 	loggedIn(user: User): void {
 		this.auth.login(user);
-		Theme.set(user.theme);
 		this.navigate('/');
 	}
 

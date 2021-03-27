@@ -32,6 +32,6 @@ router.add('^/(list|all|)$', List);
 // Application
 (async () => {
 	const app = new Application(router);
-	await app.auth.pendingStatus;
+	await app.auth.status();
 	app.navigate(location);
 })();

@@ -8,7 +8,6 @@ use Camagru\Model;
  * @property string $email
  * @property string $password
  * @property bool $verified
- * @property {'light'|'dark'} $theme
  * @property bool $receiveComments
  */
 class User extends Model
@@ -21,7 +20,6 @@ class User extends Model
 		'email',
 		'password',
 		'verified',
-		'theme',
 		'receiveComments',
 	];
 
@@ -31,12 +29,5 @@ class User extends Model
 	protected static $casts = [
 		'verified' => 'bool',
 		'receiveComments' => 'bool',
-	];
-
-	/**
-	 * @var array
-	 */
-	protected static $defaults = [
-		'theme' => 'light',
 	];
 }

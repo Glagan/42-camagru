@@ -99,12 +99,17 @@ input.error {
 }
 
 .toggle .circle {
+	@apply transition absolute w-3.5 h-3.5 bg-white rounded-full shadow inset-y-0 left-0;
 	top: 0.2rem;
 	left: 0.25rem;
 }
 
+.toggle .path {
+	@apply transition w-9 h-5 rounded-full shadow-inner bg-gray-300 border-gray-500;
+}
+
 .toggle input:checked ~ .path {
-	background-color: #81e6d9;
+	@apply bg-blue-400 border-blue-500;
 }
 
 .toggle input:checked ~ .circle {

@@ -34,13 +34,6 @@ class Profile extends Controller
 				'optional' => true,
 				'match' => $passwordMatch,
 			],
-			'theme' => [
-				'optional' => true,
-				'match' => [
-					'/light|dark/',
-					'Theme must be `light` or `dark`.',
-				],
-			],
 			'receiveComments' => [
 				'optional' => true,
 			],
