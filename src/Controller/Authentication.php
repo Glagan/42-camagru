@@ -4,6 +4,7 @@ use Camagru\Controller;
 use Camagru\Http\Response;
 use Models\User;
 use Models\UserSession;
+use Models\UserToken;
 use SQL\Operator;
 use SQL\Value;
 
@@ -164,8 +165,23 @@ class Authentication extends Controller
 	 */
 	public function sendVerification(): Response
 	{
-		// TODO
-		return $this->json(['success' => 'An email with a new verification link has been sent.']);
+		if ($this->user->verified) {
+			return $this->json(['error' => 'You are already verified.'], Response::BAD_REQUEST);
+		}
+
+		// Generate a token that will be used in the verification link
+		$token = UserToken::first(['user' => $this->user->id, 'scope' => 'verification']);
+		if ($token !== false) {
+			$token->remove();
+		}
+		$token = UserToken::generate($this->user->id, 'verification');
+		$token->persist();
+
+		// TODO: Send mail
+
+		return $this->json([
+			'success' => 'An email with a new verification link has been sent. You have 24hours to activate it.',
+		]);
 	}
 
 	/**
@@ -174,13 +190,31 @@ class Authentication extends Controller
 	public function resetPassword(): Response
 	{
 		$this->validate([
-			'username' => [
-				'min' => 4,
-				'max' => 100,
+			'email' => [
+				'validate' => \FILTER_VALIDATE_EMAIL,
 			],
 		]);
-		// TODO
-		return $this->json(['success' => 'An email with a link to reset your password has been sent.']);
+
+		// Check if the email exists
+		$email = $this->input->get('email');
+		$user = User::first(['email' => $email]);
+		if ($user === false) {
+			return $this->json(['error' => 'This email doesn\'t belong to anyone.'], Response::BAD_REQUEST);
+		}
+
+		// Generate a token that will be used when resetting the password
+		$token = UserToken::first(['user' => $user->id, 'scope' => 'password']);
+		if ($token !== false) {
+			$token->remove();
+		}
+		$token = UserToken::generate($user->id, 'password');
+		$token->persist();
+
+		// TODO: Send mail
+
+		return $this->json([
+			'success' => 'An email with a link to reset your password has been sent. You have 24hours to reset your password.',
+		]);
 	}
 
 	/**

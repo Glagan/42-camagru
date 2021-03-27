@@ -1,6 +1,8 @@
 import { Component } from '../Component';
 import { Alert } from '../UI/Alert';
+import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
+import { Http } from '../Utility/Http';
 import { Validator } from '../Utility/Validator';
 
 export class ForgotPassword extends Component {
@@ -34,20 +36,26 @@ export class ForgotPassword extends Component {
 		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit] });
 		this.form = DOM.create('form', {
 			className: 'flex flex-col flex-wrap items-stretch',
-			childs: [this.labelEmail, this.email, this.footer],
+			childs: [this.alert, this.labelEmail, this.email, this.footer],
 		});
 		this.validators.email = new Validator(this.email, Validator.email);
 	}
 
 	bind(): void {
-		this.submit.addEventListener('submit', (event) => {
+		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
 			if (!this.validate()) return;
-			// TODO: POST /api/forgot-password { email }
+			const response = await Http.post<{ success: string }>('/api/forgot-password', { email: this.email.value });
+			if (response.ok) {
+				Notification.show('success', response.body.success);
+				this.email.value = '';
+			} else {
+				Notification.show('danger', response.body.error);
+			}
 		});
 	}
 
 	render(): void {
-		DOM.append(this.parent, this.header, this.alert, this.form);
+		DOM.append(this.parent, this.header, this.form);
 	}
 }
