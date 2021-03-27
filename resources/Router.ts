@@ -1,6 +1,6 @@
 import { Component } from './Component';
 
-interface Route {
+export interface Route {
 	path: string;
 	component: typeof Component;
 }

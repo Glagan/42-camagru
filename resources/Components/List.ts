@@ -43,11 +43,15 @@ export class List extends Component {
 			return;
 		} else {
 			for (const image of this.list) {
-				const card = DOM.create('div', {
-					className: 'card',
+				const link = DOM.create('a', {
+					href: `/${image.id}`,
 					childs: [DOM.create('img', { src: `/uploads/${image.id}` })],
 				});
-				card.addEventListener('click', (event) => {
+				const card = DOM.create('div', {
+					className: 'card',
+					childs: [link],
+				});
+				link.addEventListener('click', (event) => {
 					event.preventDefault();
 					this.application.navigate(`/${image.id}`);
 				});

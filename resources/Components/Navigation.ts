@@ -18,6 +18,7 @@ export class Navigation extends Component {
 	login!: HTMLButtonElement;
 	register!: HTMLButtonElement;
 	back!: HTMLButtonElement;
+	selfImages!: HTMLButtonElement;
 	account!: HTMLButtonElement;
 	preferences!: HTMLButtonElement;
 	logout!: HTMLButtonElement;
@@ -42,6 +43,7 @@ export class Navigation extends Component {
 		this.preferences = DOM.button('secondary', 'cog', 'Preferences');
 		this.logout = DOM.button('error', 'logout', 'Logout');
 		this.back = DOM.button('secondary', 'chevron-left', 'Back Home');
+		this.selfImages = DOM.button('secondary', 'photograph', 'My Images');
 	}
 
 	bind() {
@@ -60,6 +62,10 @@ export class Navigation extends Component {
 		this.link(this.account, '/account');
 		this.link(this.preferences, '/preferences');
 		this.link(this.back, '/');
+		this.selfImages.addEventListener('click', (event) => {
+			event.preventDefault();
+			this.application.navigate(`/user/${this.application.auth.user.id}`);
+		});
 		this.logout.addEventListener('click', async (event) => {
 			event.preventDefault();
 			const response = await Http.delete('/api/logout');
@@ -100,7 +106,7 @@ export class Navigation extends Component {
 			if (this.application.page !== List.name) {
 				this.links.appendChild(this.back);
 			}
-			DOM.append(this.links, this.account, this.preferences, this.logout);
+			DOM.append(this.links, this.selfImages, this.account, this.preferences, this.logout);
 		} else {
 			if (this.application.page !== List.name) {
 				this.links.appendChild(this.back);

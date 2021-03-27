@@ -21,6 +21,7 @@ export type HeroIcon =
 	| 'login'
 	| 'logout'
 	| 'moon'
+	| 'photograph'
 	| 'plus-circle'
 	| 'question-mark-circle'
 	| 'save'
@@ -219,6 +220,16 @@ export class DOM {
 		'check-circle': (options) => DOM.createIcon([{ d: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z' }], options),
 		'exclamation-circle': (options) =>
 			DOM.createIcon([{ d: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' }], options),
+		photograph: (options) =>
+			DOM.createIcon(
+				[
+					{
+						d:
+							'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z',
+					},
+				],
+				options
+			),
 	};
 
 	static icon(name: HeroIcon, options?: IconOptions): SVGSVGElement {

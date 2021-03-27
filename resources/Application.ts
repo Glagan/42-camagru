@@ -3,9 +3,8 @@ import { Component } from './Component';
 import { Navigation } from './Components/Navigation';
 import { PageNotFound } from './Components/PageNotFound';
 import { Unauthorized } from './Components/Unauthorized';
-import { Router } from './Router';
+import { Router, Route } from './Router';
 import { DOM } from './Utility/DOM';
-import { Theme } from './Utility/Theme';
 
 export class Application {
 	navigation: Navigation;
@@ -14,6 +13,8 @@ export class Application {
 	router: Router;
 	auth: Auth;
 	page: string;
+	currentRoute: Route | undefined;
+	currentParams: RegExpMatchArray | undefined;
 	currentComponent: Component | undefined;
 	// Errors cache
 	pageNotFound: PageNotFound;
@@ -31,6 +32,15 @@ export class Application {
 		this.unauthorized = new Unauthorized(this, this.main);
 	}
 
+	private async refresh(): Promise<boolean> {
+		if (this.currentRoute && this.currentParams) {
+			const component = await this.createComponent(this.currentRoute, this.currentParams);
+			this.renderComponent(component);
+			return true;
+		}
+		return false;
+	}
+
 	loggedIn(user: User): void {
 		this.auth.login(user);
 		this.navigate('/');
@@ -38,7 +48,24 @@ export class Application {
 
 	loggedOut(): void {
 		this.auth.logout();
-		this.navigate('/');
+		this.refresh();
+	}
+
+	private async createComponent(route: Route, params: RegExpMatchArray): Promise<Component> {
+		// TODO: "Loading" Component
+		const _class = route.component;
+		if (_class.auth !== undefined) {
+			const loggedIn = await this.auth.isLoggedIn;
+			if ((_class.auth && !loggedIn) || (!_class.auth && loggedIn)) {
+				return this.unauthorized;
+			}
+		}
+		/// @ts-ignore route.component is NOT abstract
+		const component: Component = new _class(this, this.main);
+		if (component.data) {
+			await component.data(params);
+		}
+		return component;
 	}
 
 	private renderComponent(component: Component) {
@@ -60,22 +87,9 @@ export class Application {
 			this.renderComponent(this.pageNotFound);
 			return;
 		}
-		const { route, params } = match;
-		// TODO: Loading
-		const _class = route.component;
-		if (_class.auth !== undefined) {
-			const loggedIn = await this.auth.isLoggedIn;
-			if ((_class.auth && !loggedIn) || (!_class.auth && loggedIn)) {
-				this.renderComponent(this.unauthorized);
-				return;
-			}
-		}
-		/// @ts-ignore route.component is NOT abstract
-		const component: Component = new _class(this, this.main);
-		if (component.data) {
-			await component.data(params);
-		}
-		// Clear and render
+		this.currentRoute = match.route;
+		this.currentParams = match.params;
+		const component = await this.createComponent(match.route, match.params);
 		this.renderComponent(component);
 	}
 }
