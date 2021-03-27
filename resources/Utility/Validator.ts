@@ -21,4 +21,24 @@ export class Validator {
 		}
 		return true;
 	}
+
+	static username(value: string): string | true {
+		return value.length < 4 ? 'Username is too short.' : true;
+	}
+
+	static email(value: string): string | true {
+		return value.match(
+			/[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g
+		) == null
+			? 'Invalid email.'
+			: true;
+	}
+
+	static password(value: string): string | true {
+		return value.length < 8
+			? 'Password is too short (at least 8 characters).'
+			: value.match(/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/) == null
+			? 'Password must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.'
+			: true;
+	}
 }

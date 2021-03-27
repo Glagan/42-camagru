@@ -1,16 +1,19 @@
 import { Component } from '../Component';
+import { Alert } from '../UI/Alert';
 import { Toggle } from '../UI/Toggle';
 import { DOM } from '../Utility/DOM';
 import { Theme } from '../Utility/Theme';
 
 export class Preferences extends Component {
 	header!: HTMLElement;
+	alert!: HTMLElement;
 	form!: HTMLFormElement;
 	themeLabel!: HTMLLabelElement;
 	themeToggle!: HTMLInputElement;
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: 'Preferences' });
+		this.alert = Alert.make('info', 'Your preferences are automatically saved when you change them.');
 		const checked = Theme.value == 'dark';
 		const { label, checkbox } = Toggle.make('Theme', {
 			checked,
@@ -33,6 +36,6 @@ export class Preferences extends Component {
 	bind(): void {}
 
 	render(): void {
-		DOM.append(this.parent, this.header, this.form);
+		DOM.append(this.parent, this.header, this.alert, this.form);
 	}
 }

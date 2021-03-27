@@ -26,13 +26,21 @@ class Image extends Controller
 			$page = 1;
 		}
 		$images = ImageModel::select()
-			->columns(['id', 'user', 'path', 'at'])
+			->columns(['id', 'user', 'name', 'at'])
 			->where(['private' => false])
 			->page($page, 10)
 			->all(ImageModel::class);
-		// TODO: attributes of Models in an array are not found
+		$result = [];
+		foreach ($images as $image) {
+			$result[] = [
+				'id' => $image->id,
+				'user' => $image->user,
+				'name' => $image->name,
+				'at' => $image->at,
+			];
+		}
 		// TODO: Linked User + Like count + Comments count
-		return $this->json(['images' => $images]);
+		return $this->json(['images' => $result]);
 	}
 
 	/**
@@ -102,7 +110,7 @@ class Image extends Controller
 		if ($image->private && (!$this->auth->isLoggedIn() || $this->user->id != $image->user)) {
 			return $this->json(['error' => 'Private Image.'], Response::UNAUTHORIZED);
 		}
-		$attributes = $image->toArray(['id', 'user', 'path', 'at']);
+		$attributes = $image->toArray(['id', 'user', 'at']);
 		// TODO: Linked user + Likes + Comments
 		return $this->json(['image' => $attributes]);
 	}

@@ -1,10 +1,13 @@
 import { Component } from '../Component';
+import { Alert } from '../UI/Alert';
 import { DOM } from '../Utility/DOM';
+import { Http, InvalidHttpResponse } from '../Utility/Http';
 
 export class SingleImage extends Component {
 	id: number = 0;
+
 	header!: HTMLElement;
-	image!: HTMLImageElement;
+	imageSlot!: HTMLImageElement;
 	stats!: HTMLElement;
 	likes!: HTMLElement;
 	likeCount!: HTMLElement;
@@ -17,14 +20,12 @@ export class SingleImage extends Component {
 	submit!: HTMLButtonElement;
 	commentList!: HTMLElement;
 
+	image: ImageModel | undefined;
+	dataError: InvalidHttpResponse<{ error: string }> | undefined;
+
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: '#' });
-		this.image = DOM.create('img', {
-			src: 'https://via.placeholder.com/900x450',
-			className: 'shadow-md',
-			width: 900,
-			height: 450,
-		});
+		this.imageSlot = DOM.create('img', { className: 'shadow-md', width: 900, height: 450 });
 		this.likeCount = DOM.create('span', { textContent: '123' });
 		this.likes = DOM.create('div', {
 			className: 'text-center cursor-pointer',
@@ -64,11 +65,18 @@ export class SingleImage extends Component {
 		if (!isNaN(id) && id > 0) {
 			this.id = id;
 		}
+		const response = await Http.get<{ image: ImageModel }>(`/api/${this.id}`);
+		if (response.ok) {
+			this.image = response.body.image;
+		} else {
+			this.dataError = response;
+		}
 	}
 
 	bind(): void {}
 
 	render(): void {
+		// Handle route error
 		if (this.id < 1) {
 			DOM.append(
 				this.parent,
@@ -78,20 +86,44 @@ export class SingleImage extends Component {
 			);
 			return;
 		}
-		for (let index = 0; index < 10; index++) {
-			const comment = DOM.create('div', {
-				className: 'comment',
-				childs: [
-					DOM.create('p', {
-						className: 'break-words',
-						textContent:
-							'Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.',
-					}),
-					DOM.create('div', { className: 'footer', textContent: 'Anonymous - 22 March 2021 at 15:03' }),
-				],
-			});
-			this.commentList.appendChild(comment);
+		// Handle API error
+		if (this.dataError) {
+			DOM.append(
+				this.parent,
+				DOM.create('h1', { className: 'text-center text-6xl', textContent: `${this.dataError.status}` }),
+				DOM.create('h2', { className: 'text-center text-4xl', textContent: 'Error' }),
+				DOM.create('div', { className: 'text-center', textContent: this.dataError.body.error })
+			);
+			return;
 		}
-		DOM.append(this.parent, this.header, this.image, this.stats, this.form, this.commentList);
+		// Display
+		if (!this.image) return;
+		this.imageSlot.src = `/uploads/${this.image.id}`;
+		this.likeCount.textContent = '0';
+		this.commentCount.textContent = '0';
+		// Empty coment message if there is no comments
+		// this.image.comments.length == 0
+		if (true) {
+			const alert = Alert.make('info', 'No comments yet, post the first one !');
+			alert.classList.add('mt-2');
+			this.commentList.appendChild(alert);
+		} else {
+			// TODO: Add comments
+			/*for (let index = 0; index < 10; index++) {
+				const comment = DOM.create('div', {
+					className: 'comment',
+					childs: [
+						DOM.create('p', {
+							className: 'break-words',
+							textContent:
+								'Facere voluptatem omnis consectetur. Quia doloremque aliquam tempore dolorem at quidem vel. Omnis dolores at quia quisquam vel consequatur accusantium. Non nostrum fugit repudiandae laborum modi amet rem. Accusantium omnis voluptatibus sunt.',
+						}),
+						DOM.create('div', { className: 'footer', textContent: 'Anonymous - 22 March 2021 at 15:03' }),
+					],
+				});
+				this.commentList.appendChild(comment);
+			}*/
+		}
+		DOM.append(this.parent, this.header, this.imageSlot, this.stats, this.form, this.commentList);
 	}
 }
