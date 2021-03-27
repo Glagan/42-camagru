@@ -1,7 +1,6 @@
 <?php namespace SQL;
 
 use Database;
-use DateTime;
 use Exception\QueryException;
 use Exception\SQLException;
 use Log;
@@ -113,10 +112,10 @@ class Query
 		$this->table = [];
 		if (\is_array($table)) {
 			foreach ($table as $key => $value) {
-				if (empty($key)) {
-					$this->table[] = ['name' => $value];
+				if (\is_string($value[$key])) {
+					$this->table[] = ['name' => $value, 'alias' => $key];
 				} else {
-					$this->table[] = ['name' => $key, 'alias' => $value];
+					$this->table[] = ['name' => $value];
 				}
 			}
 		} else {
@@ -135,18 +134,12 @@ class Query
 	public function columns(array $fields): self
 	{
 		$this->fields = [];
-		$columns = [];
 		foreach ($fields as $key => $value) {
-			if (empty($key)) {
-				$this->fields[] = ['column' => $value];
-				$columns[] = $value;
+			if (\is_string($key)) {
+				$this->fields[] = ['column' => $value, 'alias' => $key];
 			} else {
-				$this->fields[] = ['column' => $key, 'alias' => $value];
-				$columns[] = $key;
+				$this->fields[] = ['column' => $value];
 			}
-		}
-		if (!\in_array('id', $columns)) {
-			\array_unshift($this->fields, ['column' => 'id']);
 		}
 		return $this;
 	}
@@ -187,7 +180,14 @@ class Query
 	{
 		$this->conditions = [];
 		foreach ($conditions as $key => $value) {
-			if (empty($key)) {
+			if (\is_string($key)) {
+				// Consider an array value as an IN condition
+				if (\is_array($value)) {
+					$this->conditions[] = ['column' => $key, 'operator' => Operator::IN, 'value' => $value];
+				} else {
+					$this->conditions[] = ['column' => $key, 'operator' => Operator::EQUAL, 'value' => $value];
+				}
+			} else {
 				// Check if there is 2 or 3 arguments
 				// The operator is in the middle if there is 3 arguments
 				// Check if the value is an array for an IN condition if there is only 2 arguments
@@ -199,13 +199,6 @@ class Query
 						$operator = Operator::IN;
 					}
 					$this->conditions[] = ['column' => $value[0], 'operator' => $operator, 'value' => $conditionValue];
-				}
-			} else {
-				// Consider an array value as an IN condition
-				if (\is_array($value)) {
-					$this->conditions[] = ['column' => $key, 'operator' => Operator::IN, 'value' => $value];
-				} else {
-					$this->conditions[] = ['column' => $key, 'operator' => Operator::EQUAL, 'value' => $value];
 				}
 			}
 		}
@@ -253,10 +246,10 @@ class Query
 		$this->order = [];
 		if (\is_array($order)) {
 			foreach ($order as $key => $value) {
-				if (empty($key)) {
-					$this->order[] = ['column' => $value, 'direction' => self::ASC];
-				} else if ($value == self::ASC || $value == self::DESC) {
+				if (\is_string($value[$key])) {
 					$this->order[] = ['column' => $key, 'direction' => $value];
+				} else if ($value == self::ASC || $value == self::DESC) {
+					$this->order[] = ['column' => $value, 'direction' => self::ASC];
 				}
 			}
 		} else if (!\is_null($order)) {
@@ -287,15 +280,18 @@ class Query
 				$sql .= " *";
 			} else {
 				$sql .= \implode(', ', \array_map(function ($field) {
-					if (\is_a($field, Value::class)) {
+					if ($field instanceof Value) {
 						return $field->get();
+					}
+					if ($field['column'] instanceof Value) {
+						$fieldValue = " {$field['column']->get()}";
 					} else {
 						$fieldValue = " {$field['column']}";
-						if (isset($field['alias'])) {
-							$fieldValue .= " AS {$field['alias']}";
-						}
-						return $fieldValue;
 					}
+					if (isset($field['alias'])) {
+						$fieldValue .= " AS {$field['alias']}";
+					}
+					return $fieldValue;
 				}, $this->fields));
 			}
 			$sql .= " FROM";
@@ -324,7 +320,7 @@ class Query
 					$count = 0;
 					$currentGroup = [];
 					foreach ($group as $value) {
-						if (\is_a($value, Value::class)) {
+						if ($value instanceof Value) {
 							$currentGroup[] = $value->get();
 						} else {
 							$currentGroup[] = '?';
@@ -357,7 +353,7 @@ class Query
 		if ($this->type == self::UPDATE && \count($this->updates) > 0) {
 			$assignments = [];
 			foreach ($this->updates as $key => $value) {
-				if (\is_a($value, Value::class)) {
+				if ($value instanceof Value) {
 					$assignments[] = "{$key} = {$value->get()}";
 				} else {
 					$assignments[] = "{$key} = ?";
@@ -379,7 +375,7 @@ class Query
 					$conditions[] = "{$group['column']} {$group['operator']} ({$placeholders})";
 					\array_push($this->params, ...\array_values($group['value']));
 				} else if ($operator != Operator::IS_NULL && $operator != Operator::IS_NOT_NULL) {
-					if (\is_a($group['value'], Value::class)) {
+					if ($group['value'] instanceof Value) {
 						$conditions[] = "{$group['column']} {$group['operator']} {$group['value']->get()}";
 					} else {
 						$conditions[] = "{$group['column']} {$group['operator']} ?";
@@ -429,7 +425,7 @@ class Query
 		foreach ($this->params as $param) {
 			// Convert value if necessary
 			$value = $param;
-			if (\is_a($param, \DateTime::class)) {
+			if ($param instanceof \DateTime) {
 				$value = $param->format('Y-m-d H:i:s');
 			}
 			// Find PDO type

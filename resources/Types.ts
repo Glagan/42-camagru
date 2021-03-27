@@ -1,14 +1,17 @@
-interface User {
+interface PublicUser {
 	id: number;
 	username: string;
-	email: string;
 	verified: boolean;
+}
+
+interface User extends PublicUser {
+	email: string;
 	receiveComments: boolean;
 }
 
-interface Comment {
+interface ImageComment {
 	id: number;
-	sender: string;
+	user: number;
 	at: string;
 	message: string;
 }
@@ -16,7 +19,6 @@ interface Comment {
 interface ImageModel {
 	id: number;
 	user: number;
+	name: string;
 	at: string;
-	likes: number;
-	comments: Comment[];
 }
