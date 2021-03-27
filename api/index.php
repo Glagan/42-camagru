@@ -25,20 +25,19 @@ $router = new Camagru\Router('/api');
 
 // User
 $router->group(Controller\Authentication::class, function ($router) {
-	$router->post('/register', ['auth' => false, 'use' => 'register']);
+	$router->post('/register', ['auth' => false, 'use' => 'register']); // TODO: mail
 	$router->post('/login', ['auth' => false, 'use' => 'login']);
 	$router->delete('/logout', ['auth' => true, 'use' => 'logout']);
 	$router->delete('/logout/all', ['auth' => true, 'use' => 'logoutAll']);
 	$router->delete('/logout(?:/{session:.+})?', ['auth' => true, 'use' => 'logout']);
-	$router->patch('/send-verification', ['auth' => true, 'use' => 'sendVerification']); // TODO
-	$router->post('/forgot-password', ['auth' => false, 'use' => 'resetPassword']); // TODO
+	$router->patch('/send-verification', ['auth' => true, 'use' => 'sendVerification']); // TODO: mail
+	$router->post('/forgot-password', ['auth' => false, 'use' => 'resetPassword']); // TODO: mail
 	$router->get('/status', ['use' => 'status']);
 });
 
-// Profile
-$router->group(Controller\Profile::class, function ($router) {
-	$router->patch('/profile/update', ['auth' => true, 'use' => 'update']);
-	$router->get('/profile/{id}', ['use' => 'single']);
+// Account
+$router->group(Controller\Account::class, function ($router) {
+	$router->patch('/account/update', ['auth' => true, 'use' => 'update']);
 });
 
 // Uploads
@@ -50,6 +49,7 @@ $router->group(Controller\Upload::class, function ($router) {
 $router->group(Controller\Image::class, function ($router) {
 	$router->post('/upload', ['auth' => true, 'use' => 'upload']); // TODO
 	$router->get('/list(?:/{page})?', ['use' => 'list']); // TODO
+	$router->get('/user/{id}(?:/{page})?', ['use' => 'user']);
 	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']);
 	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']);
 	$router->get('/{id}', ['use' => 'single']);
