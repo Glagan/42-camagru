@@ -30,7 +30,7 @@ class Image extends Controller
 
 		$images = ImageModel::select()
 			->columns(['id', 'user', 'name', 'at'])
-			->where(['private' => false])
+			->where(['private' => false]) // ? OR image.user = auth.user
 			->page($page, 10)
 			->all(ImageModel::class);
 		$result = [];
@@ -38,8 +38,48 @@ class Image extends Controller
 			$result[] = $image->toArray(['id', 'user', 'name', 'at']);
 		}
 
-		// ? TODO: Linked User + Like count + Comments count
 		return $this->json(['images' => $result]);
+	}
+
+	/**
+	 * @param int $page The User ID
+	 * @param int $page The page number > 0
+	 * @return \Camagru\Http\Response
+	 */
+	public function user(int $id, int $page = 1): Response
+	{
+		if ($page < 1) {
+			$page = 1;
+		}
+		if ($id < 1) {
+			return $this->json(['error' => 'Invalid User ID.'], Response::BAD_REQUEST);
+		}
+
+		if ($this->auth->isLoggedIn() && $this->user->id == $id) {
+			$user = $this->user;
+			$private = true;
+		} else {
+			$user = User::get($id);
+			if ($user === false) {
+				return $this->json(['error' => 'User not found.'], Response::NOT_FOUND);
+			}
+			$private = false;
+		}
+
+		$images = ImageModel::select()
+			->columns(['id', 'user', 'name', 'at'])
+			->where(['user' => $id, 'private' => $private])
+			->page($page, 10)
+			->all(ImageModel::class);
+		$result = [];
+		foreach ($images as $image) {
+			$result[] = $image->toArray(['id', 'user', 'name', 'at']);
+		}
+
+		return $this->json([
+			'user' => $user->toArray(['id', 'username', 'verified']),
+			'images' => $result,
+		]);
 	}
 
 	/**

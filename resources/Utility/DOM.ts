@@ -65,7 +65,8 @@ export class DOM {
 		svg.setAttribute('fill', opts.fill);
 		svg.setAttribute('stroke', opts.stroke);
 		svg.setAttribute('viewBox', opts.viewBox);
-		svg.classList.add(opts.width, opts.height);
+		if (opts.width) svg.classList.add(opts.width);
+		if (opts.height) svg.classList.add(opts.height);
 		svg.classList.add(...opts.classes);
 		// Create the paths
 		for (const definition of paths) {

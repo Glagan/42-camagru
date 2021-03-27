@@ -1,5 +1,6 @@
 import { Auth } from '../Auth';
 import { Component } from '../Component';
+import { Badge } from '../UI/Badge';
 import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
 import { Http } from '../Utility/Http';
@@ -28,16 +29,8 @@ export class Navigation extends Component {
 			textContent: 'camagru',
 		});
 		this.user = DOM.create('div', { className: 'mb-2' });
-		this.warningBadge = DOM.create('span', {
-			className: 'badge warning',
-			childs: [DOM.icon('exclamation', { width: 'w-5', height: 'h-5' })],
-			title: 'Not Verified',
-		});
-		this.verifiedBadge = DOM.create('span', {
-			className: 'badge success',
-			childs: [DOM.icon('check', { width: 'w-5', height: 'h-5' })],
-			title: 'Verified',
-		});
+		this.warningBadge = Badge.make(false);
+		this.verifiedBadge = Badge.make(true);
 		this.links = DOM.create('div', {
 			className: 'links flex flex-col flex-wrap items-center',
 		});

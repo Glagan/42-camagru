@@ -2,10 +2,9 @@
 
 use Camagru\Controller;
 use Camagru\Http\Response;
-use Models\Image;
 use Models\User;
 
-class Profile extends Controller
+class Account extends Controller
 {
 	/**
 	 * @return \Camagru\Http\Response
@@ -83,35 +82,5 @@ class Profile extends Controller
 
 		$this->user->persist();
 		return $this->json(['success' => 'Profile updated !', 'verified' => $this->user->verified]);
-	}
-
-	/**
-	 * @param int $id User ID
-	 * @return \Camagru\Http\Response
-	 */
-	public function single($id): Response
-	{
-		if ($id < 1) {
-			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
-		}
-
-		// User
-		$user = User::get($id);
-		if ($user === false) {
-			return $this->json(['error' => 'User not found.'], Response::NOT_FOUND);
-		}
-		$private = $this->auth->isLoggedIn() && $this->user->id == $id;
-
-		// Images
-		$images = Image::all(['user' => $user->id, 'private' => $private]);
-		$foundImages = [];
-		foreach ($images as $image) {
-			$foundImages[] = $image->toArray(['id', 'user', 'name', 'at']);
-		}
-
-		return $this->json([
-			'user' => $user->toArray(['id', 'username', 'verified']),
-			'images' => $foundImages,
-		]);
 	}
 }

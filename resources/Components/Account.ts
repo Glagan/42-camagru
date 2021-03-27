@@ -147,7 +147,7 @@ export class Account extends Component {
 				body.receiveComments = this.receiveCommentsToggle.checkbox.checked;
 			}
 			// Send the request
-			const response = await Http.patch<{ success: string; verified: boolean }>('/api/profile/update', body);
+			const response = await Http.patch<{ success: string; verified: boolean }>('/api/account/update', body);
 			if (response.ok) {
 				this.application.auth.user.username = this.username.value;
 				this.application.auth.user.email = this.email.value;

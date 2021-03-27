@@ -14,7 +14,7 @@ export class List extends Component {
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: '# All' });
 		this.grid = DOM.create('div', {
-			className: 'grid grid-cols-2 lg:grid-cols-3 auto-rows-min justify-items-center',
+			className: 'grid grid-cols-2 lg:grid-cols-3 auto-rows-min justify-items-center items-center',
 		});
 	}
 

@@ -1,5 +1,6 @@
 import { Component } from '../Component';
 import { Alert } from '../UI/Alert';
+import { Badge } from '../UI/Badge';
 import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
 import { Http, InvalidHttpResponse } from '../Utility/Http';
@@ -19,6 +20,8 @@ export class SingleImage extends Component {
 	header!: HTMLElement;
 	imageSlot!: HTMLImageElement;
 	stats!: HTMLElement;
+	author!: HTMLAnchorElement;
+	authorBadge!: HTMLElement;
 	likes!: HTMLElement;
 	likeIcon!: SVGSVGElement;
 	likeCount!: HTMLElement;
@@ -37,6 +40,8 @@ export class SingleImage extends Component {
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: '#' });
 		this.imageSlot = DOM.create('img', { className: 'shadow-md', width: 900, height: 450 });
+		this.author = DOM.create('a', { className: 'author' });
+		this.authorBadge = DOM.create('span');
 		this.likeCount = DOM.create('span', { textContent: '123' });
 		this.likeIcon = DOM.icon('heart', { classes: 'like', width: 'w-10', height: 'h-10' });
 		this.likes = DOM.create('div', {
@@ -49,8 +54,12 @@ export class SingleImage extends Component {
 			childs: [DOM.icon('chat', { classes: 'text-gray-400', width: 'w-10', height: 'h-10' }), this.commentCount],
 		});
 		this.stats = DOM.create('div', {
-			className: 'flex flex-row flex-nowrap justify-evenly mt-2',
-			childs: [this.likes, this.comments],
+			className: 'flex flex-row flex-nowrap justify-evenly mt-2 items-center',
+			childs: [
+				DOM.create('div', { childs: [DOM.text('Created by '), this.author, this.authorBadge] }),
+				this.likes,
+				this.comments,
+			],
 		});
 		this.commentLabel = DOM.create('label', { htmlFor: 'comment-message', textContent: 'Comment' });
 		this.comment = DOM.create('input', {
@@ -89,6 +98,11 @@ export class SingleImage extends Component {
 	}
 
 	bind(): void {
+		this.author.addEventListener('click', (event) => {
+			event.preventDefault();
+			if (!this.response) return;
+			this.application.navigate(`/user/${this.response.user.id}`);
+		});
 		this.likes.addEventListener('click', async (event) => {
 			event.preventDefault();
 			if (!this.response) return;
@@ -153,6 +167,14 @@ export class SingleImage extends Component {
 		} else {
 			for (const comment of comments) {
 				const cleanDate = new Date(comment.at).toLocaleString();
+				const userLink = DOM.create('a', {
+					href: `/user/${comment.user.id}`,
+					childs: [DOM.text(comment.user.username), Badge.make(comment.user.verified, true)],
+				});
+				userLink.addEventListener('click', (event) => {
+					event.preventDefault();
+					this.application.navigate(`/user/${comment.user.id}`);
+				});
 				const node = DOM.create('div', {
 					className: 'comment',
 					childs: [
@@ -162,7 +184,7 @@ export class SingleImage extends Component {
 						}),
 						DOM.create('div', {
 							className: 'footer',
-							textContent: `${comment.user.username} - ${cleanDate}`,
+							childs: [userLink, DOM.text(`${cleanDate}`)],
 						}),
 					],
 				});
@@ -195,6 +217,9 @@ export class SingleImage extends Component {
 		// Display
 		if (!this.response) return;
 		this.header.textContent = `# ${this.response.image.id}`;
+		this.author.textContent = this.response.user.username;
+		this.author.href = `/user/${this.response.user.id}`;
+		Badge.set(this.authorBadge, this.response.user.verified);
 		this.imageSlot.src = `/uploads/${this.response.image.id}`;
 		this.likeCount.textContent = `${this.response.likes}`;
 		if (
