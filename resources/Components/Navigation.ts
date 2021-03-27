@@ -1,5 +1,6 @@
 import { Auth } from '../Auth';
 import { Component } from '../Component';
+import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
 import { Http } from '../Utility/Http';
 import { Create } from './Create';
@@ -51,6 +52,15 @@ export class Navigation extends Component {
 	}
 
 	bind() {
+		this.sendVerification.addEventListener('click', async (event) => {
+			event.preventDefault();
+			const response = await Http.patch<{ success: string }>('/api/send-verification');
+			if (response.ok) {
+				Notification.show('success', response.body.success);
+			} else {
+				Notification.show('danger', response.body.error);
+			}
+		});
 		this.link(this.createButton, '/create');
 		this.link(this.login, '/login');
 		this.link(this.register, '/register');

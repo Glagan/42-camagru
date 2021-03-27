@@ -29,16 +29,16 @@ $router->group(Controller\Authentication::class, function ($router) {
 	$router->post('/login', ['auth' => false, 'use' => 'login']);
 	$router->delete('/logout', ['auth' => true, 'use' => 'logout']);
 	$router->delete('/logout/all', ['auth' => true, 'use' => 'logoutAll']);
-	$router->delete('/logout/{session:.+}?', ['auth' => true, 'use' => 'logout']);
-	$router->patch('/send-verification', ['auth' => true, 'use' => 'sendVerification']);
-	$router->patch('/reset-password', ['auth' => false, 'use' => 'resetPassword']);
+	$router->delete('/logout(?:/{session:.+})?', ['auth' => true, 'use' => 'logout']);
+	$router->patch('/send-verification', ['auth' => true, 'use' => 'sendVerification']); // TODO
+	$router->post('/forgot-password', ['auth' => false, 'use' => 'resetPassword']); // TODO
 	$router->get('/status', ['use' => 'status']);
 });
 
 // Profile
 $router->group(Controller\Profile::class, function ($router) {
 	$router->patch('/profile/update', ['auth' => true, 'use' => 'update']);
-	$router->get('/profile/{id}', ['use' => 'single']);
+	$router->get('/profile/{id}', ['use' => 'single']); // TODO
 });
 
 // Uploads
@@ -48,10 +48,10 @@ $router->group(Controller\Upload::class, function ($router) {
 
 // Image
 $router->group(Controller\Image::class, function ($router) {
-	$router->post('/upload', ['auth' => true, 'use' => 'upload']);
-	$router->get('/list(?:/{page})?', ['use' => 'list']);
-	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']);
-	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']);
+	$router->post('/upload', ['auth' => true, 'use' => 'upload']); // TODO
+	$router->get('/list(?:/{page})?', ['use' => 'list']); // TODO
+	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']); // TODO
+	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']); // TODO
 	$router->get('/{id}', ['use' => 'single']);
 });
 

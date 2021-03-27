@@ -74,10 +74,6 @@ button.secondary {
 	z-index: 10;
 }
 
-.card img {
-	@apply rounded;
-}
-
 form {
 	@apply mt-2;
 }
