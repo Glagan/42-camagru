@@ -30,13 +30,14 @@ $router->group(Controller\Authentication::class, function ($router) {
 	$router->delete('/logout', ['auth' => true, 'use' => 'logout']);
 	$router->delete('/logout/all', ['auth' => true, 'use' => 'logoutAll']);
 	$router->delete('/logout(?:/{session:.+})?', ['auth' => true, 'use' => 'logout']);
-	$router->patch('/send-verification', ['auth' => true, 'use' => 'sendVerification']); // TODO: mail
-	$router->post('/forgot-password', ['auth' => false, 'use' => 'resetPassword']); // TODO: mail
 	$router->get('/status', ['use' => 'status']);
 });
 
 // Account
 $router->group(Controller\Account::class, function ($router) {
+	$router->post('/account/forgot-password', ['auth' => false, 'use' => 'resetPassword']); // TODO: mail
+	$router->patch('/account/send-verification', ['auth' => true, 'use' => 'sendVerification']); // TODO: mail
+	$router->patch('/account/verify', ['auth' => true, 'use' => 'verify']);
 	$router->patch('/account/update', ['auth' => true, 'use' => 'update']);
 });
 

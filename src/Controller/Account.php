@@ -3,9 +3,101 @@
 use Camagru\Controller;
 use Camagru\Http\Response;
 use Models\User;
+use Models\UserToken;
 
 class Account extends Controller
 {
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function sendVerification(): Response
+	{
+		if ($this->user->verified) {
+			return $this->json(['error' => 'You are already verified.'], Response::BAD_REQUEST);
+		}
+
+		// Generate a token that will be used in the verification link
+		$token = UserToken::first(['user' => $this->user->id, 'scope' => 'verification']);
+		if ($token !== false) {
+			$token->remove();
+		}
+		$token = UserToken::generate($this->user->id, 'verification');
+		$token->persist();
+
+		// TODO: Send mail
+
+		return $this->json([
+			'success' => 'An email with a new verification link has been sent. You have 24hours to activate it.',
+		]);
+	}
+
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function resetPassword(): Response
+	{
+		$this->validate([
+			'email' => [
+				'validate' => \FILTER_VALIDATE_EMAIL,
+			],
+		]);
+
+		// Check if the email exists
+		$email = $this->input->get('email');
+		$user = User::first(['email' => $email]);
+		if ($user === false) {
+			return $this->json(['error' => 'This email doesn\'t belong to anyone.'], Response::BAD_REQUEST);
+		}
+
+		// Generate a token that will be used when resetting the password
+		$token = UserToken::first(['user' => $user->id, 'scope' => 'password']);
+		if ($token !== false) {
+			$token->remove();
+		}
+		$token = UserToken::generate($user->id, 'password');
+		$token->persist();
+
+		// TODO: Send mail
+
+		return $this->json([
+			'success' => 'An email with a link to reset your password has been sent. You have 24hours to reset your password.',
+		]);
+	}
+
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function verify(): Response
+	{
+		$this->validate([
+			'code' => [
+				'min' => 50, 'max' => 50,
+			],
+		]);
+
+		if ($this->user->verified) {
+			return $this->json(['error' => 'Account already verified.'], Response::BAD_REQUEST);
+		}
+
+		$token = UserToken::first(['user' => $this->user->id, 'scope' => 'verification']);
+		if ($token === false) {
+			return $this->json(['error' => 'No Activation code found, ask for a new one.'], Response::BAD_REQUEST);
+		}
+		$now = new \DateTime();
+		$diff = $now->diff($token->issued, true);
+		if ($token->token !== $this->input->get('code')) {
+			return $this->json(['error' => 'Invalid Activation code.'], Response::BAD_REQUEST);
+		}
+		$token->remove();
+		if ($diff->days >= 1) {
+			return $this->json(['error' => 'Code expired, ask for a new one.'], Response::BAD_REQUEST);
+		}
+
+		$this->user->verified = true;
+		$this->user->persist();
+		return $this->json(['success' => 'Account verified !']);
+	}
+
 	/**
 	 * @return \Camagru\Http\Response
 	 */

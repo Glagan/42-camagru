@@ -14,7 +14,7 @@ export class Navigation extends Component {
 	verifiedBadge!: HTMLElement;
 	links!: HTMLElement;
 	createButton!: HTMLButtonElement;
-	sendVerification!: HTMLButtonElement;
+	verify!: HTMLButtonElement;
 	login!: HTMLButtonElement;
 	register!: HTMLButtonElement;
 	back!: HTMLButtonElement;
@@ -36,7 +36,7 @@ export class Navigation extends Component {
 			className: 'links flex flex-col flex-wrap items-center',
 		});
 		this.createButton = DOM.button('primary', 'camera', 'Create');
-		this.sendVerification = DOM.button('success', 'at-symbol', 'Send Verification');
+		this.verify = DOM.button('success', 'at-symbol', 'Verify Account');
 		this.login = DOM.button('success', 'login', 'Login');
 		this.register = DOM.button('success', 'user-add', 'Register');
 		this.account = DOM.button('secondary', 'user', 'Account');
@@ -47,15 +47,7 @@ export class Navigation extends Component {
 	}
 
 	bind() {
-		this.sendVerification.addEventListener('click', async (event) => {
-			event.preventDefault();
-			const response = await Http.patch<{ success: string }>('/api/send-verification');
-			if (response.ok) {
-				Notification.show('success', response.body.success);
-			} else {
-				Notification.show('danger', response.body.error);
-			}
-		});
+		this.link(this.verify, '/verify');
 		this.link(this.createButton, '/create');
 		this.link(this.login, '/login');
 		this.link(this.register, '/register');
@@ -98,7 +90,7 @@ export class Navigation extends Component {
 		if (auth.loggedIn) {
 			this.displayLoggedInUser();
 			if (!auth.user.verified) {
-				DOM.append(this.links, this.sendVerification);
+				DOM.append(this.links, this.verify);
 			}
 			if (this.application.page !== Create.name) {
 				this.links.appendChild(this.createButton);
