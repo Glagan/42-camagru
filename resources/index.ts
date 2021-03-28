@@ -12,6 +12,7 @@ import { ForgotPassword } from './Components/ForgotPassword';
 import { Account } from './Components/Account';
 import { Verify } from './Components/Verify';
 import { Notification } from './UI/Notification';
+import { ResetPassword } from './Components/ResetPassword';
 
 // Set Dark theme
 Theme.initialize();
@@ -24,6 +25,7 @@ router.add('^/login$', Login);
 router.add('^/register$', Register);
 router.add('^/verify$', Verify);
 router.add('^/forgot-password$', ForgotPassword);
+router.add('^/reset-password$', ResetPassword);
 router.add('^/preferences$', Preferences);
 router.add('^/create$', Create);
 router.add('^/account$', Account);
