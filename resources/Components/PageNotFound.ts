@@ -12,8 +12,6 @@ export class PageNotFound extends Component {
 		this.message = DOM.create('div', { className: 'text-center', textContent: 'How did you get there ?' });
 	}
 
-	bind(): void {}
-
 	render(): void {
 		DOM.append(this.parent, this.code, this.header, this.message);
 	}

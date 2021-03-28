@@ -35,8 +35,6 @@ export class Preferences extends Component {
 		this.form = DOM.create('form', { childs: [this.alert, this.themeLabel] });
 	}
 
-	bind(): void {}
-
 	render(): void {
 		DOM.append(this.parent, this.header, this.form);
 	}

@@ -12,8 +12,6 @@ export class Unauthorized extends Component {
 		this.message = DOM.create('div', { className: 'text-center', textContent: "You shouldn't be here !" });
 	}
 
-	bind(): void {}
-
 	render(): void {
 		DOM.append(this.parent, this.code, this.header, this.message);
 	}
