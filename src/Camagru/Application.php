@@ -43,12 +43,12 @@ class Application
 			}
 
 			// Try to match a route and render a response
-			$match = $this->router->match($request);
-			if ($match !== false) {
+			$route = $this->router->match($request);
+			if ($route !== false) {
 				// Check if the route need authentication
 				$auth = new Auth();
-				if (isset($match['auth']) && $match['auth'] != null && (($match['auth'] && !$auth->isLoggedIn()) || (!$match['auth'] && $auth->isLoggedIn()))) {
-					$reason = $match['auth'] ?
+				if (($route->requireAuth() && !$auth->isLoggedIn()) || ($route->rejectAuth() && $auth->isLoggedIn())) {
+					$reason = $route['auth'] ?
 					'You need to be logged in to access this page.' :
 					'You need to be logged out to access this page.';
 					throw new AuthException($reason);
@@ -56,9 +56,9 @@ class Application
 				}
 
 				// Call the route
-				$controller = $match['controller'];
+				$controller = $route->getController();
 				$controller = new $controller($request, $auth);
-				$response = \call_user_func([$controller, $match['function']], ...$match['foundParams']);
+				$response = \call_user_func([$controller, $route->getFunction()], ...$route->getFoundParams());
 			} else {
 				$response = new JSONResponse(['error' => 'Not found'], Response::NOT_FOUND);
 			}

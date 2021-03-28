@@ -279,7 +279,7 @@ class Query
 			if (\count($this->fields) == 0) {
 				$sql .= " *";
 			} else {
-				$sql .= \implode(', ', \array_map(function ($field) {
+				$sql .= \implode(',', \array_map(function ($field) {
 					if ($field instanceof Value) {
 						return $field->get();
 					}
