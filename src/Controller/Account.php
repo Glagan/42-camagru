@@ -10,31 +10,7 @@ class Account extends Controller
 	/**
 	 * @return \Camagru\Http\Response
 	 */
-	public function sendVerification(): Response
-	{
-		if ($this->user->verified) {
-			return $this->json(['error' => 'You are already verified.'], Response::BAD_REQUEST);
-		}
-
-		// Generate a token that will be used in the verification link
-		$token = UserToken::first(['user' => $this->user->id, 'scope' => 'verification']);
-		if ($token !== false) {
-			$token->remove();
-		}
-		$token = UserToken::generate($this->user->id, 'verification');
-		$token->persist();
-
-		// TODO: Send mail
-
-		return $this->json([
-			'success' => 'An email with a new verification link has been sent. You have 24hours to activate it.',
-		]);
-	}
-
-	/**
-	 * @return \Camagru\Http\Response
-	 */
-	public function resetPassword(): Response
+	public function sendResetPassword(): Response
 	{
 		$this->validate([
 			'email' => [
@@ -52,6 +28,7 @@ class Account extends Controller
 		// Generate a token that will be used when resetting the password
 		$token = UserToken::first(['user' => $user->id, 'scope' => 'password']);
 		if ($token !== false) {
+			// TODO: Avoid updating token if it's still valid
 			$token->remove();
 		}
 		$token = UserToken::generate($user->id, 'password');
@@ -61,6 +38,70 @@ class Account extends Controller
 
 		return $this->json([
 			'success' => 'An email with a link to reset your password has been sent. You have 24hours to reset your password.',
+		]);
+	}
+
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function resetPassword(): Response
+	{
+		$this->validate([
+			'code' => [
+				'min' => 50, 'max' => 50,
+			],
+			'password' => [
+				'name' => 'new password',
+				'min' => 8,
+				'max' => 72,
+				'match' => [
+					'/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/',
+					'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
+				],
+			],
+		]);
+
+		$code = $this->input->get('code');
+		$token = UserToken::first(['token' => $code, 'scope' => 'password']);
+		if ($token === false) {
+			return $this->json(['error' => 'No account found for this code.'], Response::BAD_REQUEST);
+		}
+		$now = new \DateTime();
+		$diff = $now->diff($token->issued, true);
+		if ($diff->days >= 1) {
+			$token->remove();
+			return $this->json(['error' => 'Code expired, ask for a new one.'], Response::BAD_REQUEST);
+		}
+
+		$user = User::get($token->user);
+		$user->password = \password_hash($this->input->get('password'), \PASSWORD_BCRYPT);
+		$user->persist();
+		$token->remove();
+		return $this->json(['success' => 'Password resetted, you can now login.']);
+	}
+
+	/**
+	 * @return \Camagru\Http\Response
+	 */
+	public function sendVerification(): Response
+	{
+		if ($this->user->verified) {
+			return $this->json(['error' => 'You are already verified.'], Response::BAD_REQUEST);
+		}
+
+		// Generate a token that will be used in the verification link
+		$token = UserToken::first(['user' => $this->user->id, 'scope' => 'verification']);
+		if ($token !== false) {
+			// TODO: Avoid updating token if it's still valid
+			$token->remove();
+		}
+		$token = UserToken::generate($this->user->id, 'verification');
+		$token->persist();
+
+		// TODO: Send mail
+
+		return $this->json([
+			'success' => 'An email with a new verification link has been sent. You have 24hours to activate it.',
 		]);
 	}
 

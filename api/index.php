@@ -35,8 +35,9 @@ $router->group(Controller\Authentication::class, function ($router) {
 
 // Account
 $router->group(Controller\Account::class, function ($router) {
-	$router->post('/account/forgot-password', ['auth' => false, 'use' => 'resetPassword']); // TODO: mail
-	$router->patch('/account/send-verification', ['auth' => true, 'use' => 'sendVerification']); // TODO: mail
+	$router->post('/account/forgot-password', ['auth' => false, 'use' => 'sendResetPassword']); // TODO: mail
+	$router->patch('/account/reset-password', ['auth' => false, 'use' => 'resetPassword']);
+	$router->post('/account/send-verification', ['auth' => true, 'use' => 'sendVerification']); // TODO: mail
 	$router->patch('/account/verify', ['auth' => true, 'use' => 'verify']);
 	$router->patch('/account/update', ['auth' => true, 'use' => 'update']);
 });

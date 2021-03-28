@@ -44,7 +44,7 @@ export class Verify extends Component {
 	bind(): void {
 		this.sendAgain.addEventListener('click', async (event) => {
 			event.preventDefault();
-			const response = await Http.patch<{ success: string }>('/api/account/send-verification');
+			const response = await Http.post<{ success: string }>('/api/account/send-verification');
 			if (response.ok) {
 				Notification.show('success', response.body.success);
 			} else {
