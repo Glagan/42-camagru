@@ -2,6 +2,7 @@ import { Application } from './Application';
 import { Validator } from './Utility/Validator';
 
 export interface Component {
+	bind?(): void;
 	data?(params: RegExpMatchArray): Promise<void>;
 	destroy?(): void;
 }
@@ -21,7 +22,9 @@ export abstract class Component {
 			this.parent = document.createElement('div');
 		}
 		this.create();
-		this.bind();
+		if (this.bind) {
+			this.bind();
+		}
 	}
 
 	protected link(node: HTMLButtonElement, location: string): void {
@@ -32,7 +35,6 @@ export abstract class Component {
 	}
 
 	abstract create(): void;
-	abstract bind(): void;
 	abstract render(): void;
 
 	validate(): boolean {

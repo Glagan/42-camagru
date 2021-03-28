@@ -48,7 +48,7 @@ $router->group(Controller\Upload::class, function ($router) {
 // Image
 $router->group(Controller\Image::class, function ($router) {
 	$router->post('/upload', ['auth' => true, 'use' => 'upload']); // TODO
-	$router->get('/list(?:/{page})?', ['use' => 'list']); // TODO
+	$router->get('/list(?:/{page})?', ['use' => 'list']);
 	$router->get('/user/{id}(?:/{page})?', ['use' => 'user']);
 	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']);
 	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']);

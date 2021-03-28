@@ -66,9 +66,14 @@ class Image extends Controller
 			$private = false;
 		}
 
+		// Filter out private Images if it's not looking at our profile
+		$conditions = ['user' => $id];
+		if (!$private) {
+			$conditions['private'] = false;
+		}
 		$images = ImageModel::select()
 			->columns(['id', 'user', 'name', 'at'])
-			->where(['user' => $id, 'private' => $private])
+			->where($conditions)
 			->page($page, 10)
 			->all(ImageModel::class);
 		$result = [];
