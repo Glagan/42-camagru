@@ -173,63 +173,6 @@ class Authentication extends Controller
 	/**
 	 * @return \Camagru\Http\Response
 	 */
-	public function sendVerification(): Response
-	{
-		if ($this->user->verified) {
-			return $this->json(['error' => 'You are already verified.'], Response::BAD_REQUEST);
-		}
-
-		// Generate a token that will be used in the verification link
-		$token = UserToken::first(['user' => $this->user->id, 'scope' => 'verification']);
-		if ($token !== false) {
-			$token->remove();
-		}
-		$token = UserToken::generate($this->user->id, 'verification');
-		$token->persist();
-
-		// TODO: Send mail
-
-		return $this->json([
-			'success' => 'An email with a new verification link has been sent. You have 24hours to activate it.',
-		]);
-	}
-
-	/**
-	 * @return \Camagru\Http\Response
-	 */
-	public function resetPassword(): Response
-	{
-		$this->validate([
-			'email' => [
-				'validate' => \FILTER_VALIDATE_EMAIL,
-			],
-		]);
-
-		// Check if the email exists
-		$email = $this->input->get('email');
-		$user = User::first(['email' => $email]);
-		if ($user === false) {
-			return $this->json(['error' => 'This email doesn\'t belong to anyone.'], Response::BAD_REQUEST);
-		}
-
-		// Generate a token that will be used when resetting the password
-		$token = UserToken::first(['user' => $user->id, 'scope' => 'password']);
-		if ($token !== false) {
-			$token->remove();
-		}
-		$token = UserToken::generate($user->id, 'password');
-		$token->persist();
-
-		// TODO: Send mail
-
-		return $this->json([
-			'success' => 'An email with a link to reset your password has been sent. You have 24hours to reset your password.',
-		]);
-	}
-
-	/**
-	 * @return \Camagru\Http\Response
-	 */
 	public function status(): Response
 	{
 		if ($this->auth->isLoggedIn()) {

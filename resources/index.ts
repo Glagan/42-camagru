@@ -10,6 +10,7 @@ import { Login } from './Components/Login';
 import { List } from './Components/List';
 import { ForgotPassword } from './Components/ForgotPassword';
 import { Account } from './Components/Account';
+import { Verify } from './Components/Verify';
 import { Notification } from './UI/Notification';
 
 // Set Dark theme
@@ -21,6 +22,7 @@ const location = `${window.location.pathname}${window.location.search}`;
 const router = new Router();
 router.add('^/login$', Login);
 router.add('^/register$', Register);
+router.add('^/verify$', Verify);
 router.add('^/forgot-password$', ForgotPassword);
 router.add('^/preferences$', Preferences);
 router.add('^/create$', Create);

@@ -56,7 +56,7 @@ class Route
 	{
 		$this->method = $method;
 		$this->path = \trim($path, '/');
-		$this->auth = $options['auth'];
+		$this->auth = isset($options['auth']) ? $options['auth'] : null;
 		$callback = \explode('@', $callback);
 		if (\count($callback) == 2) {
 			$this->controller = $callback[0];
@@ -65,7 +65,7 @@ class Route
 			$this->controller = null;
 			$this->function = null;
 		}
-		$this->noPrefix = $options['noPrefix'];
+		$this->noPrefix = isset($options['noPrefix']) ? $options['noPrefix'] : null;
 		$this->initializeParams();
 		$this->initializeRegex();
 		$this->foundParams = [];
