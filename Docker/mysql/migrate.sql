@@ -58,7 +58,6 @@ CREATE TABLE `users` (
 	`email` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
 	`password` varchar(250) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`verified` tinyint unsigned NOT NULL DEFAULT '0',
-	`theme` enum('light','dark') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'light',
 	`receiveComments` tinyint unsigned NOT NULL DEFAULT '1',
 	PRIMARY KEY (`id`),
 	UNIQUE KEY `username` (`username`),
