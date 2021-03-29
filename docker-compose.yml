@@ -1,0 +1,36 @@
+version: '3.2'
+services:
+    php:
+        build: './Docker/php'
+        networks:
+            - backend
+        volumes:
+            - .:/var/www/html/
+    apache:
+        build: './Docker/apache'
+        depends_on:
+            - php
+            - mysql
+        networks:
+            - frontend
+            - backend
+        ports:
+            - '8080:80'
+        volumes:
+            - ./:/var/www/html/
+    mysql:
+        image: mysql:8.0
+        networks:
+            - backend
+        environment:
+            - MYSQL_TCP_PORT=3306
+            - MYSQL_DATABASE=camagru
+            - MYSQL_USER=camagrusql
+            - MYSQL_PASSWORD=password
+            - MYSQL_ROOT_PASSWORD=root
+        volumes:
+            - ./Docker/mysql/migrate.sql:/docker-entrypoint-initdb.d/migrate.sql
+            - ./Docker/mysql/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+networks:
+    frontend:
+    backend:
