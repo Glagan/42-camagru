@@ -38,7 +38,7 @@ class Account extends Controller
 		// Send the mail
 		$link = 'http://localhost:8080/reset-password?code=' . $token->token;
 		$sendMail = Mail::send(
-			$this->user,
+			$user,
 			"[camagru] Password reset",
 			[
 				"You requested to reset your password for you account {$user->username}.",
