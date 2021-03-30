@@ -3,6 +3,7 @@
 use Camagru\Controller;
 use Camagru\Http\Response;
 use Camagru\Mail;
+use Env;
 use Models\User;
 use Models\UserSession;
 use Models\UserToken;
@@ -77,7 +78,7 @@ class Authentication extends Controller
 		$token->persist();
 
 		// Send mail
-		$link = 'http://localhost:8080/verify?code=' . $token->token;
+		$link = Env::get('Camagru', 'url') . "/verify?code={$token->token}";
 		$sendMail = Mail::send(
 			$user,
 			"[camagru] Verify your Account",

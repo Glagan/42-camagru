@@ -2,6 +2,8 @@
 
 use Camagru\Controller;
 use Camagru\Http\Response;
+use Camagru\Mail;
+use Env;
 use Models\Comment;
 use Models\Image as ImageModel;
 use Models\Like;
@@ -156,6 +158,20 @@ class Image extends Controller
 			'message' => $this->input->get('message'),
 		]);
 		$comment->persist();
+
+		// Send an email to the Image author if he have the option enabled
+		$author = User::get($image->user);
+		if ($author->receiveComments) {
+			$link = Env::get('Camagru', 'url') . "/{$image->id}";
+			Mail::send(
+				$author,
+				'[camagru] New comment',
+				[
+					"<b>{$this->user->username}</b> posted a new comment on one of your creations !",
+					"You can see it there: <a href=\"{$link}\" rel=\"noreferer noopener\">{$link}</a>",
+				]
+			);
+		}
 
 		return $this->json(['success' => 'Comment added.', 'id' => $comment->id]);
 	}

@@ -3,6 +3,7 @@
 use Camagru\Controller;
 use Camagru\Http\Response;
 use Camagru\Mail;
+use Env;
 use Models\User;
 use Models\UserToken;
 
@@ -36,7 +37,7 @@ class Account extends Controller
 		$token->persist();
 
 		// Send the mail
-		$link = 'http://localhost:8080/reset-password?code=' . $token->token;
+		$link = Env::get('Camagru', 'url') . "/reset-password?code={$token->token}";
 		$sendMail = Mail::send(
 			$user,
 			"[camagru] Password reset",
@@ -116,7 +117,7 @@ class Account extends Controller
 		$token->persist();
 
 		// Send the mail
-		$link = 'http://localhost:8080/verify?code=' . $token->token;
+		$link = Env::get('Camagru', 'url') . "/verify?code={$token->token}";
 		$sendMail = Mail::send(
 			$this->user,
 			"[camagru] Verify your Account",
