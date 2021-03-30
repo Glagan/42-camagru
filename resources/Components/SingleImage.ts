@@ -138,13 +138,14 @@ export class SingleImage extends Component {
 			}
 			if (!this.response) return;
 			if (!this.validate()) return;
+			const comment = this.comment.value.trim();
 			const response = await Http.post<{ success: string; id: number }>(`/api/${this.id}/comment`, {
-				message: this.comment.value,
+				message: comment,
 			});
 			if (response.ok) {
 				this.response.comments.unshift({
 					id: response.body.id,
-					message: this.comment.value,
+					message: comment,
 					user: this.application.auth.user,
 					at: new Date().toISOString(),
 				});

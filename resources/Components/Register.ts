@@ -97,10 +97,9 @@ export class Register extends Component {
 			event.preventDefault();
 			if (!this.validate()) return;
 			const response = await Http.post<{ user: User }>('/api/register', {
-				username: this.username.value,
-				email: this.email.value,
-				password: this.password.value,
-				theme: Theme.value,
+				username: this.username.value.trim(),
+				email: this.email.value.trim(),
+				password: this.password.value.trim(),
 			});
 			if (response.ok) {
 				Notification.show('success', 'Account created !');

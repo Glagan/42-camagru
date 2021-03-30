@@ -75,7 +75,7 @@ export class ResetPassword extends Component {
 		});
 		this.validators.password = new Validator(this.password, Validator.password);
 		this.validators.confirmPassword = new Validator(this.confirmPassword, (value) => {
-			return value !== this.password.value ? 'Password does not match.' : true;
+			return value !== this.password.value.trim() ? 'Password does not match.' : true;
 		});
 	}
 
@@ -84,8 +84,8 @@ export class ResetPassword extends Component {
 			event.preventDefault();
 			if (!this.validate()) return;
 			const response = await Http.patch<{ success: string }>('/api/account/reset-password', {
-				code: this.code.value,
-				password: this.password.value,
+				code: this.code.value.trim(),
+				password: this.password.value.trim(),
 			});
 			if (response.ok) {
 				Notification.show('success', response.body.success);

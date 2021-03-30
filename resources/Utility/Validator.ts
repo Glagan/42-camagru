@@ -13,7 +13,7 @@ export class Validator {
 
 	validate(): boolean {
 		this.node.classList.remove('error');
-		const errorMessage = this.validator(this.node.value);
+		const errorMessage = this.validator(this.node.value.trim());
 		if (errorMessage !== true) {
 			this.node.classList.add('error');
 			Notification.show('danger', errorMessage);

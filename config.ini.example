@@ -9,6 +9,8 @@ origin_whitelist[] = "http://localhost:8080"
 folder = "/storage/logs/"
 
 [MailJet]
+sender_email = "your@mailjet.email"
+api_key = "your_secret_api_key"
 secret_key = "your_secret_random_key"
 
 [MySQL]

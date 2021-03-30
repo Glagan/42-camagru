@@ -60,8 +60,8 @@ export class Login extends Component {
 			event.preventDefault();
 			if (!this.validate()) return;
 			const response = await Http.post<{ user: User }>('/api/login', {
-				username: this.username.value,
-				password: this.password.value,
+				username: this.username.value.trim(),
+				password: this.password.value.trim(),
 			});
 			if (response.ok) {
 				Notification.show('success', 'Logged in !');

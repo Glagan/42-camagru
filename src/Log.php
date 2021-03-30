@@ -34,7 +34,12 @@ class Log
 				\fclose($this->file);
 			}
 			$day = $date->format('Y_m_d');
-			$folder = Env::get('Camagru', 'root') . '/' . Env::get('Log', 'folder', '/storage/logs/');
+			$setFolder = Env::get('Log', 'folder');
+			if ($setFolder === false) {
+				$folder = Env::get('Camagru', 'storage') . '/logs/';
+			} else {
+				$folder = Env::get('Camagru', 'root') . '/' . Env::get('Log', 'folder');
+			}
 			$this->file = \fopen($folder . $day . '.log', 'a');
 			$this->day = $day;
 		}
