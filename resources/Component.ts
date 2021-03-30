@@ -4,7 +4,6 @@ import { Validator } from './Utility/Validator';
 export interface Component {
 	bind?(): void;
 	data?(params: RegExpMatchArray): Promise<void>;
-	destroy?(): void;
 }
 
 export abstract class Component {

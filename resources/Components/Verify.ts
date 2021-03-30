@@ -73,7 +73,9 @@ export class Verify extends Component {
 			this.application.navigate('/');
 			return;
 		}
-		// TODO: this.code.value = URLqueryParams.code;
+		if (this.application.currentMatch?.query.code) {
+			this.code.value = this.application.currentMatch.query.code;
+		}
 		DOM.append(this.parent, this.header, this.form);
 	}
 }

@@ -19,7 +19,6 @@ Theme.initialize();
 Notification.initialize();
 
 // Map URLs to Components
-const location = `${window.location.pathname}${window.location.search}`;
 const router = new Router();
 router.add('^/login$', Login);
 router.add('^/register$', Register);
@@ -37,5 +36,5 @@ router.add('^/(list|all|)$', List);
 (async () => {
 	const app = new Application(router);
 	await app.auth.status();
-	app.navigate(location);
+	app.navigate(window.location.pathname, window.location.search);
 })();

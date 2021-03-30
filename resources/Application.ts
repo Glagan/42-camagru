@@ -3,7 +3,7 @@ import { Component } from './Component';
 import { Navigation } from './Components/Navigation';
 import { PageNotFound } from './Components/PageNotFound';
 import { Unauthorized } from './Components/Unauthorized';
-import { Router, Route } from './Router';
+import { Router, Route, RouteMatch } from './Router';
 import { DOM } from './Utility/DOM';
 
 export class Application {
@@ -13,9 +13,7 @@ export class Application {
 	router: Router;
 	auth: Auth;
 	page: string;
-	currentRoute: Route | undefined;
-	currentParams: RegExpMatchArray | undefined;
-	currentComponent: Component | undefined;
+	currentMatch: RouteMatch | undefined;
 	// Errors cache
 	pageNotFound: PageNotFound;
 	unauthorized: Unauthorized;
@@ -30,11 +28,14 @@ export class Application {
 		this.page = '';
 		this.pageNotFound = new PageNotFound(this, this.main);
 		this.unauthorized = new Unauthorized(this, this.main);
+		window.addEventListener('popstate', (event) => {
+			this.setLocation(event.state.location);
+		});
 	}
 
 	private async refresh(): Promise<boolean> {
-		if (this.currentRoute && this.currentParams) {
-			const component = await this.createComponent(this.currentRoute, this.currentParams);
+		if (this.currentMatch) {
+			const component = await this.createComponent(this.currentMatch.route, this.currentMatch.params);
 			this.renderComponent(component);
 			return true;
 		}
@@ -70,26 +71,25 @@ export class Application {
 
 	private renderComponent(component: Component) {
 		DOM.clear(this.main);
-		if (this.currentComponent && this.currentComponent.destroy) {
-			this.currentComponent.destroy();
-		}
-		this.currentComponent = component;
 		this.page = component.constructor.name;
 		component.render();
 		this.navigation.render();
 	}
 
-	async navigate(location: string): Promise<void> {
-		console.log('navigating to', location);
-		const match = this.router.match(location);
-		console.log('found route', match);
+	async setLocation(location: string, query?: string): Promise<void> {
+		const match = this.router.match(location, query);
 		if (match === undefined) {
+			this.currentMatch = undefined;
 			this.renderComponent(this.pageNotFound);
 			return;
 		}
-		this.currentRoute = match.route;
-		this.currentParams = match.params;
+		this.currentMatch = match;
 		const component = await this.createComponent(match.route, match.params);
 		this.renderComponent(component);
+	}
+
+	async navigate(location: string, query?: string): Promise<void> {
+		history.pushState({ location, query }, '', location);
+		this.setLocation(location, query);
 	}
 }
