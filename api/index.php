@@ -19,13 +19,14 @@
 $root = \dirname(__DIR__);
 Env::load($root . '/config.ini');
 Env::set('Camagru', 'root', $root);
+Env::set('Camagru', 'storage', $root . '/storage');
 
 // All routes
 $router = new Camagru\Router('/api');
 
 // User
 $router->group(Controller\Authentication::class, function ($router) {
-	$router->post('/register', ['auth' => false, 'use' => 'register']); // TODO: mail
+	$router->post('/register', ['auth' => false, 'use' => 'register']);
 	$router->post('/login', ['auth' => false, 'use' => 'login']);
 	$router->delete('/logout', ['auth' => true, 'use' => 'logout']);
 	$router->delete('/logout/all', ['auth' => true, 'use' => 'logoutAll']);
@@ -35,9 +36,9 @@ $router->group(Controller\Authentication::class, function ($router) {
 
 // Account
 $router->group(Controller\Account::class, function ($router) {
-	$router->post('/account/forgot-password', ['auth' => false, 'use' => 'sendResetPassword']); // TODO: mail
+	$router->post('/account/forgot-password', ['auth' => false, 'use' => 'sendResetPassword']);
 	$router->patch('/account/reset-password', ['auth' => false, 'use' => 'resetPassword']);
-	$router->post('/account/send-verification', ['auth' => true, 'use' => 'sendVerification']); // TODO: mail
+	$router->put('/account/send-verification', ['auth' => true, 'use' => 'sendVerification']);
 	$router->patch('/account/verify', ['auth' => true, 'use' => 'verify']);
 	$router->patch('/account/update', ['auth' => true, 'use' => 'update']);
 });
@@ -53,7 +54,7 @@ $router->group(Controller\Image::class, function ($router) {
 	$router->get('/list(?:/{page})?', ['use' => 'list']);
 	$router->get('/user/{id}(?:/{page})?', ['use' => 'user']);
 	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']);
-	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']);
+	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']); // TODO: Mail
 	$router->get('/{id}', ['use' => 'single']);
 });
 

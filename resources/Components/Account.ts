@@ -114,14 +114,17 @@ export class Account extends Component {
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
 			// We need to check each fields individually since they are not all required
-			if (this.username.value != '' && !this.validators.user.validate()) {
+			const username = this.username.value.trim();
+			if (username != '' && !this.validators.user.validate()) {
 				return;
 			}
-			if (this.email.value != '' && !this.validators.email.validate()) {
+			const email = this.email.value.trim();
+			if (email != '' && !this.validators.email.validate()) {
 				return;
 			}
+			const password = this.password.value.trim();
 			if (
-				this.password.value != '' &&
+				password != '' &&
 				(!this.validators.password.validate() || !this.validators.confirmPassword.validate())
 			) {
 				return;
@@ -133,15 +136,15 @@ export class Account extends Component {
 			const body: Partial<Pick<User, 'username' | 'email' | 'verified' | 'receiveComments'>> & {
 				password?: string;
 				currentPassword: string;
-			} = { currentPassword: this.currentPassword.value };
-			if (this.username.value != this.application.auth.user.username) {
-				body.username = this.username.value;
+			} = { currentPassword: this.currentPassword.value.trim() };
+			if (username != this.application.auth.user.username) {
+				body.username = username;
 			}
-			if (this.email.value != this.application.auth.user.email) {
-				body.email = this.email.value;
+			if (email != this.application.auth.user.email) {
+				body.email = email;
 			}
-			if (this.password.value != '') {
-				body.password = this.password.value;
+			if (password != '') {
+				body.password = password;
 			}
 			if (this.receiveCommentsToggle.checkbox.checked != this.application.auth.user.receiveComments) {
 				body.receiveComments = this.receiveCommentsToggle.checkbox.checked;

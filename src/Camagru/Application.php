@@ -48,7 +48,7 @@ class Application
 				// Check if the route need authentication
 				$auth = new Auth();
 				if (($route->requireAuth() && !$auth->isLoggedIn()) || ($route->rejectAuth() && $auth->isLoggedIn())) {
-					$reason = $route['auth'] ?
+					$reason = $route->requireAuth() ?
 					'You need to be logged in to access this page.' :
 					'You need to be logged out to access this page.';
 					throw new AuthException($reason);

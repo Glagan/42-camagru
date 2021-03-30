@@ -2,6 +2,7 @@
 
 use Camagru\Controller;
 use Camagru\Http\Response;
+use Camagru\Mail;
 use Models\User;
 use Models\UserToken;
 
@@ -34,7 +35,23 @@ class Account extends Controller
 		$token = UserToken::generate($user->id, 'password');
 		$token->persist();
 
-		// TODO: Send mail
+		// Send the mail
+		$link = 'http://localhost:8080/reset-password?code=' . $token->token;
+		$sendMail = Mail::send(
+			$this->user,
+			"[camagru] Password reset",
+			[
+				"You requested to reset your password for you account {$user->username}.",
+				"Use this link to set a new password: <a href=\"{$link}\" rel=\"noreferer noopener\">{$link}</a>.",
+				"As an alternative, you can enter this code in the Reset Passwrod page: {$token->token}",
+				"You have 24 hours to use this code until it expires.",
+			]
+		);
+		if (!$sendMail) {
+			return $this->json([
+				'error' => 'Failed to send the email.',
+			]);
+		}
 
 		return $this->json([
 			'success' => 'An email with a link to reset your password has been sent. You have 24hours to reset your password.',
@@ -98,11 +115,28 @@ class Account extends Controller
 		$token = UserToken::generate($this->user->id, 'verification');
 		$token->persist();
 
-		// TODO: Send mail
+		// Send the mail
+		$link = 'http://localhost:8080/verify?code=' . $token->token;
+		$sendMail = Mail::send(
+			$this->user,
+			"[camagru] Verify your Account",
+			[
+				"Welcome to camagru !",
+				"Use this link to verify your account: <a href=\"{$link}\" rel=\"noreferer noopener\">{$link}</a>.",
+				"As an alternative, you can enter this code in the verification page: {$token->token}",
+				"You have 24 hours to use this code until it expires.",
+			]
+		);
+		if (!$sendMail) {
+			return $this->json([
+				'error' => 'Failed to send the email.',
+			]);
+		}
 
 		return $this->json([
 			'success' => 'An email with a new verification link has been sent. You have 24hours to activate it.',
 		]);
+
 	}
 
 	/**

@@ -2,6 +2,7 @@
 
 use Camagru\Controller;
 use Camagru\Http\Response;
+use Camagru\Mail;
 use Models\User;
 use Models\UserSession;
 use Models\UserToken;
@@ -75,7 +76,24 @@ class Authentication extends Controller
 		$token = UserToken::generate($user->id, 'verification');
 		$token->persist();
 
-		// TODO: Send mail
+		// Send mail
+		$link = 'http://localhost:8080/verify?code=' . $token->token;
+		$sendMail = Mail::send(
+			$user,
+			"[camagru] Verify your Account",
+			[
+				"Welcome to camagru !",
+				"Use this link to verify your account: <a href=\"{$link}\" rel=\"noreferer noopener\">{$link}</a>.",
+				"As an alternative, you can enter this code in the verification page: {$token->token}",
+				"You have 24 hours to use this code until it expires.",
+			]
+		);
+		if (!$sendMail) {
+			return $this->json([
+				'success' => 'Registered ! Failed to send an Activation code, retry while logged in.',
+				'user' => $user->toArray(['id', 'username', 'email', 'verified', 'receiveComments']),
+			]);
+		}
 
 		return $this->json([
 			'success' => 'Registered ! A link was sent to your email to verify it. You have 24hours to validate it.',

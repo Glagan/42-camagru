@@ -46,7 +46,7 @@ export class ForgotPassword extends Component {
 			event.preventDefault();
 			if (!this.validate()) return;
 			const response = await Http.post<{ success: string }>('/api/account/forgot-password', {
-				email: this.email.value,
+				email: this.email.value.trim(),
 			});
 			if (response.ok) {
 				Notification.show('success', response.body.success);
