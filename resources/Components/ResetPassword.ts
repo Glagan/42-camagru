@@ -97,6 +97,9 @@ export class ResetPassword extends Component {
 	}
 
 	render(): void {
+		if (this.application.currentMatch?.query.code) {
+			this.code.value = this.application.currentMatch.query.code;
+		}
 		DOM.append(this.parent, this.header, this.form);
 	}
 }
