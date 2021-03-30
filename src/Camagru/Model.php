@@ -94,7 +94,7 @@ class Model
 	 * Query the Database on the Model table to find if there is a Model with the given ID.
 	 * Returns false if the Model doesn't exists.
 	 * @param integer $id
-	 * @return \Model|false
+	 * @return $this|false
 	 */
 	public static function get(int $id)
 	{
@@ -105,7 +105,7 @@ class Model
 	 * Return the first found row that meet the conditions.
 	 * @param array $conditions
 	 * @param array|string $order
-	 * @return \Model|false
+	 * @return $this|false
 	 */
 	public static function first(array $conditions, $order = [])
 	{
@@ -122,7 +122,7 @@ class Model
 	 * @param array $conditions Array of selectors
 	 * @param array|string $order
 	 * @param int $limit
-	 * @return \Model[]
+	 * @return $this[]
 	 */
 	public static function all(array $conditions, $order = [], $limit = -1): array
 	{

@@ -4,8 +4,8 @@ use Camagru\Model;
 
 /**
  * @property int $id
- * @property Image $image
- * @property User $user
+ * @property int $image
+ * @property int $user
  * @property \DateTime $at
  * @property string $message
  */

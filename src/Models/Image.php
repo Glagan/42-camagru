@@ -4,7 +4,7 @@ use Camagru\Model;
 
 /**
  * @property int $id
- * @property User $user
+ * @property int $user
  * @property string $name
  * @property bool $private
  */

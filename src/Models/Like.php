@@ -4,7 +4,7 @@ use Camagru\Model;
 
 /**
  * @property int $id
- * @property Image $image
+ * @property int $image
  * @property \DateTime $at
  */
 class Like extends Model

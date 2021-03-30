@@ -5,7 +5,7 @@ use Camagru\Model;
 /**
  * Valid User sessions.
  * @property int $id
- * @property User $user
+ * @property int $user
  * @property string $token
  * @property string $scope
  * @property \DateTime $issued
