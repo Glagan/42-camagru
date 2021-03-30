@@ -8,20 +8,20 @@
 * mail: ``string``
 * password: : ``string``
 * verified: ``boolean`` mail is verified
-* theme: ``'light' | 'dark'``
 * receiveComments: ``boolean`` Receive a mail when a comment is posted in one of your images
 
 ## Image
 
 * id: ``int``
 * user: ``User.id``
-* path: ``string``
+* name: ``string``
 * private: ``boolean``
 * at: ``Date``
 
 ## Like
 
 * id: ``int``
+* user: ``User.id``
 * image: ``Image.id``
 * at: ``Date``
 
@@ -35,9 +35,17 @@
 * edited: ``Date`` Date of the last edition if there is one
 * deleted: ``boolean`` Is the message deleted, only the content is not visible
 
+## Session
 
-## Commands
+* id: ``int``
+* user: ``User.id``
+* session: ``string`` Unique PHP session
+* issued: ``Date``
 
-```SQL
-CREATE DATABASE `camagru` COLLATE 'utf8mb4_unicode_ci';
-```
+## Token
+
+* id: ``int``
+* user: ``User.id``
+* token: ``string`` 50 characters long unique token
+* scope: ``verification | password``
+* issued: ``Date``
