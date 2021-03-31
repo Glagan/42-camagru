@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
+use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 use Camagru\Mail;
 use Env;
@@ -10,9 +11,9 @@ use Models\UserToken;
 class Account extends Controller
 {
 	/**
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function sendResetPassword(): Response
+	public function sendResetPassword(): JSONResponse
 	{
 		$this->validate([
 			'email' => [
@@ -60,9 +61,9 @@ class Account extends Controller
 	}
 
 	/**
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function resetPassword(): Response
+	public function resetPassword(): JSONResponse
 	{
 		$this->validate([
 			'code' => [
@@ -99,9 +100,9 @@ class Account extends Controller
 	}
 
 	/**
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function sendVerification(): Response
+	public function sendVerification(): JSONResponse
 	{
 		if ($this->user->verified) {
 			return $this->json(['error' => 'You are already verified.'], Response::BAD_REQUEST);
@@ -141,9 +142,9 @@ class Account extends Controller
 	}
 
 	/**
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function verify(): Response
+	public function verify(): JSONResponse
 	{
 		$this->validate([
 			'code' => [
@@ -175,9 +176,9 @@ class Account extends Controller
 	}
 
 	/**
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function update(): Response
+	public function update(): JSONResponse
 	{
 		$passwordMatch = [
 			'/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/',

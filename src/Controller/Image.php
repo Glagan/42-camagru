@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
+use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 use Camagru\Mail;
 use Env;
@@ -13,9 +14,9 @@ use SQL\Query;
 class Image extends Controller
 {
 	/**
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function upload(): Response
+	public function upload(): JSONResponse
 	{
 		// TODO
 		return $this->json(['success' => 'Creation uploaded.']);
@@ -23,9 +24,9 @@ class Image extends Controller
 
 	/**
 	 * @param int $page The page number > 0
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	function list(int $page = 1): Response {
+	function list(int $page = 1): JSONResponse {
 		if ($page < 1) {
 			$page = 1;
 		}
@@ -46,9 +47,9 @@ class Image extends Controller
 	/**
 	 * @param int $page The User ID
 	 * @param int $page The page number > 0
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function user(int $id, int $page = 1): Response
+	public function user(int $id, int $page = 1): JSONResponse
 	{
 		if ($page < 1) {
 			$page = 1;
@@ -91,9 +92,9 @@ class Image extends Controller
 
 	/**
 	 * @param int $id Image ID
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function like(int $id): Response
+	public function like(int $id): JSONResponse
 	{
 		if ($id < 0) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
@@ -130,9 +131,9 @@ class Image extends Controller
 
 	/**
 	 * @param int $id Image ID
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function comment(int $id): Response
+	public function comment(int $id): JSONResponse
 	{
 		$this->validate([
 			'message' => [
@@ -178,9 +179,9 @@ class Image extends Controller
 
 	/**
 	 * @param int $id Image ID
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function single(int $id): Response
+	public function single(int $id): JSONResponse
 	{
 		if ($id < 1) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);

@@ -18,6 +18,13 @@
 * private: ``boolean``
 * at: ``Date``
 
+## Decoration
+
+* id: ``int``
+* name: ``string``
+* category: ``still | animated``
+* public: ``boolean``
+
 ## Like
 
 * id: ``int``
