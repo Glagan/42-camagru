@@ -62,16 +62,36 @@ button.primary {
 	@apply bg-blue-500 text-white border-blue-800 hover:bg-blue-700;
 }
 
+button:disabled {
+	@apply shadow-inner;
+}
+
+button.primary:disabled {
+	@apply bg-blue-300;
+}
+
 button.success {
 	@apply bg-green-500 text-white border-green-800 hover:bg-green-700;
+}
+
+button.success:disabled {
+	@apply bg-green-300;
 }
 
 button.error {
 	@apply bg-red-500 text-white border-red-800 hover:bg-red-700;
 }
 
+button.error:disabled {
+	@apply bg-red-300;
+}
+
 button.secondary {
 	@apply bg-gray-500 text-white border-gray-800 hover:bg-gray-700;
+}
+
+button.secondary:disabled {
+	@apply bg-gray-300;
 }
 
 #content {
