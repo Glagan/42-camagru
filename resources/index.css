@@ -106,8 +106,12 @@ button.secondary:disabled,
 	@apply bg-gray-300;
 }
 
+#navigation {
+	@apply flex-1 text-center p-4 h-auto md:h-screen relative md:sticky top-0 w-full md:w-3/12;
+}
+
 #content {
-	@apply flex-grow flex-shrink-0 p-4 w-full md:w-8/12;
+	@apply flex-grow flex-shrink-0 p-4 w-full md:w-9/12;
 }
 
 .header {
@@ -242,5 +246,21 @@ input.error {
 .preview {
 	@apply shadow-md;
 	max-width: 100%;
-	max-height: 50vh;
+	max-height: 40vh;
+}
+
+.decorations {
+	@apply mt-2 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 auto-rows-min justify-items-center items-center;
+}
+
+.decorations img,
+.decorations video {
+	@apply transition rounded overflow-hidden bg-transparent cursor-pointer bg-opacity-0;
+	max-height: 10vh;
+}
+
+.decorations img:hover,
+.decorations video:hover {
+	@apply shadow-md bg-opacity-100;
+	background: radial-gradient(#cc21d5, #d0592d);
 }

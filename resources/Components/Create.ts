@@ -1,10 +1,19 @@
 import { Component } from '../Component';
 import { Alert } from '../UI/Alert';
+import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
+import { Http } from '../Utility/Http';
+
+export interface Decoration {
+	id: number;
+	name: string;
+	category: 'still' | 'animated';
+}
 
 export class Create extends Component {
 	static auth = true;
 
+	decorations: { still: Decoration[]; animated: Decoration[] } = { still: [], animated: [] };
 	preview!: HTMLElement;
 	noPreview!: HTMLElement;
 	videoPreview!: HTMLVideoElement;
@@ -18,14 +27,15 @@ export class Create extends Component {
 	capture!: HTMLButtonElement;
 	cancelCapture!: HTMLButtonElement;
 	submit!: HTMLButtonElement;
-	decorations!: HTMLElement;
+	decorationSelector!: HTMLElement;
+	currentDecorations: Decoration[] = [];
 
 	create(): void {
 		this.layers = [];
 		this.preview = DOM.create('div', {
-			className: 'sticky top-4 z-30 flex items-center justify-center', // bg-gray-200 dark:bg-gray-600
+			className: 'flex items-center justify-center', // sticky top-4 z-30 && bg-gray-200 dark:bg-gray-600
 		});
-		this.videoPreview = DOM.create('video', { className: 'preview', loop: true, volume: 0 });
+		this.videoPreview = DOM.create('video', { className: 'preview', loop: true, autoplay: true, volume: 0 });
 		this.imagePreview = DOM.create('img', { className: 'preview' });
 		this.selectCamera = DOM.button('primary', 'camera', 'Camera');
 		this.selectCamera.classList.add('rounded-tr-none', 'rounded-br-none');
@@ -56,10 +66,23 @@ export class Create extends Component {
 				this.submit,
 			],
 		});
-		this.decorations = DOM.create('div', {
-			className:
-				'mt-2 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 auto-rows-min justify-items-center p-4',
-		});
+		this.decorationSelector = DOM.create('div', { className: 'decorations' });
+	}
+
+	async data(): Promise<void> {
+		const response = await Http.get<{ list: Decoration[] }>('/api/decorations');
+		if (response.ok) {
+			this.decorations = { still: [], animated: [] };
+			for (const decoration of response.body.list) {
+				if (decoration.category == 'still') {
+					this.decorations.still.push(decoration);
+				} else {
+					this.decorations.animated.push(decoration);
+				}
+			}
+		} else {
+			Notification.show('danger', `Failed to load Decorations: ${response.body.error}`);
+		}
 	}
 
 	private enableCapture() {
@@ -82,6 +105,7 @@ export class Create extends Component {
 				this.enableCapture();
 				this.preview.appendChild(this.videoPreview);
 				this.videoPreview.srcObject = stream;
+				this.videoPreview.src = '';
 				this.capture.classList.remove('hidden');
 				this.cancelCapture.classList.add('hidden');
 				this.submit.disabled = false;
@@ -109,6 +133,7 @@ export class Create extends Component {
 		DOM.clear(this.preview);
 		const isVideo = /^data:video/.test(file);
 		if (isVideo) {
+			this.videoPreview.srcObject = null;
 			this.videoPreview.src = file;
 			this.preview.appendChild(this.videoPreview);
 		} else {
@@ -164,10 +189,34 @@ export class Create extends Component {
 		});
 	}
 
+	private createDecoration(decoration: Decoration): void {
+		const visual = DOM.create(decoration.category == 'still' ? 'img' : 'video', {
+			src: `/decorations/${decoration.name}`,
+			autoplay: true,
+			loop: true,
+			volume: 0,
+		});
+		const card = DOM.create('div', {
+			className: 'card',
+			childs: [visual],
+		});
+		card.addEventListener('click', (event) => {
+			event.preventDefault();
+			this.currentDecorations.push(decoration);
+		});
+		this.decorationSelector.appendChild(card);
+	}
+
 	render(): void {
+		for (const decoration of this.decorations.still) {
+			this.createDecoration(decoration);
+		}
+		for (const decoration of this.decorations.animated) {
+			this.createDecoration(decoration);
+		}
 		this.cancelCapture.classList.add('hidden');
 		this.submit.disabled = true;
-		DOM.append(this.parent, this.preview, this.actions, this.decorations);
+		DOM.append(this.parent, this.preview, this.actions, this.decorationSelector);
 		this.enableCamera();
 	}
 }
