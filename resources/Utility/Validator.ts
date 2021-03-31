@@ -1,11 +1,13 @@
 import { Notification } from '../UI/Notification';
 import { DOM } from './DOM';
 
+export type ValidateFunction = (value: string) => string | true;
+
 export class Validator {
 	node: HTMLInputElement;
-	validator: (value: string) => string | true;
+	validator: ValidateFunction;
 
-	constructor(node: HTMLInputElement, validator: (value: string) => string | true) {
+	constructor(node: HTMLInputElement, validator: ValidateFunction) {
 		this.node = node;
 		this.validator = validator;
 		DOM.validateInput(this.node, this.validator);
