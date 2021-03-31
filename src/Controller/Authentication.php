@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
+use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 use Camagru\Mail;
 use Env;
@@ -13,9 +14,9 @@ use SQL\Value;
 class Authentication extends Controller
 {
 	/**
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function register(): Response
+	public function register(): JSONResponse
 	{
 		$this->validate([
 			'username' => [
@@ -103,9 +104,9 @@ class Authentication extends Controller
 	}
 
 	/**
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function login(): Response
+	public function login(): JSONResponse
 	{
 		$this->validate([
 			'username' => [
@@ -161,9 +162,9 @@ class Authentication extends Controller
 
 	/**
 	 * @param string|null $session A PHP Session unique ID
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function logout($session = null): Response
+	public function logout($session = null): JSONResponse
 	{
 		if ($session === null) {
 			$session = \session_id();
@@ -190,9 +191,9 @@ class Authentication extends Controller
 	}
 
 	/**
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\JSONResponse
 	 */
-	public function status(): Response
+	public function status(): JSONResponse
 	{
 		if ($this->auth->isLoggedIn()) {
 			$user = $this->auth->getUser();

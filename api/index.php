@@ -54,8 +54,14 @@ $router->group(Controller\Image::class, function ($router) {
 	$router->get('/list(?:/{page})?', ['use' => 'list']);
 	$router->get('/user/{id}(?:/{page})?', ['use' => 'user']);
 	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']);
-	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']); // TODO: Mail
+	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']);
 	$router->get('/{id}', ['use' => 'single']);
+});
+
+// Image
+$router->group(Controller\Decoration::class, function ($router) {
+	$router->get('/decorations/{category:still|animated}', ['use' => 'filtered']);
+	$router->get('/decorations', ['use' => 'list']);
 });
 
 // Create and start App

@@ -87,4 +87,12 @@ CREATE TABLE `usertokens` (
 	CONSTRAINT `usertokens_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `decorations`;
+CREATE TABLE `decorations` (
+	`id` int unsigned NOT NULL AUTO_INCREMENT,
+	`name` varchar(250) NOT NULL,
+	`category` enum('still','animated') NOT NULL,
+	`public` tinyint(1) NOT NULL DEFAULT '1',
+	PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 -- 2021-03-29 13:34:49

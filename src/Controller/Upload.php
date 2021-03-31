@@ -1,6 +1,7 @@
 <?php namespace Controller;
 
 use Camagru\Controller;
+use Camagru\Http\FileResponse;
 use Camagru\Http\Response;
 use Env;
 use Models\Image;
@@ -19,9 +20,9 @@ class Upload extends Controller
 
 	/**
 	 * @param int $id The Image ID
-	 * @return \Camagru\Http\Response
+	 * @return \Camagru\Http\FileResponse
 	 */
-	public function single(int $id)
+	public function single(int $id): FileResponse
 	{
 		if ($id < 1) {
 			return $this->file($this->path('400.png'), Response::BAD_REQUEST);
