@@ -46,51 +46,63 @@
 	@apply mb-0;
 }
 
-button {
+button,
+.button {
 	@apply inline-flex items-center transition rounded-md border py-1 px-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
 }
 
-button svg {
+button svg,
+.button svg {
 	@apply mr-2;
 }
 
-button svg:last-child {
+button svg:last-child,
+.button svg:last-child {
 	@apply mr-0;
 }
 
-button.primary {
-	@apply bg-blue-500 text-white border-blue-800 hover:bg-blue-700;
-}
-
-button:disabled {
+button:disabled,
+.button:disabled {
 	@apply shadow-inner;
 }
 
-button.primary:disabled {
+button.primary,
+.button.primary {
+	@apply bg-blue-500 text-white border-blue-800 hover:bg-blue-700;
+}
+
+button.primary:disabled,
+.button.primary:disabled {
 	@apply bg-blue-300;
 }
 
-button.success {
+button.success,
+.button.success {
 	@apply bg-green-500 text-white border-green-800 hover:bg-green-700;
 }
 
-button.success:disabled {
+button.success:disabled,
+.button.success:disabled {
 	@apply bg-green-300;
 }
 
-button.error {
+button.error,
+.button.error {
 	@apply bg-red-500 text-white border-red-800 hover:bg-red-700;
 }
 
-button.error:disabled {
+button.error:disabled,
+.button.error:disabled {
 	@apply bg-red-300;
 }
 
-button.secondary {
+button.secondary,
+.button.secondary {
 	@apply bg-gray-500 text-white border-gray-800 hover:bg-gray-700;
 }
 
-button.secondary:disabled {
+button.secondary:disabled,
+.button.secondary:disabled {
 	@apply bg-gray-300;
 }
 
@@ -225,4 +237,10 @@ input.error {
 .alert.warning,
 .notification.warning {
 	@apply bg-yellow-100 border-yellow-500 text-yellow-900;
+}
+
+.preview {
+	@apply shadow-md;
+	max-width: 100%;
+	max-height: 50vh;
 }
