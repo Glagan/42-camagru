@@ -253,9 +253,14 @@ input.error {
 	@apply absolute left-0 top-0 right-0 bottom-0;
 }
 
+.preview-decorations > img.transform-center,
+.preview-decorations > video.transform-center {
+	transform: translate(-50%, -50%);
+}
+
 .preview-decorations > img,
 .preview-decorations > video {
-	@apply max-h-full max-w-full select-none;
+	@apply absolute max-h-full max-w-full cursor-move;
 }
 
 .decorations {
