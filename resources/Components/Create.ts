@@ -14,10 +14,12 @@ export class Create extends Component {
 	static auth = true;
 
 	decorations: { still: Decoration[]; animated: Decoration[] } = { still: [], animated: [] };
+	previewRow!: HTMLElement;
 	preview!: HTMLElement;
-	noPreview!: HTMLElement;
 	videoPreview!: HTMLVideoElement;
 	imagePreview!: HTMLImageElement;
+	allowCamera!: HTMLElement;
+	noCamera!: HTMLElement;
 	layers!: HTMLElement[];
 	actions!: HTMLElement;
 	sourceSelection!: HTMLElement;
@@ -28,15 +30,22 @@ export class Create extends Component {
 	cancelCapture!: HTMLButtonElement;
 	submit!: HTMLButtonElement;
 	decorationSelector!: HTMLElement;
+	visibleDecorations!: HTMLElement;
 	currentDecorations: Decoration[] = [];
 
 	create(): void {
 		this.layers = [];
+		this.videoPreview = DOM.create('video', { className: 'hidden preview', loop: true, autoplay: true, volume: 0 });
+		this.imagePreview = DOM.create('img', { className: 'hidden preview' });
+		this.allowCamera = Alert.make('info', 'Allow the Camera permission on the top left to be able to use it.');
+		this.noCamera = Alert.make('danger', 'Error while accessing your Camera.');
+		this.visibleDecorations = DOM.create('div', { className: 'preview-decorations' });
 		this.preview = DOM.create('div', {
-			className: 'flex items-center justify-center', // sticky top-4 z-30 && bg-gray-200 dark:bg-gray-600
+			className: 'relative',
+			childs: [this.videoPreview, this.imagePreview, this.allowCamera, this.noCamera, this.visibleDecorations],
 		});
-		this.videoPreview = DOM.create('video', { className: 'preview', loop: true, autoplay: true, volume: 0 });
-		this.imagePreview = DOM.create('img', { className: 'preview' });
+		// sticky top-4 z-30 && bg-gray-200 dark:bg-gray-600
+		this.previewRow = DOM.create('div', { className: 'flex items-center justify-center', childs: [this.preview] });
 		this.selectCamera = DOM.button('primary', 'camera', 'Camera');
 		this.selectCamera.classList.add('rounded-tr-none', 'rounded-br-none');
 		this.selectUpload = DOM.button('secondary', 'upload', 'Upload');
@@ -85,63 +94,69 @@ export class Create extends Component {
 		}
 	}
 
-	private enableCapture() {
+	private enableCapture(): void {
 		this.capture.classList.remove('hidden');
 		this.cancelCapture.classList.add('hidden');
 	}
 
-	private enableCamera(): void {
-		DOM.clear(this.preview);
+	private disableCapture(): void {
 		this.capture.classList.add('hidden');
 		this.cancelCapture.classList.add('hidden');
-		this.preview.appendChild(
-			Alert.make('info', 'Allow the Camera permission on the top left to be able to use it.')
-		);
+	}
+
+	private hidePreviews(): void {
+		this.imagePreview.classList.add('hidden');
+		this.videoPreview.classList.add('hidden');
+		this.allowCamera.classList.add('hidden');
+		this.noCamera.classList.add('hidden');
+	}
+
+	private cameraMode(): void {
+		this.hidePreviews();
+		this.enableCapture();
 		this.submit.disabled = true;
+		this.allowCamera.classList.remove('hidden');
+		this.noCamera.classList.add('hidden');
 		navigator.mediaDevices
 			.getUserMedia({ audio: false, video: { width: { min: 1280 }, height: { min: 720 }, frameRate: 30 } })
 			.then((stream) => {
-				DOM.clear(this.preview);
-				this.enableCapture();
-				this.preview.appendChild(this.videoPreview);
-				this.videoPreview.srcObject = stream;
+				this.videoPreview.classList.remove('hidden');
 				this.videoPreview.src = '';
-				this.capture.classList.remove('hidden');
-				this.cancelCapture.classList.add('hidden');
+				this.videoPreview.srcObject = stream;
+				this.enableCapture();
 				this.submit.disabled = false;
+				this.allowCamera.classList.add('hidden');
+				this.noCamera.classList.add('hidden');
 			})
 			.catch((error) => {
-				DOM.clear(this.preview);
-				this.capture.classList.add('hidden');
-				this.cancelCapture.classList.add('hidden');
-				this.preview.appendChild(
-					Alert.make('danger', 'Could not access your Camera, please allow this page to use your Camera.')
-				);
+				this.hidePreviews();
+				this.disableCapture();
+				this.allowCamera.classList.add('hidden');
+				this.noCamera.classList.remove('hidden');
 			});
 	}
 
-	private setCapturePreview(image: string): void {
-		this.imagePreview.src = image;
-		this.videoPreview.remove();
-		this.preview.appendChild(this.imagePreview);
-		this.capture.classList.add('hidden');
-		this.cancelCapture.classList.remove('hidden');
+	private uploadMode(file: string): void {
+		this.hidePreviews();
+		this.disableCapture();
 		this.submit.disabled = false;
-	}
-
-	private setUploadPreview(file: string): void {
-		DOM.clear(this.preview);
 		const isVideo = /^data:video/.test(file);
 		if (isVideo) {
 			this.videoPreview.srcObject = null;
 			this.videoPreview.src = file;
-			this.preview.appendChild(this.videoPreview);
+			this.videoPreview.classList.remove('hidden');
 		} else {
 			this.imagePreview.src = file;
-			this.preview.appendChild(this.imagePreview);
+			this.imagePreview.classList.remove('hidden');
 		}
+	}
+
+	private setCapturePreview(image: string): void {
+		this.imagePreview.src = image;
+		this.imagePreview.classList.remove('hidden');
+		this.videoPreview.classList.add('hidden');
 		this.capture.classList.add('hidden');
-		this.cancelCapture.classList.add('hidden');
+		this.cancelCapture.classList.remove('hidden');
 		this.submit.disabled = false;
 	}
 
@@ -151,19 +166,18 @@ export class Create extends Component {
 		});
 		this.selectCamera.addEventListener('click', (event) => {
 			event.preventDefault();
-			this.enableCamera();
+			this.cameraMode();
 		});
 		this.selectUpload.addEventListener('click', (event) => {
 			event.preventDefault();
 			this.uploadInput.click();
 		});
 		this.uploadInput.addEventListener('change', (event) => {
-			console.log(event);
 			if (this.uploadInput.value && this.uploadInput.files?.length) {
 				const reader = new FileReader();
 				reader.readAsDataURL(this.uploadInput.files[0]);
 				reader.addEventListener('load', () => {
-					this.setUploadPreview(reader.result as string);
+					this.uploadMode(reader.result as string);
 				});
 			}
 		});
@@ -180,8 +194,8 @@ export class Create extends Component {
 		this.cancelCapture.addEventListener('click', (event) => {
 			event.preventDefault();
 			this.imagePreview.src = '';
-			this.imagePreview.remove();
-			this.preview.appendChild(this.videoPreview);
+			this.imagePreview.classList.add('hidden');
+			this.videoPreview.classList.remove('hidden');
 			this.videoPreview.play();
 			this.capture.classList.remove('hidden');
 			this.cancelCapture.classList.add('hidden');
@@ -189,13 +203,17 @@ export class Create extends Component {
 		});
 	}
 
-	private createDecoration(decoration: Decoration): void {
-		const visual = DOM.create(decoration.category == 'still' ? 'img' : 'video', {
+	private createDecoration(decoration: Decoration): HTMLElement {
+		return DOM.create(decoration.category == 'still' ? 'img' : 'video', {
 			src: `/decorations/${decoration.name}`,
 			autoplay: true,
 			loop: true,
 			volume: 0,
 		});
+	}
+
+	private displayDecoration(decoration: Decoration): void {
+		const visual = this.createDecoration(decoration);
 		const card = DOM.create('div', {
 			className: 'card',
 			childs: [visual],
@@ -203,20 +221,23 @@ export class Create extends Component {
 		card.addEventListener('click', (event) => {
 			event.preventDefault();
 			this.currentDecorations.push(decoration);
+			const layer = this.createDecoration(decoration);
+			layer.classList.add('absolute', 'left-0', 'top-0', 'right-0', 'bottom-0');
+			this.visibleDecorations.appendChild(layer);
 		});
 		this.decorationSelector.appendChild(card);
 	}
 
 	render(): void {
 		for (const decoration of this.decorations.still) {
-			this.createDecoration(decoration);
+			this.displayDecoration(decoration);
 		}
 		for (const decoration of this.decorations.animated) {
-			this.createDecoration(decoration);
+			this.displayDecoration(decoration);
 		}
 		this.cancelCapture.classList.add('hidden');
 		this.submit.disabled = true;
-		DOM.append(this.parent, this.preview, this.actions, this.decorationSelector);
-		this.enableCamera();
+		DOM.append(this.parent, this.previewRow, this.actions, this.decorationSelector);
+		this.cameraMode();
 	}
 }
