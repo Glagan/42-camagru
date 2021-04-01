@@ -130,7 +130,7 @@ export class Create extends Component {
 				this.videoPreview.src = '';
 				this.videoPreview.srcObject = stream;
 				this.enableCapture();
-				this.submit.disabled = false;
+				this.submit.disabled = true;
 				this.allowCamera.classList.add('hidden');
 				this.noCamera.classList.add('hidden');
 			})
@@ -206,6 +206,20 @@ export class Create extends Component {
 			this.capture.classList.remove('hidden');
 			this.cancelCapture.classList.add('hidden');
 			this.submit.disabled = true;
+		});
+		this.submit.addEventListener('click', async (event) => {
+			event.preventDefault();
+			const response = await Http.post<{ success: string; id: number }>('/api/upload', {
+				image: this.imagePreview.src,
+				decorations: this.currentDecorations.map((d) => {
+					return { id: d.id, position: this.dragState[d.id].current };
+				}),
+			});
+			if (response.ok) {
+				Notification.show('success', `Nice.`);
+			} else {
+				Notification.show('danger', `Could not upload creation: ${response.body.error}`);
+			}
 		});
 	}
 

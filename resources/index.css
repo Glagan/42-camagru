@@ -256,14 +256,14 @@ input.error {
 
 .preview-decorations > img,
 .preview-decorations > video {
-	@apply absolute max-h-full max-w-full cursor-move border border-transparent;
+	@apply absolute max-h-full max-w-full cursor-pointer border border-transparent;
 	touch-action: none;
 	user-select: none;
 }
 
 .preview-decorations > img:active,
 .preview-decorations > video:active {
-	@apply border-pink-400;
+	@apply cursor-move border-pink-400;
 }
 
 .decorations {

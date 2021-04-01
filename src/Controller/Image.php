@@ -6,6 +6,7 @@ use Camagru\Http\Response;
 use Camagru\Mail;
 use Env;
 use Models\Comment;
+use Models\Decoration;
 use Models\Image as ImageModel;
 use Models\Like;
 use Models\User;
@@ -14,12 +15,133 @@ use SQL\Query;
 class Image extends Controller
 {
 	/**
+	 * PNG ALPHA CHANNEL SUPPORT for imagecopymerge();
+	 * by Sina Salek
+	 * Bugfix by Ralph Voigt (bug which causes it
+	 * to work only for $src_x = $src_y = 0.
+	 * Also, inverting opacity is not necessary.)
+	 * 08-JAN-2011
+	 * @see https://www.php.net/manual/en/function.imagecopymerge.php#92787
+	 **/
+	public function imagecopymerge_alpha($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): void
+	{
+		// creating a cut resource
+		$cut = imagecreatetruecolor($src_w, $src_h);
+
+		// copying relevant section from background to the cut resource
+		imagecopy($cut, $dst_im, 0, 0, $dst_x, $dst_y, $src_w, $src_h);
+
+		// copying relevant section from watermark to the cut resource
+		imagecopy($cut, $src_im, 0, 0, $src_x, $src_y, $src_w, $src_h);
+
+		// insert cut resource to destination image
+		imagecopymerge($dst_im, $cut, $dst_x, $dst_y, 0, 0, $src_w, $src_h, $pct);
+	}
+
+	/**
 	 * @return \Camagru\Http\JSONResponse
 	 */
 	public function upload(): JSONResponse
 	{
-		// TODO
-		return $this->json(['success' => 'Creation uploaded.']);
+		$this->validate([
+			'image' => [
+				'type' => 'string',
+			],
+			'decorations' => [
+				'type' => 'array',
+			],
+		]);
+
+		$upload = $this->input->get('image');
+		if ($upload == '') {
+			return $this->json(['error' => 'Empty upload received'], Response::BAD_REQUEST);
+		}
+		if (\mb_strlen($upload) > 10_000_000) {
+			return $this->json(['error' => 'Upload size limit is 10 MB.'], Response::BAD_REQUEST);
+		}
+
+		// Check mime type in base64
+		$match = [];
+		if (!\preg_match('/(data:(\w+)\/(\w{2,5});base64,)/', $upload, $match)) {
+			return $this->json(['error' => 'Could not find type in upload.'], Response::BAD_REQUEST);
+		}
+		$type = $match[2]; // image or video
+		$extension = $match[3]; // webm, mp4, jpg, gif, png
+		$isAnimated = $type == 'video' || $extension == 'gif';
+
+		// Remove base64 mime type
+		$upload = \mb_substr($upload, \mb_strlen($match[1]));
+		$decodedUpload = \base64_decode($upload);
+		if ($decodedUpload === false) {
+			return $this->json(['error' => 'Empty or invalid upload.'], Response::BAD_REQUEST);
+		}
+
+		// Check decorations
+		$rawDecorations = $this->input->get('decorations');
+		$rawDecorations = \array_filter($rawDecorations, function ($decoration) {
+			return \is_array($decoration)
+			&& \array_key_exists('id', $decoration)
+			&& \array_key_exists('position', $decoration)
+			&& \is_array($decoration['position'])
+			&& \array_key_exists('x', $decoration['position'])
+			&& \array_key_exists('y', $decoration['position']);
+		});
+		if (\count($rawDecorations) < 1) {
+			return $this->json(['error' => 'You need to add at least one Decoration.'], Response::BAD_REQUEST);
+		}
+		$decorations = Decoration::all([
+			'id' => \array_map(function ($d) {
+				return $d['id'];
+			}, $rawDecorations),
+			'public' => true,
+		]);
+		// Map received decorations to Decorations in the database for positions
+		$decorationList = [];
+		foreach ($decorations as $decoration) {
+			$isAnimated = $isAnimated || $decoration->category == 'animated';
+			foreach ($rawDecorations as $rawDecoration) {
+				if ($rawDecoration['id'] == $decoration->id) {
+					$decorationList[$decoration->id] = $decoration;
+					break;
+				}
+			}
+		}
+		if (\count($decorationList) < 1) {
+			return $this->json(['error' => 'You need to add at least one valid Decoration.'], Response::BAD_REQUEST);
+		}
+
+		// Animated upload
+		if ($isAnimated) {
+			// TODO
+		}
+		// Static upload
+		else {
+			$resource = \imagecreatefromstring($decodedUpload);
+			if ($resource === false) {
+				return $this->json(['error' => 'Invalid or corrupted Image.'], Response::BAD_REQUEST);
+			}
+			\imagealphablending($resource, false);
+			\imagesavealpha($resource, true);
+			foreach ($rawDecorations as $rawDecoration) {
+				$modelDecoration = $decorationList[$rawDecoration['id']];
+				$path = Env::get('Camagru', 'storage') . '/decorations/' . $modelDecoration->name;
+				$decorationResource = \imagecreatefromstring(\file_get_contents($path));
+				$position = $rawDecoration['position'];
+				$size = [\imagesx($decorationResource), \imagesy($decorationResource)];
+				$this->imagecopymerge_alpha(
+					$resource,
+					$decorationResource,
+					$position['x'], $position['y'],
+					0, 0,
+					$size[0], $size[1], // TODO: Fix position
+					100
+				);
+			}
+			\imagepng($resource, Env::get('Camagru', 'storage') . '/uploads/azeazaeaezaez.png');
+			\imagedestroy($resource);
+		}
+
+		return $this->json(['success' => 'Creation uploaded.' /*, 'id' => $creation->id*/]);
 	}
 
 	/**
