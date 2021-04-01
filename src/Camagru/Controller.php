@@ -91,6 +91,14 @@ abstract class Controller
 						throw new ValidateException("Missing {$field}.");
 					}
 				} else {
+					// Type
+					if (isset($validator['type'])) {
+						if ($validator['type'] == 'array' && !\is_array($value)) {
+							throw new ValidateException("{$field} need to be an array.");
+						} else if ($validator['type'] == 'string' && !\is_string($value)) {
+							throw new ValidateException("{$field} need to be a string.");
+						}
+					}
 					// Validity
 					if (isset($validator['validate'])) {
 						if (!\filter_var($value, $validator['validate'])) {

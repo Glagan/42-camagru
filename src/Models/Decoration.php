@@ -3,7 +3,7 @@
 use Camagru\Model;
 
 /**
- * Valid User sessions.
+ * A Decoration on top of uploaded images or videos.
  * @property int $id
  * @property string $name
  * @property string $category
