@@ -13,7 +13,7 @@ class Decoration extends Controller
 		$all = DecorationModel::all(['public' => true]);
 		$list = [];
 		foreach ($all as $decoration) {
-			$list[] = $decoration->toArray(['id', 'name', 'category']);
+			$list[] = $decoration->toArray(['id', 'name', 'category', 'position']);
 		}
 		return $this->json(['list' => $list]);
 	}
@@ -26,7 +26,7 @@ class Decoration extends Controller
 		$all = DecorationModel::all(['category' => $category, 'public' => true]);
 		$list = [];
 		foreach ($all as $decoration) {
-			$list[] = $decoration->toArray(['id', 'name', 'category']);
+			$list[] = $decoration->toArray(['id', 'name', 'category', 'position']);
 		}
 		return $this->json(['list' => $list]);
 	}

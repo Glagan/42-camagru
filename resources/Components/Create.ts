@@ -4,10 +4,13 @@ import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
 import { Http } from '../Utility/Http';
 
+export type Position = 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' | 'center';
+
 export interface Decoration {
 	id: number;
 	name: string;
 	category: 'still' | 'animated';
+	position: Position;
 }
 
 export class Create extends Component {
@@ -212,6 +215,21 @@ export class Create extends Component {
 		});
 	}
 
+	private positionClasses(position: Position): string[] {
+		switch (position) {
+			case 'top-left':
+				return ['top-0', 'left-0'];
+			case 'top-right':
+				return ['top-0', 'right-0'];
+			case 'bottom-left':
+				return ['bottom-0', 'left-0'];
+			case 'bottom-right':
+				return ['bottom-0', 'right-0'];
+			case 'center':
+				return ['top-1/2', 'left-1/2', 'transform-center'];
+		}
+	}
+
 	private displayDecoration(decoration: Decoration): void {
 		const visual = this.createDecoration(decoration);
 		const card = DOM.create('div', {
@@ -222,7 +240,7 @@ export class Create extends Component {
 			event.preventDefault();
 			this.currentDecorations.push(decoration);
 			const layer = this.createDecoration(decoration);
-			layer.classList.add('absolute', 'left-0', 'top-0', 'right-0', 'bottom-0');
+			layer.classList.add(...this.positionClasses(decoration.position));
 			this.visibleDecorations.appendChild(layer);
 		});
 		this.decorationSelector.appendChild(card);
