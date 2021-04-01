@@ -4,19 +4,19 @@ import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
 import { Http } from '../Utility/Http';
 
-export type Position = 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left' | 'center';
+export type DecorationPosition = 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
+export type XYPosition = { x: number; y: number };
 
 export interface Decoration {
 	id: number;
 	name: string;
 	category: 'still' | 'animated';
-	position: Position;
+	position: DecorationPosition;
 }
 
 export class Create extends Component {
 	static auth = true;
 
-	decorations: { still: Decoration[]; animated: Decoration[] } = { still: [], animated: [] };
 	previewRow!: HTMLElement;
 	preview!: HTMLElement;
 	videoPreview!: HTMLVideoElement;
@@ -34,6 +34,9 @@ export class Create extends Component {
 	submit!: HTMLButtonElement;
 	decorationSelector!: HTMLElement;
 	visibleDecorations!: HTMLElement;
+
+	decorations: { still: Decoration[]; animated: Decoration[] } = { still: [], animated: [] };
+	dragState: { [key: string]: { node: HTMLElement; initial: XYPosition; active: boolean; current: XYPosition } } = {};
 	currentDecorations: Decoration[] = [];
 
 	create(): void {
@@ -215,7 +218,7 @@ export class Create extends Component {
 		});
 	}
 
-	private positionClasses(position: Position): string[] {
+	private positionClasses(position: DecorationPosition): string[] {
 		switch (position) {
 			case 'top-left':
 				return ['top-0', 'left-0'];
@@ -225,9 +228,52 @@ export class Create extends Component {
 				return ['bottom-0', 'left-0'];
 			case 'bottom-right':
 				return ['bottom-0', 'right-0'];
-			case 'center':
-				return ['top-1/2', 'left-1/2', 'transform-center'];
 		}
+	}
+
+	private dragStart(event: TouchEvent | MouseEvent, id: number): void {
+		event.preventDefault();
+		const state = this.dragState[id];
+
+		// Calculate
+		const currentState: XYPosition = { x: 0, y: 0 };
+		if (event.type === 'touchstart') {
+			currentState.x = (event as TouchEvent).touches[0].clientX - state.current.x;
+			currentState.y = (event as TouchEvent).touches[0].clientY - state.current.y;
+		} else {
+			currentState.x = (event as MouseEvent).clientX - state.current.x;
+			currentState.y = (event as MouseEvent).clientY - state.current.y;
+		}
+
+		// Save
+		this.dragState[id].initial = currentState;
+		if (event.target === state.node) {
+			this.dragState[id].active = true;
+		}
+	}
+
+	private drag(event: TouchEvent | MouseEvent, id: number): void {
+		const state = this.dragState[id];
+
+		if (state.active) {
+			event.preventDefault();
+			if (event.type === 'touchmove') {
+				state.current.x = (event as TouchEvent).touches[0].clientX - state.initial.x;
+				state.current.y = (event as TouchEvent).touches[0].clientY - state.initial.y;
+			} else {
+				state.current.x = (event as MouseEvent).clientX - state.initial.x;
+				state.current.y = (event as MouseEvent).clientY - state.initial.y;
+			}
+			state.node.style.transform = `translate3d(${state.current.x}px, ${state.current.y}px, 0)`;
+		}
+	}
+
+	private dragEnd(_event: TouchEvent | MouseEvent, id: number): void {
+		const state = this.dragState[id];
+
+		state.initial.x = state.current.x;
+		state.initial.y = state.current.y;
+		state.active = false;
 	}
 
 	private displayDecoration(decoration: Decoration): void {
@@ -238,9 +284,24 @@ export class Create extends Component {
 		});
 		card.addEventListener('click', (event) => {
 			event.preventDefault();
-			this.currentDecorations.push(decoration);
+			//this.currentDecorations.push(decoration);
+			this.currentDecorations = [decoration];
 			const layer = this.createDecoration(decoration);
 			layer.classList.add(...this.positionClasses(decoration.position));
+			this.dragState[decoration.id] = {
+				node: layer,
+				initial: { x: 0, y: 0 },
+				active: false,
+				current: { x: 0, y: 0 },
+			};
+			// Addapted from https://www.kirupa.com/html5/drag.htm
+			layer.addEventListener('touchstart', (e) => this.dragStart(e, decoration.id), false);
+			layer.addEventListener('touchend', (e) => this.dragEnd(e, decoration.id), false);
+			layer.addEventListener('touchmove', (e) => this.drag(e, decoration.id), false);
+			layer.addEventListener('mousedown', (e) => this.dragStart(e, decoration.id), false);
+			layer.addEventListener('mouseup', (e) => this.dragEnd(e, decoration.id), false);
+			layer.addEventListener('mousemove', (e) => this.drag(e, decoration.id), false);
+			DOM.clear(this.visibleDecorations); // Remove with multiple decorations
 			this.visibleDecorations.appendChild(layer);
 		});
 		this.decorationSelector.appendChild(card);

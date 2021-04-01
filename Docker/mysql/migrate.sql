@@ -93,7 +93,7 @@ CREATE TABLE `decorations` (
 	`name` varchar(250) NOT NULL,
 	`category` enum('still','animated') NOT NULL,
 	`public` tinyint(1) NOT NULL DEFAULT '1',
-	`position` enum('top-left', 'top-right', 'bottom-right', 'bottom-left', 'center') NOT NULL,
+	`position` enum('top-left', 'top-right', 'bottom-right', 'bottom-left') NOT NULL DEFAULT 'top-left',
 	PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 -- 2021-03-29 13:34:49
