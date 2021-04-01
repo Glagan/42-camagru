@@ -249,13 +249,22 @@ input.error {
 	max-height: 40vh;
 }
 
+.preview-decorations {
+	@apply absolute left-0 top-0 right-0 bottom-0;
+}
+
+.preview-decorations > img,
+.preview-decorations > video {
+	@apply max-h-full max-w-full select-none;
+}
+
 .decorations {
 	@apply mt-2 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 auto-rows-min justify-items-center items-center;
 }
 
 .decorations img,
 .decorations video {
-	@apply transition rounded overflow-hidden bg-transparent cursor-pointer bg-opacity-0;
+	@apply transition rounded overflow-hidden bg-transparent cursor-pointer bg-opacity-0 select-none;
 	max-height: 10vh;
 }
 
