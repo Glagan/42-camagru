@@ -250,17 +250,20 @@ input.error {
 }
 
 .preview-decorations {
-	@apply absolute left-0 top-0 right-0 bottom-0;
-}
-
-.preview-decorations > img.transform-center,
-.preview-decorations > video.transform-center {
-	transform: translate(-50%, -50%);
+	@apply absolute left-0 top-0 right-0 bottom-0 overflow-hidden;
+	touch-action: none;
 }
 
 .preview-decorations > img,
 .preview-decorations > video {
-	@apply absolute max-h-full max-w-full cursor-move;
+	@apply absolute max-h-full max-w-full cursor-move border border-transparent;
+	touch-action: none;
+	user-select: none;
+}
+
+.preview-decorations > img:active,
+.preview-decorations > video:active {
+	@apply border-pink-400;
 }
 
 .decorations {
