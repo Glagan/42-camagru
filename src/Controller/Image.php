@@ -133,7 +133,7 @@ class Image extends Controller
 					$decorationResource,
 					$position['x'], $position['y'],
 					0, 0,
-					$size[0], $size[1], // TODO: Fix position
+					$size[0], $size[1],
 					100
 				);
 			}
