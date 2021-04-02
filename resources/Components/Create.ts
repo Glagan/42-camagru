@@ -14,6 +14,9 @@ export interface Decoration {
 	position: DecorationPosition;
 }
 
+const WIDTH = 1280;
+const HEIGHT = 720;
+
 export class Create extends Component {
 	static auth = true;
 
@@ -51,7 +54,10 @@ export class Create extends Component {
 			childs: [this.videoPreview, this.imagePreview, this.allowCamera, this.noCamera, this.visibleDecorations],
 		});
 		// sticky top-4 z-30 && bg-gray-200 dark:bg-gray-600
-		this.previewRow = DOM.create('div', { className: 'flex items-center justify-center', childs: [this.preview] });
+		this.previewRow = DOM.create('div', {
+			className: 'flex items-center justify-center mt-2',
+			childs: [this.preview],
+		});
 		this.selectCamera = DOM.button('primary', 'camera', 'Camera');
 		this.selectCamera.classList.add('rounded-tr-none', 'rounded-br-none');
 		this.selectUpload = DOM.button('secondary', 'upload', 'Upload');
@@ -61,7 +67,7 @@ export class Create extends Component {
 			id: 'create-upload',
 			name: 'create-upload',
 			type: 'file',
-			accept: '.png,.jpg,.jpeg,.gif,.mp4',
+			accept: '.png,.jpg,.jpeg,.gif,.mp4,.webm',
 		});
 		this.uploadInput.classList.add('border-l-0', 'rounded-tl-none', 'rounded-bl-none');
 		this.sourceSelection = DOM.create('div', {
@@ -75,11 +81,7 @@ export class Create extends Component {
 		this.submit = DOM.button('success', 'plus-circle', 'Submit');
 		this.actions = DOM.create('div', {
 			className: 'flex flex-row flex-nowrap justify-between mt-2',
-			childs: [
-				this.sourceSelection,
-				DOM.create('div', { childs: [this.capture, this.cancelCapture] }),
-				this.submit,
-			],
+			childs: [DOM.create('div', { childs: [this.capture, this.cancelCapture] }), this.submit],
 		});
 		this.decorationSelector = DOM.create('div', { className: 'decorations' });
 	}
@@ -124,7 +126,10 @@ export class Create extends Component {
 		this.allowCamera.classList.remove('hidden');
 		this.noCamera.classList.add('hidden');
 		navigator.mediaDevices
-			.getUserMedia({ audio: false, video: { width: { min: 1280 }, height: { min: 720 }, frameRate: 30 } })
+			.getUserMedia({
+				audio: false,
+				video: { width: { min: WIDTH, max: WIDTH }, height: { min: HEIGHT, max: HEIGHT }, frameRate: 30 },
+			})
 			.then((stream) => {
 				this.videoPreview.classList.remove('hidden');
 				this.videoPreview.src = '';
@@ -209,10 +214,12 @@ export class Create extends Component {
 		});
 		this.submit.addEventListener('click', async (event) => {
 			event.preventDefault();
+			const ratio = { x: WIDTH / this.preview.offsetWidth, y: HEIGHT / this.preview.offsetHeight };
 			const response = await Http.post<{ success: string; id: number }>('/api/upload', {
 				image: this.imagePreview.src,
 				decorations: this.currentDecorations.map((d) => {
-					return { id: d.id, position: this.dragState[d.id].current };
+					const position = this.dragState[d.id].current;
+					return { id: d.id, position: { x: position.x * ratio.x, y: position.y * ratio.y } };
 				}),
 			});
 			if (response.ok) {
@@ -232,17 +239,9 @@ export class Create extends Component {
 		});
 	}
 
-	private positionClasses(position: DecorationPosition): string[] {
-		switch (position) {
-			case 'top-left':
-				return ['top-0', 'left-0'];
-			case 'top-right':
-				return ['top-0', 'right-0'];
-			case 'bottom-left':
-				return ['bottom-0', 'left-0'];
-			case 'bottom-right':
-				return ['bottom-0', 'right-0'];
-		}
+	private translate(node: HTMLElement, position: XYPosition): void {
+		node.style.setProperty('--tw-translate-x', `${position.x}px`);
+		node.style.setProperty('--tw-translate-y', `${position.y}px`);
 	}
 
 	private dragStart(event: TouchEvent | MouseEvent, id: number): void {
@@ -268,7 +267,6 @@ export class Create extends Component {
 
 	private drag(event: TouchEvent | MouseEvent, id: number): void {
 		const state = this.dragState[id];
-
 		if (state.active) {
 			event.preventDefault();
 			if (event.type === 'touchmove') {
@@ -278,13 +276,12 @@ export class Create extends Component {
 				state.current.x = (event as MouseEvent).clientX - state.initial.x;
 				state.current.y = (event as MouseEvent).clientY - state.initial.y;
 			}
-			state.node.style.transform = `translate3d(${state.current.x}px, ${state.current.y}px, 0)`;
+			this.translate(state.node, state.current);
 		}
 	}
 
 	private dragEnd(_event: TouchEvent | MouseEvent, id: number): void {
 		const state = this.dragState[id];
-
 		state.initial.x = state.current.x;
 		state.initial.y = state.current.y;
 		state.active = false;
@@ -301,20 +298,29 @@ export class Create extends Component {
 			//this.currentDecorations.push(decoration);
 			this.currentDecorations = [decoration];
 			const layer = this.createDecoration(decoration);
-			layer.classList.add(...this.positionClasses(decoration.position));
+
+			// Default position
+			this.translate(layer, { x: 0, y: 0 });
+
+			// Calculate ratio and update decorations -- ratio = WIDTH / previewWidth;
+			const ratio = { x: this.preview.offsetWidth / WIDTH, y: this.preview.offsetHeight / HEIGHT };
+			layer.style.setProperty('--tw-scale-x', `${ratio.x}`);
+			layer.style.setProperty('--tw-scale-y', `${ratio.y}`);
+
+			// Adapted from https://www.kirupa.com/html5/drag.htm
 			this.dragState[decoration.id] = {
 				node: layer,
 				initial: { x: 0, y: 0 },
 				active: false,
 				current: { x: 0, y: 0 },
 			};
-			// Addapted from https://www.kirupa.com/html5/drag.htm
 			layer.addEventListener('touchstart', (e) => this.dragStart(e, decoration.id), false);
 			layer.addEventListener('touchend', (e) => this.dragEnd(e, decoration.id), false);
 			layer.addEventListener('touchmove', (e) => this.drag(e, decoration.id), false);
 			layer.addEventListener('mousedown', (e) => this.dragStart(e, decoration.id), false);
 			layer.addEventListener('mouseup', (e) => this.dragEnd(e, decoration.id), false);
 			layer.addEventListener('mousemove', (e) => this.drag(e, decoration.id), false);
+
 			DOM.clear(this.visibleDecorations); // Remove with multiple decorations
 			this.visibleDecorations.appendChild(layer);
 		});
@@ -330,7 +336,7 @@ export class Create extends Component {
 		}
 		this.cancelCapture.classList.add('hidden');
 		this.submit.disabled = true;
-		DOM.append(this.parent, this.previewRow, this.actions, this.decorationSelector);
+		DOM.append(this.parent, this.sourceSelection, this.previewRow, this.actions, this.decorationSelector);
 		this.cameraMode();
 	}
 }
