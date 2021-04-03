@@ -33,8 +33,8 @@ router.add('^/(\\d+)$', SingleImage);
 router.add('^/(list|all|)$', List);
 
 // Application
-(async () => {
+window.addEventListener('load', async (event) => {
 	const app = new Application(router);
 	await app.auth.status();
 	app.navigate(window.location.pathname, window.location.search);
-})();
+});
