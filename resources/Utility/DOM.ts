@@ -252,6 +252,10 @@ export class DOM {
 			(elt as HTMLAnchorElement).rel = 'noreferrer noopener';
 		}
 		if (properties) {
+			if (properties.dataset) {
+				Object.assign(elt.dataset, properties.dataset);
+				delete (properties as any).dataset;
+			}
 			Object.assign(elt, properties);
 			if (properties.textContent) {
 				elt.textContent = properties.textContent;
