@@ -3,3 +3,4 @@ TODO.md
 config.ini
 node_modules
 public/assets/*
+storage/tmp/*
