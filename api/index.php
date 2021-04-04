@@ -20,6 +20,9 @@ $root = \dirname(__DIR__);
 Env::load($root . '/config.ini');
 Env::set('Camagru', 'root', $root);
 Env::set('Camagru', 'storage', $root . '/storage');
+Env::set('Camagru', 'tmp', $root . '/storage/tmp');
+Env::set('Camagru', 'decorations', $root . '/storage/decorations');
+Env::set('Camagru', 'uploads', $root . '/storage/uploads');
 
 // All routes
 $router = new Camagru\Router('/api');

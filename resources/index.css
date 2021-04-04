@@ -243,6 +243,11 @@ input.error {
 	@apply bg-yellow-100 border-yellow-500 text-yellow-900;
 }
 
+.preview-container {
+	max-width: 1280px;
+	max-height: 720px;
+}
+
 .preview {
 	@apply max-w-full cursor-pointer shadow-md border border-transparent;
 	max-width: 100%;
@@ -267,6 +272,11 @@ input.error {
 
 .decorations {
 	@apply mt-2 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 auto-rows-min justify-items-center items-center;
+}
+
+.decorations:not(.active) img,
+.decorations:not(.active) video {
+	@apply opacity-60 cursor-not-allowed;
 }
 
 .decorations img,

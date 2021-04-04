@@ -53,7 +53,7 @@ export class Create extends Component {
 		this.noCamera = Alert.make('danger', 'Error while accessing your Camera.');
 		this.visibleDecorations = DOM.create('div', { className: 'preview-decorations' });
 		this.preview = DOM.create('div', {
-			className: 'relative',
+			className: 'relative preview-container',
 			childs: [this.videoPreview, this.imagePreview, this.allowCamera, this.noCamera, this.visibleDecorations],
 		});
 		// sticky top-4 z-30 && bg-gray-200 dark:bg-gray-600
@@ -70,7 +70,7 @@ export class Create extends Component {
 			id: 'create-upload',
 			name: 'create-upload',
 			type: 'file',
-			accept: '.png,.jpg,.jpeg,.gif,.mp4,.webm',
+			accept: '.png,.jpg,.jpeg,.webp',
 		});
 		this.uploadInput.classList.add('border-l-0', 'rounded-tl-none', 'rounded-bl-none');
 		this.sourceSelection = DOM.create('div', {
@@ -128,6 +128,7 @@ export class Create extends Component {
 		this.submit.disabled = true;
 		this.allowCamera.classList.remove('hidden');
 		this.noCamera.classList.add('hidden');
+		this.decorationSelector.classList.remove('active');
 		navigator.mediaDevices
 			.getUserMedia({
 				audio: false,
@@ -139,6 +140,7 @@ export class Create extends Component {
 				this.videoPreview.srcObject = stream;
 				this.enableCapture();
 				this.submit.disabled = true;
+				this.decorationSelector.classList.add('active');
 				this.allowCamera.classList.add('hidden');
 				this.noCamera.classList.add('hidden');
 			})
@@ -147,22 +149,17 @@ export class Create extends Component {
 				this.disableCapture();
 				this.allowCamera.classList.add('hidden');
 				this.noCamera.classList.remove('hidden');
+				this.decorationSelector.classList.remove('active');
 			});
 	}
 
 	private uploadMode(file: string): void {
 		this.hidePreviews();
 		this.disableCapture();
+		this.decorationSelector.classList.add('active');
 		this.submit.disabled = false;
-		const isVideo = /^data:video/.test(file);
-		if (isVideo) {
-			this.videoPreview.srcObject = null;
-			this.videoPreview.src = file;
-			this.videoPreview.classList.remove('hidden');
-		} else {
-			this.imagePreview.src = file;
-			this.imagePreview.classList.remove('hidden');
-		}
+		this.imagePreview.src = file;
+		this.imagePreview.classList.remove('hidden');
 	}
 
 	private setCapturePreview(image: string): void {
@@ -171,6 +168,7 @@ export class Create extends Component {
 		this.videoPreview.classList.add('hidden');
 		this.capture.classList.add('hidden');
 		this.cancelCapture.classList.remove('hidden');
+		this.decorationSelector.classList.add('active');
 		this.submit.disabled = false;
 	}
 
@@ -188,6 +186,7 @@ export class Create extends Component {
 		});
 		this.uploadInput.addEventListener('change', (event) => {
 			if (this.uploadInput.value && this.uploadInput.files?.length) {
+				// TODO: Check Image size and dimensions
 				const reader = new FileReader();
 				reader.readAsDataURL(this.uploadInput.files[0]);
 				reader.addEventListener('load', () => {
@@ -219,7 +218,7 @@ export class Create extends Component {
 			event.preventDefault();
 			const ratio = { x: WIDTH / this.preview.offsetWidth, y: HEIGHT / this.preview.offsetHeight };
 			const response = await Http.post<{ success: string; id: number }>('/api/upload', {
-				image: this.imagePreview.src,
+				upload: this.imagePreview.src,
 				decorations: this.currentDecorations.map((d) => {
 					const position = this.dragState[d.id].current;
 					return { id: d.id, position: { x: position.x * ratio.x, y: position.y * ratio.y } };
@@ -308,6 +307,8 @@ export class Create extends Component {
 		});
 		card.addEventListener('click', (event) => {
 			event.preventDefault();
+			if (!this.decorationSelector.classList.contains('active')) return;
+
 			//this.currentDecorations.push(decoration);
 			this.currentDecorations = [decoration];
 			const layer = this.createDecoration(decoration);

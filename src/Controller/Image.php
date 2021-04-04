@@ -5,6 +5,7 @@ use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 use Camagru\Mail;
 use Env;
+use FFMPEG;
 use Models\Comment;
 use Models\Decoration;
 use Models\Image as ImageModel;
@@ -14,6 +15,9 @@ use SQL\Query;
 
 class Image extends Controller
 {
+	const WIDTH = 1280;
+	const HEIGHT = 720;
+
 	/**
 	 * PNG ALPHA CHANNEL SUPPORT for imagecopymerge();
 	 * by Sina Salek
@@ -23,7 +27,7 @@ class Image extends Controller
 	 * 08-JAN-2011
 	 * @see https://www.php.net/manual/en/function.imagecopymerge.php#92787
 	 **/
-	public function imagecopymerge_alpha($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): void
+	private function imagecopymerge_alpha($dst_im, $src_im, int $dst_x, int $dst_y, int $src_x, int $src_y, int $src_w, int $src_h, int $pct): void
 	{
 		// creating a cut resource
 		$cut = imagecreatetruecolor($src_w, $src_h);
@@ -44,7 +48,7 @@ class Image extends Controller
 	public function upload(): JSONResponse
 	{
 		$this->validate([
-			'image' => [
+			'upload' => [
 				'type' => 'string',
 			],
 			'decorations' => [
@@ -52,12 +56,9 @@ class Image extends Controller
 			],
 		]);
 
-		$upload = $this->input->get('image');
+		$upload = $this->input->get('upload');
 		if ($upload == '') {
 			return $this->json(['error' => 'Empty upload received'], Response::BAD_REQUEST);
-		}
-		if (\mb_strlen($upload) > 10_000_000) {
-			return $this->json(['error' => 'Upload size limit is 10 MB.'], Response::BAD_REQUEST);
 		}
 
 		// Check mime type in base64
@@ -68,12 +69,18 @@ class Image extends Controller
 		$type = $match[2]; // image or video
 		$extension = $match[3]; // webm, mp4, jpg, gif, png
 		$isAnimated = $type == 'video' || $extension == 'gif';
+		if ($isAnimated) {
+			return $this->json(['error' => 'A source can\'t be animated.'], Response::BAD_REQUEST);
+		}
 
 		// Remove base64 mime type
 		$upload = \mb_substr($upload, \mb_strlen($match[1]));
 		$decodedUpload = \base64_decode($upload);
 		if ($decodedUpload === false) {
 			return $this->json(['error' => 'Empty or invalid upload.'], Response::BAD_REQUEST);
+		}
+		if (\mb_strlen($decodedUpload) > 5_000_000) {
+			return $this->json(['error' => 'Upload size limit is 5 MB.'], Response::BAD_REQUEST);
 		}
 
 		// Check decorations
@@ -95,36 +102,63 @@ class Image extends Controller
 			}, $rawDecorations),
 			'public' => true,
 		]);
-		// Map received decorations to Decorations in the database for positions
-		$decorationList = [];
+
+		// Update raw decorations with the database for positions
+		$foundDecorations = 0;
 		foreach ($decorations as $decoration) {
 			$isAnimated = $isAnimated || $decoration->category == 'animated';
-			foreach ($rawDecorations as $rawDecoration) {
+			foreach ($rawDecorations as $key => $rawDecoration) {
 				if ($rawDecoration['id'] == $decoration->id) {
-					$decorationList[$decoration->id] = $decoration;
+					$rawDecorations[$key]['animated'] = $decoration->category == 'animated';
+					$rawDecorations[$key]['name'] = $decoration->name;
+					$rawDecorations[$key]['x'] = \round($rawDecoration['position']['x']);
+					$rawDecorations[$key]['y'] = \round($rawDecoration['position']['y']);
+					$foundDecorations++;
 					break;
 				}
 			}
 		}
-		if (\count($decorationList) < 1) {
+		if ($foundDecorations < 1) {
 			return $this->json(['error' => 'You need to add at least one valid Decoration.'], Response::BAD_REQUEST);
 		}
 
+		// Static background
+		$resource = \imagecreatefromstring($decodedUpload);
+		if ($resource === false) {
+			return $this->json(['error' => 'Invalid or corrupted Image.'], Response::BAD_REQUEST);
+		}
+		$now = (new \DateTime())->format('His');
+
 		// Animated upload
 		if ($isAnimated) {
-			// TODO
+			// Save backgrond image for FFMPEG
+			$name = "{$now}_" . \bin2hex(\random_bytes(5)) . ".png";
+			$tmpPath = Env::get('Camagru', 'tmp') . "/{$name}";
+			$saved = \imagepng($resource, $tmpPath);
+			\imagedestroy($resource);
+			if ($saved === false) {
+				return $this->json(['error' => 'Failed to save background Image.'], Response::BAD_REQUEST);
+			}
+
+			// Add all decorations on the source
+			$ffmpeg = new FFMPEG();
+			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".webm";
+			$result = $ffmpeg->decorate($tmpPath, $rawDecorations, Env::get('Camagru', 'uploads') . "/{$output}");
+
+			// Clear
+			\unlink($tmpPath);
+			if ($result === false) {
+				return $this->json(['error' => 'Failed to generate animated Image.'], Response::BAD_REQUEST);
+			}
 		}
 		// Static upload
 		else {
-			$resource = \imagecreatefromstring($decodedUpload);
-			if ($resource === false) {
-				return $this->json(['error' => 'Invalid or corrupted Image.'], Response::BAD_REQUEST);
-			}
 			\imagealphablending($resource, false);
 			\imagesavealpha($resource, true);
+
+			// Add decorations
 			foreach ($rawDecorations as $rawDecoration) {
-				$modelDecoration = $decorationList[$rawDecoration['id']];
-				$path = Env::get('Camagru', 'storage') . '/decorations/' . $modelDecoration->name;
+				$path = Env::get('Camagru', 'decorations') . "/{$rawDecoration['name']}";
 				$decorationResource = \imagecreatefromstring(\file_get_contents($path));
 				$position = $rawDecoration['position'];
 				$size = [\imagesx($decorationResource), \imagesy($decorationResource)];
@@ -137,11 +171,25 @@ class Image extends Controller
 					100
 				);
 			}
-			\imagepng($resource, Env::get('Camagru', 'storage') . '/uploads/azeazaeaezaez.png');
+
+			// Save
+			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".png";
+			$saved = \imagepng($resource, Env::get('Camagru', 'uploads') . "/{$output}");
 			\imagedestroy($resource);
+			if ($saved === false) {
+				return $this->json(['error' => 'Failed to save background Image.'], Response::BAD_REQUEST);
+			}
 		}
 
-		return $this->json(['success' => 'Creation uploaded.' /*, 'id' => $creation->id*/]);
+		// Create Image model
+		$creation = new ImageModel([
+			'user' => $this->user->id,
+			'name' => $output,
+			'private' => false,
+		]);
+		$creation->persist();
+
+		return $this->json(['success' => 'Creation uploaded.', 'id' => $creation->id]);
 	}
 
 	/**
