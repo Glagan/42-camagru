@@ -20,5 +20,14 @@ interface ImageModel {
 	id: number;
 	user: number;
 	name: string;
+	animated: boolean;
 	at: string;
+}
+
+type DecorationPosition = 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
+interface Decoration {
+	id: number;
+	name: string;
+	animated: boolean;
+	position: DecorationPosition;
 }

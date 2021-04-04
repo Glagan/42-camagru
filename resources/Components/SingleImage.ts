@@ -19,6 +19,7 @@ export class SingleImage extends Component {
 
 	header!: HTMLElement;
 	imageSlot!: HTMLImageElement;
+	videoSlot!: HTMLVideoElement;
 	stats!: HTMLElement;
 	author!: HTMLAnchorElement;
 	authorBadge!: HTMLElement;
@@ -39,7 +40,8 @@ export class SingleImage extends Component {
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: '#' });
-		this.imageSlot = DOM.create('img', { className: 'shadow-md', width: 900, height: 450 });
+		this.imageSlot = DOM.create('img', { className: 'shadow-md' });
+		this.videoSlot = DOM.create('video', { className: 'shadow-md', autoplay: true, loop: true, volume: 0 });
 		this.author = DOM.create('a', { className: 'author' });
 		this.authorBadge = DOM.create('span');
 		this.likeCount = DOM.create('span', { textContent: '123' });
@@ -221,7 +223,15 @@ export class SingleImage extends Component {
 		this.author.textContent = this.response.user.username;
 		this.author.href = `/user/${this.response.user.id}`;
 		Badge.set(this.authorBadge, this.response.user.verified);
-		this.imageSlot.src = `/uploads/${this.response.image.id}`;
+		const media = `/uploads/${this.response.image.id}`;
+		let display: HTMLElement;
+		if (this.response.image.animated) {
+			display = this.videoSlot;
+			this.videoSlot.src = media;
+		} else {
+			display = this.imageSlot;
+			this.imageSlot.src = `/uploads/${this.response.image.id}`;
+		}
 		this.likeCount.textContent = `${this.response.likes}`;
 		if (
 			this.response.liked ||
@@ -230,6 +240,6 @@ export class SingleImage extends Component {
 			this.likeIcon.classList.add('active');
 		}
 		this.renderComments(this.response.comments);
-		DOM.append(this.parent, this.header, this.imageSlot, this.stats, this.form, this.commentList);
+		DOM.append(this.parent, this.header, display, this.stats, this.form, this.commentList);
 	}
 }

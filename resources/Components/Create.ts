@@ -4,15 +4,7 @@ import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
 import { Http } from '../Utility/Http';
 
-export type DecorationPosition = 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
 export type XYPosition = { x: number; y: number };
-
-export interface Decoration {
-	id: number;
-	name: string;
-	category: 'still' | 'animated';
-	position: DecorationPosition;
-}
 
 const WIDTH = 1280;
 const HEIGHT = 720;
@@ -94,7 +86,7 @@ export class Create extends Component {
 		if (response.ok) {
 			this.decorations = { still: [], animated: [] };
 			for (const decoration of response.body.list) {
-				if (decoration.category == 'still') {
+				if (decoration.animated) {
 					this.decorations.still.push(decoration);
 				} else {
 					this.decorations.animated.push(decoration);
@@ -233,7 +225,7 @@ export class Create extends Component {
 	}
 
 	private createDecoration(decoration: Decoration, observer?: IntersectionObserver): HTMLElement {
-		const isImage = decoration.category == 'still';
+		const isImage = !decoration.animated;
 		let src = `/decorations/${decoration.name}`;
 		let dataSrc = '';
 		if (observer) {

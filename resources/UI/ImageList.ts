@@ -23,14 +23,14 @@ export class ImageList {
 			return;
 		} else {
 			for (const image of this.images) {
-				const link = DOM.create('a', {
-					href: `/${image.id}`,
-					childs: [DOM.create('img', { src: `/uploads/${image.id}` })],
+				const display = DOM.create(image.animated ? 'video' : 'img', {
+					src: `/uploads/${image.id}`,
+					autoplay: true,
+					loop: true,
+					volume: 0,
 				});
-				const card = DOM.create('div', {
-					className: 'card',
-					childs: [link],
-				});
+				const link = DOM.create('a', { href: `/${image.id}`, childs: [display] });
+				const card = DOM.create('div', { className: 'card', childs: [link] });
 				link.addEventListener('click', (event) => {
 					event.preventDefault();
 					this.application.navigate(`/${image.id}`);

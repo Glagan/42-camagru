@@ -30,6 +30,7 @@ CREATE TABLE `images` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`user` int unsigned NOT NULL,
 	`name` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+	`animated` tinyint NOT NULL DEFAULT '0',
 	`private` tinyint NOT NULL DEFAULT '0',
 	`at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`),
@@ -91,7 +92,7 @@ DROP TABLE IF EXISTS `decorations`;
 CREATE TABLE `decorations` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`name` varchar(250) NOT NULL,
-	`category` enum('still','animated') NOT NULL,
+	`animated` tinyint NOT NULL DEFAULT '0',
 	`public` tinyint(1) NOT NULL DEFAULT '1',
 	`position` enum('top-left', 'top-right', 'bottom-right', 'bottom-left') NOT NULL DEFAULT 'top-left',
 	PRIMARY KEY (`id`)
