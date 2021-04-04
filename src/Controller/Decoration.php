@@ -13,7 +13,7 @@ class Decoration extends Controller
 		$all = DecorationModel::all(['public' => true]);
 		$list = [];
 		foreach ($all as $decoration) {
-			$list[] = $decoration->toArray(['id', 'name', 'category', 'position']);
+			$list[] = $decoration->toArray(['id', 'name', 'animated', 'position']);
 		}
 		return $this->json(['list' => $list]);
 	}
@@ -23,10 +23,11 @@ class Decoration extends Controller
 	 */
 	public function filtered(string $category): JSONResponse
 	{
-		$all = DecorationModel::all(['category' => $category, 'public' => true]);
+		$animated = $category == 'animated';
+		$all = DecorationModel::all(['animated' => $animated, 'public' => true]);
 		$list = [];
 		foreach ($all as $decoration) {
-			$list[] = $decoration->toArray(['id', 'name', 'category', 'position']);
+			$list[] = $decoration->toArray(['id', 'name', 'animated', 'position']);
 		}
 		return $this->json(['list' => $list]);
 	}

@@ -28,7 +28,7 @@ export class List extends Component {
 
 	render(): void {
 		if (this.dataError) {
-			// ...
+			// ?
 			return;
 		}
 		this.imageList.render();

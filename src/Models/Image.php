@@ -6,7 +6,9 @@ use Camagru\Model;
  * @property int $id
  * @property int $user
  * @property string $name
+ * @property bool $animated
  * @property bool $private
+ * @property \DateTime $at
  */
 class Image extends Model
 {
@@ -16,7 +18,9 @@ class Image extends Model
 	protected static $fields = [
 		'user',
 		'name',
+		'animated',
 		'private',
+		'at',
 	];
 
 	/**
@@ -24,6 +28,8 @@ class Image extends Model
 	 */
 	protected static $casts = [
 		'user' => User::class,
+		'animated' => 'bool',
 		'private' => 'bool',
+		'at' => 'date',
 	];
 }

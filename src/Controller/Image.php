@@ -17,6 +17,7 @@ class Image extends Controller
 {
 	const WIDTH = 1280;
 	const HEIGHT = 720;
+	const MODEL_COLUMNS = ['id', 'user', 'name', 'animated', 'at'];
 
 	/**
 	 * PNG ALPHA CHANNEL SUPPORT for imagecopymerge();
@@ -109,7 +110,7 @@ class Image extends Controller
 			$isAnimated = $isAnimated || $decoration->category == 'animated';
 			foreach ($rawDecorations as $key => $rawDecoration) {
 				if ($rawDecoration['id'] == $decoration->id) {
-					$rawDecorations[$key]['animated'] = $decoration->category == 'animated';
+					$rawDecorations[$key]['animated'] = $decoration->animated;
 					$rawDecorations[$key]['name'] = $decoration->name;
 					$rawDecorations[$key]['x'] = \round($rawDecoration['position']['x']);
 					$rawDecorations[$key]['y'] = \round($rawDecoration['position']['y']);
@@ -185,6 +186,7 @@ class Image extends Controller
 		$creation = new ImageModel([
 			'user' => $this->user->id,
 			'name' => $output,
+			'animated' => $isAnimated,
 			'private' => false,
 		]);
 		$creation->persist();
@@ -202,13 +204,13 @@ class Image extends Controller
 		}
 
 		$images = ImageModel::select()
-			->columns(['id', 'user', 'name', 'at'])
+			->columns(self::MODEL_COLUMNS)
 			->where(['private' => false]) // ? OR image.user = auth.user
 			->page($page, 10)
 			->all(ImageModel::class);
 		$result = [];
 		foreach ($images as $image) {
-			$result[] = $image->toArray(['id', 'user', 'name', 'at']);
+			$result[] = $image->toArray(self::MODEL_COLUMNS);
 		}
 
 		return $this->json(['images' => $result]);
@@ -245,13 +247,13 @@ class Image extends Controller
 			$conditions['private'] = false;
 		}
 		$images = ImageModel::select()
-			->columns(['id', 'user', 'name', 'at'])
+			->columns(self::MODEL_COLUMNS)
 			->where($conditions)
 			->page($page, 10)
 			->all(ImageModel::class);
 		$result = [];
 		foreach ($images as $image) {
-			$result[] = $image->toArray(['id', 'user', 'name', 'at']);
+			$result[] = $image->toArray(self::MODEL_COLUMNS);
 		}
 
 		return $this->json([
@@ -412,7 +414,7 @@ class Image extends Controller
 		}
 
 		return $this->json([
-			'image' => $image->toArray(['id', 'user', 'name', 'at']),
+			'image' => $image->toArray(self::MODEL_COLUMNS),
 			'user' => $user->toArray(['id', 'username', 'verified']),
 			'likes' => $likeCount,
 			'liked' => $liked,

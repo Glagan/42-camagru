@@ -6,7 +6,7 @@ use Camagru\Model;
  * A Decoration on top of uploaded images or videos.
  * @property int $id
  * @property string $name
- * @property string $category
+ * @property bool $animated
  * @property bool $public
  */
 class Decoration extends Model
@@ -16,7 +16,7 @@ class Decoration extends Model
 	 */
 	protected static $fields = [
 		'name',
-		'category',
+		'animated',
 		'public',
 	];
 
@@ -25,5 +25,6 @@ class Decoration extends Model
 	 */
 	protected static $casts = [
 		'public' => 'bool',
+		'animated' => 'bool',
 	];
 }
