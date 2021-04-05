@@ -2,7 +2,7 @@ import { Component } from '../Component';
 import { Alert } from '../UI/Alert';
 import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
-import { Http } from '../Utility/Http';
+import { Http, InvalidHttpResponse } from '../Utility/Http';
 
 export type XYPosition = { x: number; y: number };
 
@@ -36,6 +36,7 @@ export class Create extends Component {
 	decorations: { still: Decoration[]; animated: Decoration[] } = { still: [], animated: [] };
 	dragState: { [key: string]: { node: HTMLElement; initial: XYPosition; active: boolean; current: XYPosition } } = {};
 	currentDecorations: Decoration[] = [];
+	dataError: InvalidHttpResponse<{ error: string }> | undefined;
 
 	create(): void {
 		this.layers = [];
@@ -94,6 +95,7 @@ export class Create extends Component {
 			}
 		} else {
 			Notification.show('danger', `Failed to load Decorations: ${response.body.error}`);
+			this.dataError = response;
 		}
 	}
 
@@ -334,6 +336,14 @@ export class Create extends Component {
 	}
 
 	render(): void {
+		if (!this.application.auth.user.verified) {
+			this.genericError('401', 'Not verified', 'You need to verify your account to create Images.');
+			return;
+		}
+		if (this.dataError) {
+			this.genericError(`${this.dataError.status}`, 'Error', this.dataError.body.error);
+			return;
+		}
 		// https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
 		const observer = new IntersectionObserver((entries, observer) => {
 			for (const entry of entries) {

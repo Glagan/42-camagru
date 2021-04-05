@@ -94,6 +94,10 @@ export class Navigation extends Component {
 			}
 			if (this.application.page !== Create.name) {
 				this.links.appendChild(this.createButton);
+				if (!auth.user.verified) {
+					this.createButton.title = 'You need to Verify your account to create Images !';
+					this.createButton.disabled = true;
+				}
 			}
 			if (this.application.page !== List.name) {
 				this.links.appendChild(this.back);

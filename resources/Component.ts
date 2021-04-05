@@ -1,4 +1,5 @@
 import { Application } from './Application';
+import { DOM } from './Utility/DOM';
 import { Validator } from './Utility/Validator';
 
 export interface Component {
@@ -35,6 +36,16 @@ export abstract class Component {
 
 	abstract create(): void;
 	abstract render(): void;
+
+	genericError(title: string, header: string, content: string): void {
+		DOM.append(
+			this.parent,
+			DOM.create('h1', { className: 'text-center text-6xl', textContent: title }),
+			DOM.create('h2', { className: 'text-center text-4xl', textContent: header }),
+			DOM.create('div', { className: 'text-center', textContent: content })
+		);
+		return;
+	}
 
 	validate(): boolean {
 		for (const key in this.validators) {

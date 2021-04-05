@@ -57,6 +57,10 @@ class Image extends Controller
 			],
 		]);
 
+		if (!$this->user->verified) {
+			return $this->json(['error' => 'You need to be verified to create an Image.'], Response::UNAUTHORIZED);
+		}
+
 		$upload = $this->input->get('upload');
 		if ($upload == '') {
 			return $this->json(['error' => 'Empty upload received'], Response::BAD_REQUEST);
@@ -107,7 +111,7 @@ class Image extends Controller
 		// Update raw decorations with the database for positions
 		$foundDecorations = 0;
 		foreach ($decorations as $decoration) {
-			$isAnimated = $isAnimated || $decoration->category == 'animated';
+			$isAnimated = $isAnimated || $decoration->animated;
 			foreach ($rawDecorations as $key => $rawDecoration) {
 				if ($rawDecoration['id'] == $decoration->id) {
 					$rawDecorations[$key]['animated'] = $decoration->animated;
@@ -315,6 +319,9 @@ class Image extends Controller
 		]);
 		if ($id < 0) {
 			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
+		}
+		if (!$this->user->verified) {
+			return $this->json(['error' => 'You need to be verified to post a comment.'], Response::UNAUTHORIZED);
 		}
 
 		$image = ImageModel::get($id);

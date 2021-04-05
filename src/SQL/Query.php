@@ -246,7 +246,7 @@ class Query
 		$this->order = [];
 		if (\is_array($order)) {
 			foreach ($order as $key => $value) {
-				if (\is_string($value[$key])) {
+				if (\is_string($key)) {
 					$this->order[] = ['column' => $key, 'direction' => $value];
 				} else if ($value == self::ASC || $value == self::DESC) {
 					$this->order[] = ['column' => $value, 'direction' => self::ASC];
