@@ -35,7 +35,7 @@ export class SingleUser extends Component {
 
 	render(): void {
 		if (this.dataError) {
-			// ...
+			this.genericError(`${this.dataError.status}`, 'Error', this.dataError.body.error);
 			return;
 		}
 		this.header.textContent = `@ ${this.user.username}`;

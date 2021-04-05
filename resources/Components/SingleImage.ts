@@ -199,22 +199,12 @@ export class SingleImage extends Component {
 	render(): void {
 		// Handle route error
 		if (this.id < 1) {
-			DOM.append(
-				this.parent,
-				DOM.create('h1', { className: 'text-center text-6xl', textContent: '404' }),
-				DOM.create('h2', { className: 'text-center text-4xl', textContent: 'Image not Found' }),
-				DOM.create('div', { className: 'text-center', textContent: 'How did you get there ?' })
-			);
+			this.genericError('404', 'Image not Found', 'How did you get there ?');
 			return;
 		}
 		// Handle API error
 		if (this.dataError) {
-			DOM.append(
-				this.parent,
-				DOM.create('h1', { className: 'text-center text-6xl', textContent: `${this.dataError.status}` }),
-				DOM.create('h2', { className: 'text-center text-4xl', textContent: 'Error' }),
-				DOM.create('div', { className: 'text-center', textContent: this.dataError.body.error })
-			);
+			this.genericError(`${this.dataError.status}`, 'Error', this.dataError.body.error);
 			return;
 		}
 		// Display
@@ -239,7 +229,13 @@ export class SingleImage extends Component {
 		) {
 			this.likeIcon.classList.add('active');
 		}
+		DOM.append(this.parent, this.header, display, this.stats);
+		if (this.application.auth.loggedIn && this.application.auth.user.verified) {
+			this.parent.appendChild(this.form);
+		} else {
+			this.parent.appendChild(Alert.make('info', `You need to be logged in and verified to post a comment.`));
+		}
 		this.renderComments(this.response.comments);
-		DOM.append(this.parent, this.header, display, this.stats, this.form, this.commentList);
+		this.parent.appendChild(this.commentList);
 	}
 }

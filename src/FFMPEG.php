@@ -33,12 +33,8 @@ class FFMPEG
 		Log::debug('FFMPEG command', $command);
 		$output = [];
 		$code = 0;
-		$result = \exec(
-			$command,
-			$output,
-			$code
-		);
-		Log::debug('FFMPEG result: ' . $code);
+		$result = \exec($command, $output, $code);
+		Log::debug('FFMPEG result: ' . $code, $output);
 		return $result !== false && $code === 0;
 	}
 }
