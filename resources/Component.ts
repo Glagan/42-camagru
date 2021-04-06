@@ -5,6 +5,7 @@ import { Validator } from './Utility/Validator';
 export interface Component {
 	bind?(): void;
 	data?(params: RegExpMatchArray): Promise<void>;
+	destroy?(): void;
 }
 
 export abstract class Component {
@@ -57,5 +58,22 @@ export abstract class Component {
 			}
 		}
 		return true;
+	}
+
+	async runOnce(node: HTMLElement, fct: () => Promise<void>, block?: HTMLInputElement[]): Promise<void> {
+		if (node.dataset.pending) return;
+		node.dataset.pending = 'true';
+		if (block !== undefined) {
+			for (const node of block) {
+				node.disabled = true;
+			}
+		}
+		await fct();
+		delete node.dataset.pending;
+		if (block !== undefined) {
+			for (const node of block) {
+				node.disabled = false;
+			}
+		}
 	}
 }

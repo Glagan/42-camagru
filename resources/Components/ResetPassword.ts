@@ -17,6 +17,7 @@ export class ResetPassword extends Component {
 	confirmPassword!: HTMLInputElement;
 	footer!: HTMLElement;
 	submit!: HTMLButtonElement;
+	forgotPage!: HTMLButtonElement;
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: 'Password Reset' });
@@ -31,6 +32,7 @@ export class ResetPassword extends Component {
 			placeholder: 'Code',
 			min: '50',
 			max: '50',
+			required: true,
 		});
 		this.labelPassword = DOM.create('label', {
 			htmlFor: 'reset-password',
@@ -43,6 +45,7 @@ export class ResetPassword extends Component {
 			placeholder: 'New password',
 			min: '8',
 			max: '72',
+			required: true,
 		});
 		this.labelConfirmPassword = DOM.create('label', {
 			htmlFor: 'reset-confirm-password',
@@ -55,9 +58,11 @@ export class ResetPassword extends Component {
 			placeholder: 'Confirm Password',
 			min: '8',
 			max: '72',
+			required: true,
 		});
 		this.submit = DOM.button('primary', 'at-symbol', 'Send Reset Link');
-		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit] });
+		this.forgotPage = DOM.button('secondary', 'chevron-left', "I don't have a code");
+		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit, this.forgotPage] });
 		this.form = DOM.create('form', {
 			className: 'flex flex-col flex-wrap items-stretch',
 			childs: [
@@ -80,19 +85,26 @@ export class ResetPassword extends Component {
 	}
 
 	bind(): void {
+		this.link(this.forgotPage, '/forgot-password');
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			if (!this.validate()) return;
-			const response = await Http.patch<{ success: string }>('/api/account/reset-password', {
-				code: this.code.value.trim(),
-				password: this.password.value.trim(),
-			});
-			if (response.ok) {
-				Notification.show('success', response.body.success);
-				this.application.navigate('/login');
-			} else {
-				Notification.show('danger', response.body.error);
-			}
+			this.runOnce(
+				this.form,
+				async () => {
+					if (!this.validate()) return;
+					const response = await Http.patch<{ success: string }>('/api/account/reset-password', {
+						code: this.code.value.trim(),
+						password: this.password.value.trim(),
+					});
+					if (response.ok) {
+						Notification.show('success', response.body.success);
+						this.application.navigate('/login');
+					} else {
+						Notification.show('danger', response.body.error);
+					}
+				},
+				[this.code, this.password, this.confirmPassword]
+			);
 		});
 	}
 

@@ -32,6 +32,7 @@ export class Login extends Component {
 			placeholder: 'Username',
 			min: '4',
 			max: '100',
+			required: true,
 		});
 		this.labelPassword = DOM.create('label', {
 			htmlFor: 'login-password',
@@ -44,6 +45,7 @@ export class Login extends Component {
 			placeholder: 'Password',
 			min: '8',
 			max: '72',
+			required: true,
 		});
 		this.rememberMe = Toggle.make('Stay connected', { name: 'rememberMe' });
 		this.forgotPassword = DOM.button('secondary', 'at-symbol', 'Forgot Password');
@@ -68,18 +70,24 @@ export class Login extends Component {
 		this.link(this.forgotPassword, '/forgot-password');
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			if (!this.validate()) return;
-			const response = await Http.post<{ user: User }>('/api/login', {
-				username: this.username.value.trim(),
-				password: this.password.value.trim(),
-				rememberMe: this.rememberMe.checkbox.checked,
-			});
-			if (response.ok) {
-				Notification.show('success', 'Logged in !');
-				this.application.loggedIn(response.body.user);
-			} else {
-				Notification.show('danger', `Error: ${response.body.error}`);
-			}
+			this.runOnce(
+				this.form,
+				async () => {
+					if (!this.validate()) return;
+					const response = await Http.post<{ user: User }>('/api/login', {
+						username: this.username.value.trim(),
+						password: this.password.value.trim(),
+						rememberMe: this.rememberMe.checkbox.checked,
+					});
+					if (response.ok) {
+						Notification.show('success', 'Logged in !');
+						this.application.loggedIn(response.body.user);
+					} else {
+						Notification.show('danger', `Error: ${response.body.error}`);
+					}
+				},
+				[this.username, this.password, this.rememberMe.checkbox]
+			);
 		});
 	}
 

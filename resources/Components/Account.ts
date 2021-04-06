@@ -113,55 +113,64 @@ export class Account extends Component {
 	bind(): void {
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			// We need to check each fields individually since they are not all required
-			const username = this.username.value.trim();
-			if (username != '' && !this.validators.user.validate()) {
-				return;
-			}
-			const email = this.email.value.trim();
-			if (email != '' && !this.validators.email.validate()) {
-				return;
-			}
-			const password = this.password.value.trim();
-			if (
-				password != '' &&
-				(!this.validators.password.validate() || !this.validators.confirmPassword.validate())
-			) {
-				return;
-			}
-			if (!this.validators.currentPassword.validate()) {
-				return;
-			}
-			// Construct
-			const body: Partial<Pick<User, 'username' | 'email' | 'verified' | 'receiveComments'>> & {
-				password?: string;
-				currentPassword: string;
-			} = { currentPassword: this.currentPassword.value.trim() };
-			if (username != this.application.auth.user.username) {
-				body.username = username;
-			}
-			if (email != this.application.auth.user.email) {
-				body.email = email;
-			}
-			if (password != '') {
-				body.password = password;
-			}
-			if (this.receiveCommentsToggle.checkbox.checked != this.application.auth.user.receiveComments) {
-				body.receiveComments = this.receiveCommentsToggle.checkbox.checked;
-			}
-			// Send the request
-			const response = await Http.patch<{ success: string; verified: boolean }>('/api/account/update', body);
-			if (response.ok) {
-				this.application.auth.user.username = this.username.value;
-				this.application.auth.user.email = this.email.value;
-				this.application.auth.user.receiveComments = this.receiveCommentsToggle.checkbox.checked;
-				this.application.auth.user.verified = response.body.verified;
-				// Update the navigation now
-				this.application.navigation.render();
-				Notification.show('success', response.body.success);
-			} else {
-				Notification.show('danger', `Error: ${response.body.error}`);
-			}
+			this.runOnce(
+				this.form,
+				async () => {
+					// We need to check each fields individually since they are not all required
+					const username = this.username.value.trim();
+					if (username != '' && !this.validators.user.validate()) {
+						return;
+					}
+					const email = this.email.value.trim();
+					if (email != '' && !this.validators.email.validate()) {
+						return;
+					}
+					const password = this.password.value.trim();
+					if (
+						password != '' &&
+						(!this.validators.password.validate() || !this.validators.confirmPassword.validate())
+					) {
+						return;
+					}
+					if (!this.validators.currentPassword.validate()) {
+						return;
+					}
+					// Construct
+					const body: Partial<Pick<User, 'username' | 'email' | 'verified' | 'receiveComments'>> & {
+						password?: string;
+						currentPassword: string;
+					} = { currentPassword: this.currentPassword.value.trim() };
+					if (username != this.application.auth.user.username) {
+						body.username = username;
+					}
+					if (email != this.application.auth.user.email) {
+						body.email = email;
+					}
+					if (password != '') {
+						body.password = password;
+					}
+					if (this.receiveCommentsToggle.checkbox.checked != this.application.auth.user.receiveComments) {
+						body.receiveComments = this.receiveCommentsToggle.checkbox.checked;
+					}
+					// Send the request
+					const response = await Http.patch<{ success: string; verified: boolean }>(
+						'/api/account/update',
+						body
+					);
+					if (response.ok) {
+						this.application.auth.user.username = this.username.value;
+						this.application.auth.user.email = this.email.value;
+						this.application.auth.user.receiveComments = this.receiveCommentsToggle.checkbox.checked;
+						this.application.auth.user.verified = response.body.verified;
+						// Update the navigation now
+						this.application.navigation.render();
+						Notification.show('success', response.body.success);
+					} else {
+						Notification.show('danger', `Error: ${response.body.error}`);
+					}
+				},
+				[this.username, this.email, this.password, this.confirmPassword, this.currentPassword]
+			);
 		});
 	}
 

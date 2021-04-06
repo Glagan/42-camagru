@@ -107,26 +107,30 @@ export class SingleImage extends Component {
 		});
 		this.likes.addEventListener('click', async (event) => {
 			event.preventDefault();
-			if (!this.response) return;
-			if (!this.application.auth.loggedIn) {
-				Notification.show('info', 'You need to be logged in to leave a like.');
-				return;
-			}
-			if (this.application.auth.user.id == this.response.user.id) {
-				Notification.show('info', `You can't like your own Image.`);
-				return;
-			}
-			const response = await Http.put<{ success: string; total: number; liked: boolean }>(`/api/${this.id}/like`);
-			if (response.ok) {
-				this.likeIcon.classList.remove('active');
-				if (response.body.liked) {
-					this.likeIcon.classList.add('active');
+			this.runOnce(this.likes, async () => {
+				if (!this.response) return;
+				if (!this.application.auth.loggedIn) {
+					Notification.show('info', 'You need to be logged in to leave a like.');
+					return;
 				}
-				this.likeCount.textContent = `${response.body.total}`;
-				Notification.show('success', response.body.success);
-			} else {
-				Notification.show('danger', response.body.error);
-			}
+				if (this.application.auth.user.id == this.response.user.id) {
+					Notification.show('info', `You can't like your own Image.`);
+					return;
+				}
+				const response = await Http.put<{ success: string; total: number; liked: boolean }>(
+					`/api/${this.id}/like`
+				);
+				if (response.ok) {
+					this.likeIcon.classList.remove('active');
+					if (response.body.liked) {
+						this.likeIcon.classList.add('active');
+					}
+					this.likeCount.textContent = `${response.body.total}`;
+					Notification.show('success', response.body.success);
+				} else {
+					Notification.show('danger', response.body.error);
+				}
+			});
 		});
 		this.comments.addEventListener('click', (event) => {
 			event.preventDefault();
@@ -134,29 +138,31 @@ export class SingleImage extends Component {
 		});
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			if (!this.application.auth.loggedIn) {
-				Notification.show('info', 'You need to be logged in to leave a comment.');
-				return;
-			}
-			if (!this.response) return;
-			if (!this.validate()) return;
-			const comment = this.comment.value.trim();
-			const response = await Http.post<{ success: string; id: number }>(`/api/${this.id}/comment`, {
-				message: comment,
-			});
-			if (response.ok) {
-				this.response.comments.unshift({
-					id: response.body.id,
+			this.runOnce(this.likes, async () => {
+				if (!this.application.auth.loggedIn) {
+					Notification.show('info', 'You need to be logged in to leave a comment.');
+					return;
+				}
+				if (!this.response) return;
+				if (!this.validate()) return;
+				const comment = this.comment.value.trim();
+				const response = await Http.post<{ success: string; id: number }>(`/api/${this.id}/comment`, {
 					message: comment,
-					user: this.application.auth.user,
-					at: new Date().toISOString(),
 				});
-				this.renderComments(this.response.comments);
-				this.comment.value = '';
-				Notification.show('success', response.body.success);
-			} else {
-				Notification.show('danger', response.body.error);
-			}
+				if (response.ok) {
+					this.response.comments.unshift({
+						id: response.body.id,
+						message: comment,
+						user: this.application.auth.user,
+						at: new Date().toISOString(),
+					});
+					this.renderComments(this.response.comments);
+					this.comment.value = '';
+					Notification.show('success', response.body.success);
+				} else {
+					Notification.show('danger', response.body.error);
+				}
+			});
 		});
 	}
 
