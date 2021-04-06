@@ -63,7 +63,7 @@ export class Create extends Component {
 			id: 'create-upload',
 			name: 'create-upload',
 			type: 'file',
-			accept: '.png,.jpg,.jpeg,.webp',
+			accept: '.png,.jpg,.jpeg,.webp,.bmp',
 		});
 		this.uploadInput.classList.add('border-l-0', 'rounded-tl-none', 'rounded-bl-none');
 		this.sourceSelection = DOM.create('div', {
@@ -180,11 +180,36 @@ export class Create extends Component {
 		});
 		this.uploadInput.addEventListener('change', (event) => {
 			if (this.uploadInput.value && this.uploadInput.files?.length) {
-				// TODO: Check Image size and dimensions
 				const reader = new FileReader();
 				reader.readAsDataURL(this.uploadInput.files[0]);
 				reader.addEventListener('load', () => {
-					this.uploadMode(reader.result as string);
+					const result = reader.result as string;
+					// Check size, approximation
+					if (3 * (result.length / 4) >= 5_000_000) {
+						Notification.show('danger', `Size limit is 5 MB.`);
+						return;
+					}
+					// Check extension
+					const mime = /data:(image|video)\/([a-zA-Z]{2,5});base64,/.exec(result);
+					if (mime === null || mime[1] == 'video') {
+						Notification.show('danger', `No valid file type found.`);
+						return;
+					}
+					const type = mime[1].toLocaleLowerCase();
+					const extension = mime[2].toLocaleLowerCase();
+					if (type !== 'image' || ['png', 'jpeg', 'jpg', 'webp', 'bmp'].indexOf(extension) < 0) {
+						Notification.show('danger', `You can only add png, jpeg, jpg, webp or bmp files.`);
+						return;
+					}
+					// Check dimensions
+					const image = new Image();
+					image.src = result;
+					if (image.naturalWidth > WIDTH || image.naturalHeight > HEIGHT) {
+						Notification.show('warning', `Maximum dimensions are ${WIDTH}x${HEIGHT}px.`);
+						return;
+					}
+					// Display
+					this.uploadMode(result);
 				});
 			}
 		});
