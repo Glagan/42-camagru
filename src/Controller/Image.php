@@ -65,10 +65,13 @@ class Image extends Controller
 		if ($upload == '') {
 			return $this->json(['error' => 'Empty upload received'], Response::BAD_REQUEST);
 		}
+		if (3 * (\strlen($upload) / 4) > 5_000_000) {
+			return $this->json(['error' => 'Upload size limit is 5 MB.'], Response::BAD_REQUEST);
+		}
 
 		// Check mime type in base64
 		$match = [];
-		if (!\preg_match('/(data:(\w+)\/(\w{2,5});base64,)/', $upload, $match)) {
+		if (!\preg_match('/(data:(image|video)\/(\w{2,5});base64,)/', $upload, $match)) {
 			return $this->json(['error' => 'Could not find type in upload.'], Response::BAD_REQUEST);
 		}
 		$type = $match[2]; // image or video
@@ -83,9 +86,6 @@ class Image extends Controller
 		$decodedUpload = \base64_decode($upload);
 		if ($decodedUpload === false) {
 			return $this->json(['error' => 'Empty or invalid upload.'], Response::BAD_REQUEST);
-		}
-		if (\mb_strlen($decodedUpload) > 5_000_000) {
-			return $this->json(['error' => 'Upload size limit is 5 MB.'], Response::BAD_REQUEST);
 		}
 
 		// Check decorations
@@ -131,6 +131,9 @@ class Image extends Controller
 		$resource = \imagecreatefromstring($decodedUpload);
 		if ($resource === false) {
 			return $this->json(['error' => 'Invalid or corrupted Image.'], Response::BAD_REQUEST);
+		}
+		if (\imagesx($resource) > self::WIDTH || \imagesy($resource) > self::HEIGHT) {
+			return $this->json(['error' => "Maximum dimensions are " . self::WIDTH . "x" . self::HEIGHT . "px."], Response::BAD_REQUEST);
 		}
 		$now = (new \DateTime())->format('His');
 
