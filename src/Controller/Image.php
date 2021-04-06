@@ -15,8 +15,10 @@ use SQL\Query;
 
 class Image extends Controller
 {
-	const WIDTH = 1280;
-	const HEIGHT = 720;
+	const MIN_WIDTH = 854;
+	const MAX_WIDTH = 1366;
+	const MIN_HEIGHT = 480;
+	const MAX_HEIGHT = 768;
 	const MODEL_COLUMNS = ['id', 'user', 'name', 'animated', 'at'];
 
 	/**
@@ -132,8 +134,12 @@ class Image extends Controller
 		if ($resource === false) {
 			return $this->json(['error' => 'Invalid or corrupted Image.'], Response::BAD_REQUEST);
 		}
-		if (\imagesx($resource) > self::WIDTH || \imagesy($resource) > self::HEIGHT) {
-			return $this->json(['error' => "Maximum dimensions are " . self::WIDTH . "x" . self::HEIGHT . "px."], Response::BAD_REQUEST);
+		[$width, $height] = [\imagesx($resource), \imagesy($resource)];
+		if ($width < self::MIN_WIDTH || $height < self::MIN_HEIGHT) {
+			return $this->json(['error' => "Minimum dimensions are " . self::MIN_WIDTH . "x" . self::MIN_HEIGHT . "px."], Response::BAD_REQUEST);
+		}
+		if ($width > self::MAX_WIDTH || $height > self::MAX_HEIGHT) {
+			return $this->json(['error' => "Maximum dimensions are " . self::MAX_WIDTH . "x" . self::MAX_HEIGHT . "px."], Response::BAD_REQUEST);
 		}
 		$now = (new \DateTime())->format('His');
 

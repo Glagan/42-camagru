@@ -138,31 +138,35 @@ export class SingleImage extends Component {
 		});
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			this.runOnce(this.likes, async () => {
-				if (!this.application.auth.loggedIn) {
-					Notification.show('info', 'You need to be logged in to leave a comment.');
-					return;
-				}
-				if (!this.response) return;
-				if (!this.validate()) return;
-				const comment = this.comment.value.trim();
-				const response = await Http.post<{ success: string; id: number }>(`/api/${this.id}/comment`, {
-					message: comment,
-				});
-				if (response.ok) {
-					this.response.comments.unshift({
-						id: response.body.id,
+			this.runOnce(
+				this.likes,
+				async () => {
+					if (!this.application.auth.loggedIn) {
+						Notification.show('info', 'You need to be logged in to leave a comment.');
+						return;
+					}
+					if (!this.response) return;
+					if (!this.validate()) return;
+					const comment = this.comment.value.trim();
+					const response = await Http.post<{ success: string; id: number }>(`/api/${this.id}/comment`, {
 						message: comment,
-						user: this.application.auth.user,
-						at: new Date().toISOString(),
 					});
-					this.renderComments(this.response.comments);
-					this.comment.value = '';
-					Notification.show('success', response.body.success);
-				} else {
-					Notification.show('danger', response.body.error);
-				}
-			});
+					if (response.ok) {
+						this.response.comments.unshift({
+							id: response.body.id,
+							message: comment,
+							user: this.application.auth.user,
+							at: new Date().toISOString(),
+						});
+						this.renderComments(this.response.comments);
+						this.comment.value = '';
+						Notification.show('success', response.body.success);
+					} else {
+						Notification.show('danger', response.body.error);
+					}
+				},
+				[this.comment, this.submit]
+			);
 		});
 	}
 

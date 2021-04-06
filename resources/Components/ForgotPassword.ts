@@ -62,7 +62,7 @@ export class ForgotPassword extends Component {
 						Notification.show('danger', response.body.error);
 					}
 				},
-				[this.email]
+				[this.email, this.submit, this.codePage]
 			);
 		});
 	}

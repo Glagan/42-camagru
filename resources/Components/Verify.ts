@@ -77,7 +77,7 @@ export class Verify extends Component {
 						Notification.show('danger', `Error: ${response.body.error}`);
 					}
 				},
-				[this.code]
+				[this.code, this.submit, this.sendAgain]
 			);
 		});
 	}

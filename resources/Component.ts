@@ -60,19 +60,31 @@ export abstract class Component {
 		return true;
 	}
 
-	async runOnce(node: HTMLElement, fct: () => Promise<void>, block?: HTMLInputElement[]): Promise<void> {
+	async runOnce(
+		node: HTMLElement,
+		fct: () => Promise<void>,
+		block?: (HTMLInputElement | HTMLButtonElement)[]
+	): Promise<void> {
 		if (node.dataset.pending) return;
 		node.dataset.pending = 'true';
 		if (block !== undefined) {
 			for (const node of block) {
-				node.disabled = true;
+				if (node.disabled) {
+					node.dataset.alreadyDisabled = 'true';
+				} else {
+					node.disabled = true;
+				}
 			}
 		}
 		await fct();
 		delete node.dataset.pending;
 		if (block !== undefined) {
 			for (const node of block) {
-				node.disabled = false;
+				if (node.dataset.alreadyDisabled) {
+					delete node.dataset.alreadyDisabled;
+				} else {
+					node.disabled = false;
+				}
 			}
 		}
 	}
