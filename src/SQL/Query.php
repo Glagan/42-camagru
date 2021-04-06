@@ -169,39 +169,51 @@ class Query
 	}
 
 	/**
+	 * Parse rawConditions to create groups of conditions.
+	 * @param array $rawConditions
+	 * @return array
+	 */
+	private function transformConditions(array $rawConditions): array
+	{
+		$conditions = [];
+		foreach ($rawConditions as $key => $value) {
+			$isArray = \is_array($value);
+			if (!$isArray && ($value === Operator::CONDITION_AND || $value === Operator::CONDITION_OR)) {
+				$conditions[] = ['operator' => $value];
+			} else if (\is_string($key)) {
+				if ($isArray) {
+					// Check if the value is an array for an IN condition if there is only 2 arguments
+					if (\count($value) === 2) {
+						$conditions[] = ['column' => $key, 'operator' => $value[0], 'value' => $value[1]];
+					}
+					// Consider an array value as an IN condition
+					else {
+						$conditions[] = ['column' => $key, 'operator' => Operator::IN, 'value' => $value];
+					}
+				} else {
+					$conditions[] = ['column' => $key, 'operator' => Operator::EQUAL, 'value' => $value];
+				}
+			}
+			// If the value is an array without a key assume a new condition group
+			else if ($isArray) {
+				$conditions[] = $this->transformConditions($value);
+
+			}
+		}
+		return $conditions;
+	}
+
+	/**
 	 * Set the WHERE conditions of a query.
 	 * Format:
-	 * 	['field' => 'value', ['field', 'operator', 'value'], ['field', 'value']]
+	 * 	['field' => 'value', 'field' => ['operator', 'value'], [ 'field' => 'value' ]]
 	 * 	If the condition is not an array or if the condition is an array without an operator, EQUAL is assumed.
 	 * @param array $conditions
 	 * @return self
 	 */
 	public function where(array $conditions): self
 	{
-		$this->conditions = [];
-		foreach ($conditions as $key => $value) {
-			if (\is_string($key)) {
-				// Consider an array value as an IN condition
-				if (\is_array($value)) {
-					$this->conditions[] = ['column' => $key, 'operator' => Operator::IN, 'value' => $value];
-				} else {
-					$this->conditions[] = ['column' => $key, 'operator' => Operator::EQUAL, 'value' => $value];
-				}
-			} else {
-				// Check if there is 2 or 3 arguments
-				// The operator is in the middle if there is 3 arguments
-				// Check if the value is an array for an IN condition if there is only 2 arguments
-				if (\is_array($value)) {
-					$hasOperator = \count($value) == 3;
-					$operator = $hasOperator ? $value[1] : Operator::EQUAL;
-					$conditionValue = $hasOperator ? $value[2] : $value[1];
-					if (!$hasOperator && \is_array($conditionValue)) {
-						$operator = Operator::IN;
-					}
-					$this->conditions[] = ['column' => $value[0], 'operator' => $operator, 'value' => $conditionValue];
-				}
-			}
-		}
+		$this->conditions = $this->transformConditions($conditions);
 		return $this;
 	}
 
@@ -256,6 +268,50 @@ class Query
 			$this->order[] = ['column' => $order, 'direction' => $direction];
 		}
 		return $this;
+	}
+
+	private function buildCondition(array $conditions): string
+	{
+		$length = \count($conditions);
+		$result = [];
+		$i = 1;
+		$previousOperator = false;
+		foreach ($conditions as $group) {
+			if (!isset($group['operator'])) {
+				if (!$previousOperator && $i > 1) {
+					$result[] = 'AND';
+				}
+				$result[] = "({$this->buildCondition($group)})";
+			} else {
+				$operator = $group['operator'];
+				if ($operator == Operator::CONDITION_AND || $operator == Operator::CONDITION_OR) {
+					$result[] = $operator;
+					$previousOperator = true;
+					continue;
+				} else if (!$previousOperator && $i > 1) {
+					$result[] = 'AND';
+					$i++;
+				}
+				if ($operator == Operator::IN || $operator == Operator::NOT_IN) {
+					$length = \is_array($group['value']) ? \count($group['value']) : 1;
+					$placeholders = \implode(', ', \array_fill(0, $length, '?'));
+					$result[] = "{$group['column']} {$group['operator']} ({$placeholders})";
+					\array_push($this->params, ...\array_values($group['value']));
+				} else if ($operator != Operator::IS_NULL && $operator != Operator::IS_NOT_NULL) {
+					if ($group['value'] instanceof Value) {
+						$result[] = "{$group['column']} {$group['operator']} {$group['value']->get()}";
+					} else {
+						$result[] = "{$group['column']} {$group['operator']} ?";
+						$this->params[] = $group['value'];
+					}
+				} else {
+					$result[] = "{$group['column']} {$group['operator']}";
+				}
+			}
+			$i++;
+			$previousOperator = false;
+		}
+		return \implode(' ', $result);
 	}
 
 	/**
@@ -366,26 +422,8 @@ class Query
 
 		// Add conditions
 		if ($this->type != self::INSERT && \count($this->conditions) > 0) {
-			$conditions = [];
-			foreach ($this->conditions as $group) {
-				$operator = $group['operator'];
-				if ($operator == Operator::IN || $operator == Operator::NOT_IN) {
-					$length = \is_array($group['value']) ? \count($group['value']) : 1;
-					$placeholders = \implode(', ', \array_fill(0, $length, '?'));
-					$conditions[] = "{$group['column']} {$group['operator']} ({$placeholders})";
-					\array_push($this->params, ...\array_values($group['value']));
-				} else if ($operator != Operator::IS_NULL && $operator != Operator::IS_NOT_NULL) {
-					if ($group['value'] instanceof Value) {
-						$conditions[] = "{$group['column']} {$group['operator']} {$group['value']->get()}";
-					} else {
-						$conditions[] = "{$group['column']} {$group['operator']} ?";
-						$this->params[] = $group['value'];
-					}
-				} else {
-					$conditions[] = "{$group['column']} {$group['operator']}";
-				}
-			}
-			$sql .= (' WHERE ' . \implode(' AND ', $conditions));
+			$conditions = $this->buildCondition($this->conditions);
+			$sql .= " WHERE {$conditions}";
 		}
 
 		// Add order

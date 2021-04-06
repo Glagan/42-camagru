@@ -135,7 +135,7 @@ form {
 }
 
 form .footer {
-	@apply flex flex-row-reverse flex-nowrap justify-between;
+	@apply flex flex-row-reverse flex-nowrap justify-between mt-2;
 }
 
 label {
