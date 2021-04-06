@@ -64,11 +64,15 @@ class Authentication extends Controller
 		$user->persist();
 
 		// Register a new valid session
+		$session = session_id();
 		$userSession = new UserSession([
 			'user' => $user->id,
-			'session' => session_id(),
+			'session' => $session,
+			'issued' => new \DateTime(),
+			'rememberMe' => false,
 		]);
 		$userSession->persist();
+		$userSession->setCookie();
 
 		// Generate a token for the email verification link
 		$token = UserToken::first(['user' => $user->id, 'scope' => 'verification']);
@@ -92,7 +96,7 @@ class Authentication extends Controller
 		);
 		if (!$sendMail) {
 			return $this->json([
-				'success' => 'Registered ! Failed to send an Activation code, retry while logged in.',
+				'success' => 'Registered but failed to send an Activation code, retry while logged in.',
 				'user' => $user->toArray(['id', 'username', 'email', 'verified', 'receiveComments']),
 			]);
 		}
@@ -136,27 +140,41 @@ class Authentication extends Controller
 		}
 
 		// Clean previous invalid UserSession
+		$rememberMe = $this->input->get('rememberMe') != false;
 		$session = \session_id();
-		UserSession::delete()->where([
-			'user' => $user->id,
-			['issued', Operator::MORE_THAN, Value::make("(NOW() - INTERVAL 7 DAY)", true)],
-		])->execute();
+		UserSession::delete()
+			->where([
+				'user' => $user->id,
+				[
+					[
+						'issued' => [Operator::LESS_THAN, Value::make("(NOW() - INTERVAL 1 YEAR)")],
+						'rememberMe' => true,
+					],
+					Operator::CONDITION_OR,
+					'issued' => [Operator::LESS_THAN, Value::make("(NOW() - INTERVAL 1 HOUR)")],
+				],
+			])
+			->execute();
 
-		// Register the new valid session or refresh the old one
+		// Register the new valid session or refresh an old one
 		$userSession = UserSession::first(['user' => $user->id, 'session' => $session]);
 		if ($userSession === false) {
 			$userSession = new UserSession([
 				'user' => $user->id,
 				'session' => $session,
+				'issued' => new \DateTime(),
+				'rememberMe' => $rememberMe,
 			]);
+			$userSession->persist();
 		} else {
-			$userSession->issued = new \DateTime();
+			$userSession->rememberMe = $rememberMe;
+			$userSession->refresh();
 		}
-		$userSession->persist();
+		$userSession->setCookie();
 
 		return $this->json([
 			'success' => 'Logged in !',
-			'user' => $user->toArray(['id', 'username', 'email', 'verified', 'theme', 'receiveComments']),
+			'user' => $user->toArray(['id', 'username', 'email', 'verified', 'receiveComments']),
 		]);
 	}
 
@@ -182,7 +200,10 @@ class Authentication extends Controller
 	public function logoutAll(): Response
 	{
 		$session = \session_id();
-		$userSessions = UserSession::all(['user' => $this->user->id, ['session', Operator::DIFFERENT, $session]]);
+		$userSessions = UserSession::all([
+			'user' => $this->user->id,
+			'session' => [Operator::DIFFERENT, $session],
+		]);
 		foreach ($userSessions as $userSession) {
 			$userSession->remove();
 		}

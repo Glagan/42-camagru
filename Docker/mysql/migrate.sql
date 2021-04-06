@@ -71,6 +71,7 @@ CREATE TABLE `usersessions` (
 	`user` int unsigned NOT NULL,
 	`session` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
 	`issued` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	`rememberMe` tinyint unsigned NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`),
 	KEY `user` (`user`),
 	CONSTRAINT `usersessions_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE

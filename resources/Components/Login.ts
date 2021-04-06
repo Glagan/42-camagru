@@ -1,5 +1,6 @@
 import { Component } from '../Component';
 import { Notification } from '../UI/Notification';
+import { Toggle } from '../UI/Toggle';
 import { DOM } from '../Utility/DOM';
 import { Http } from '../Utility/Http';
 import { Validator } from '../Utility/Validator';
@@ -13,6 +14,7 @@ export class Login extends Component {
 	username!: HTMLInputElement;
 	labelPassword!: HTMLLabelElement;
 	password!: HTMLInputElement;
+	rememberMe!: { label: HTMLLabelElement; checkbox: HTMLInputElement };
 	footer!: HTMLElement;
 	forgotPassword!: HTMLButtonElement;
 	submit!: HTMLButtonElement;
@@ -43,12 +45,20 @@ export class Login extends Component {
 			min: '8',
 			max: '72',
 		});
+		this.rememberMe = Toggle.make('Stay connected', { name: 'rememberMe' });
 		this.forgotPassword = DOM.button('secondary', 'at-symbol', 'Forgot Password');
 		this.submit = DOM.button('primary', 'login', 'Login');
 		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit, this.forgotPassword] });
 		this.form = DOM.create('form', {
 			className: 'flex flex-col flex-wrap items-stretch',
-			childs: [this.labelUsername, this.username, this.labelPassword, this.password, this.footer],
+			childs: [
+				this.labelUsername,
+				this.username,
+				this.labelPassword,
+				this.password,
+				this.rememberMe.label,
+				this.footer,
+			],
 		});
 		this.validators.username = new Validator(this.username, Validator.username);
 		this.validators.password = new Validator(this.password, Validator.password);
@@ -62,6 +72,7 @@ export class Login extends Component {
 			const response = await Http.post<{ user: User }>('/api/login', {
 				username: this.username.value.trim(),
 				password: this.password.value.trim(),
+				rememberMe: this.rememberMe.checkbox.checked,
 			});
 			if (response.ok) {
 				Notification.show('success', 'Logged in !');

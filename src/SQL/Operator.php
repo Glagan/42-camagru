@@ -14,4 +14,7 @@ class Operator
 	const IS_NOT_NULL = 'IN';
 	// const LIKE = 'LIKE';
 	// const NOT_LIKE = 'NOT LIKE';
+
+	const CONDITION_AND = 'AND';
+	const CONDITION_OR = 'OR';
 }
