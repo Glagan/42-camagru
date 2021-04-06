@@ -114,7 +114,7 @@ export class Register extends Component {
 						Notification.show('danger', `Error: ${response.body.error}`);
 					}
 				},
-				[this.username, this.email, this.password, this.confirmPassword]
+				[this.username, this.email, this.password, this.confirmPassword, this.submit]
 			);
 		});
 	}

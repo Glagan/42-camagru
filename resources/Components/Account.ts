@@ -169,7 +169,7 @@ export class Account extends Component {
 						Notification.show('danger', `Error: ${response.body.error}`);
 					}
 				},
-				[this.username, this.email, this.password, this.confirmPassword, this.currentPassword]
+				[this.username, this.email, this.password, this.confirmPassword, this.currentPassword, this.submit]
 			);
 		});
 	}

@@ -103,7 +103,7 @@ export class ResetPassword extends Component {
 						Notification.show('danger', response.body.error);
 					}
 				},
-				[this.code, this.password, this.confirmPassword]
+				[this.code, this.password, this.confirmPassword, this.submit, this.forgotPage]
 			);
 		});
 	}

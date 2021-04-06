@@ -86,7 +86,7 @@ export class Login extends Component {
 						Notification.show('danger', `Error: ${response.body.error}`);
 					}
 				},
-				[this.username, this.password, this.rememberMe.checkbox]
+				[this.username, this.password, this.rememberMe.checkbox, this.submit]
 			);
 		});
 	}

@@ -6,8 +6,10 @@ import { Http, InvalidHttpResponse } from '../Utility/Http';
 
 export type XYPosition = { x: number; y: number };
 
-const WIDTH = 1280;
-const HEIGHT = 720;
+const MIN_WIDTH = 854;
+const MAX_WIDTH = 1366;
+const MIN_HEIGHT = 480;
+const MAX_HEIGHT = 768;
 const LOADING_IMG =
 	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKAQMAAAC3/F3+AAAAA1BMVEUzzMx0ynDKAAAACklEQVR4XmPACwAAHgAB5s72BgAAAABJRU5ErkJggg==';
 const LOADING_VIDEO = `data:image/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAJ+EU2bdLtNu4tTq4QVSalmU6yB5U27jFOrhBZUrmtTrIIBHE27jFOrhBJUw2dTrIIBXE27jFOrhBxTu2tTrIICaOwBAAAAAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVJqWayKtexgw9CQE2AjUxhdmY1OC4yOS4xMDBXQY1MYXZmNTguMjkuMTAwRImIQEQAAAAAAAAWVK5ru64BAAAAAAAAMteBAXPFgQGcgQAitZyDdW5khoVWX1ZQOIOBASPjg4QCYloA4AEAAAAAAAAGsIEKuoEKElTDZ0C/c3MBAAAAAAAALmPAAQAAAAAAAABnyAEAAAAAAAAaRaOHRU5DT0RFUkSHjUxhdmY1OC4yOS4xMDBzcwEAAAAAAAA5Y8ABAAAAAAAABGPFgQFnyAEAAAAAAAAhRaOHRU5DT0RFUkSHlExhdmM1OC41NC4xMDAgbGlidnB4c3MBAAAAAAAAOmPAAQAAAAAAAARjxYEBZ8gBAAAAAAAAIkWjiERVUkFUSU9ORIeUMDA6MDA6MDAuMDQwMDAwMDAwAAAfQ7Z1wueBAKO9gQAAgLACAJ0BKgoACgAARwiFhYiFhIgCAgJ1qgP4Agz9KAD+90av/rgPzgPzgP5lv/8D9/gfv8D9/+BPABxTu2uRu4+zgQC3iveBAfGCAiHwgQM=`;
@@ -126,7 +128,11 @@ export class Create extends Component {
 		navigator.mediaDevices
 			.getUserMedia({
 				audio: false,
-				video: { width: { min: WIDTH, max: WIDTH }, height: { min: HEIGHT, max: HEIGHT }, frameRate: 30 },
+				video: {
+					width: { min: MIN_WIDTH, ideal: MAX_WIDTH, max: MAX_WIDTH },
+					height: { min: MIN_HEIGHT, ideal: MAX_HEIGHT, max: MAX_HEIGHT },
+					frameRate: 30,
+				},
 			})
 			.then((stream) => {
 				this.videoPreview.classList.remove('hidden');
@@ -204,12 +210,21 @@ export class Create extends Component {
 					// Check dimensions
 					const image = new Image();
 					image.src = result;
-					if (image.naturalWidth > WIDTH || image.naturalHeight > HEIGHT) {
-						Notification.show('warning', `Maximum dimensions are ${WIDTH}x${HEIGHT}px.`);
-						return;
-					}
-					// Display
-					this.uploadMode(result);
+					// On next frame to wait for image to load
+					requestAnimationFrame(() => {
+						const [width, height] = [image.naturalWidth, image.naturalHeight];
+						console.log('found dimensions', width, height);
+						if (width < MIN_WIDTH || height < MIN_HEIGHT) {
+							Notification.show('warning', `Minimum dimensions are ${MIN_WIDTH}x${MIN_HEIGHT}px.`);
+							return;
+						}
+						if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+							Notification.show('warning', `Maximum dimensions are ${MAX_WIDTH}x${MAX_HEIGHT}px.`);
+							return;
+						}
+						// Display
+						this.uploadMode(result);
+					});
 				});
 			}
 		});
@@ -235,21 +250,28 @@ export class Create extends Component {
 		});
 		this.submit.addEventListener('click', async (event) => {
 			event.preventDefault();
-			this.runOnce(this.submit, async () => {
-				const ratio = { x: WIDTH / this.preview.offsetWidth, y: HEIGHT / this.preview.offsetHeight };
-				const response = await Http.post<{ success: string; id: number }>('/api/upload', {
-					upload: this.imagePreview.src,
-					decorations: this.currentDecorations.map((d) => {
-						const position = this.dragState[d.id].current;
-						return { id: d.id, position: { x: position.x * ratio.x, y: position.y * ratio.y } };
-					}),
-				});
-				if (response.ok) {
-					Notification.show('success', `Nice.`);
-				} else {
-					Notification.show('danger', `Could not upload creation: ${response.body.error}`);
-				}
-			});
+			this.runOnce(
+				this.submit,
+				async () => {
+					const ratio = {
+						x: MAX_WIDTH / this.preview.offsetWidth,
+						y: MAX_HEIGHT / this.preview.offsetHeight,
+					};
+					const response = await Http.post<{ success: string; id: number }>('/api/upload', {
+						upload: this.imagePreview.src,
+						decorations: this.currentDecorations.map((d) => {
+							const position = this.dragState[d.id].current;
+							return { id: d.id, position: { x: position.x * ratio.x, y: position.y * ratio.y } };
+						}),
+					});
+					if (response.ok) {
+						Notification.show('success', `Nice.`);
+					} else {
+						Notification.show('danger', `Could not upload creation: ${response.body.error}`);
+					}
+				},
+				[this.selectCamera, this.selectUpload, this.capture, this.cancelCapture, this.submit]
+			);
 		});
 	}
 
@@ -338,7 +360,7 @@ export class Create extends Component {
 			this.translate(layer, { x: 0, y: 0 });
 
 			// Calculate ratio and update decorations -- ratio = WIDTH / previewWidth;
-			const ratio = { x: this.preview.offsetWidth / WIDTH, y: this.preview.offsetHeight / HEIGHT };
+			const ratio = { x: this.preview.offsetWidth / MAX_WIDTH, y: this.preview.offsetHeight / MAX_HEIGHT };
 			layer.style.setProperty('--tw-scale-x', `${ratio.x}`);
 			layer.style.setProperty('--tw-scale-y', `${ratio.y}`);
 
