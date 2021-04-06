@@ -210,19 +210,21 @@ export class Create extends Component {
 		});
 		this.submit.addEventListener('click', async (event) => {
 			event.preventDefault();
-			const ratio = { x: WIDTH / this.preview.offsetWidth, y: HEIGHT / this.preview.offsetHeight };
-			const response = await Http.post<{ success: string; id: number }>('/api/upload', {
-				upload: this.imagePreview.src,
-				decorations: this.currentDecorations.map((d) => {
-					const position = this.dragState[d.id].current;
-					return { id: d.id, position: { x: position.x * ratio.x, y: position.y * ratio.y } };
-				}),
+			this.runOnce(this.submit, async () => {
+				const ratio = { x: WIDTH / this.preview.offsetWidth, y: HEIGHT / this.preview.offsetHeight };
+				const response = await Http.post<{ success: string; id: number }>('/api/upload', {
+					upload: this.imagePreview.src,
+					decorations: this.currentDecorations.map((d) => {
+						const position = this.dragState[d.id].current;
+						return { id: d.id, position: { x: position.x * ratio.x, y: position.y * ratio.y } };
+					}),
+				});
+				if (response.ok) {
+					Notification.show('success', `Nice.`);
+				} else {
+					Notification.show('danger', `Could not upload creation: ${response.body.error}`);
+				}
 			});
-			if (response.ok) {
-				Notification.show('success', `Nice.`);
-			} else {
-				Notification.show('danger', `Could not upload creation: ${response.body.error}`);
-			}
 		});
 	}
 

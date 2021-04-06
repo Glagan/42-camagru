@@ -32,6 +32,7 @@ export class ForgotPassword extends Component {
 			id: 'forget-email',
 			name: 'email',
 			placeholder: 'Email',
+			required: true,
 		});
 		this.submit = DOM.button('primary', 'at-symbol', 'Send Reset Link');
 		this.codePage = DOM.button('secondary', 'clipboard-list', 'I already have a code');
@@ -47,16 +48,22 @@ export class ForgotPassword extends Component {
 		this.link(this.codePage, '/reset-password');
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			if (!this.validate()) return;
-			const response = await Http.post<{ success: string }>('/api/account/forgot-password', {
-				email: this.email.value.trim(),
-			});
-			if (response.ok) {
-				Notification.show('success', response.body.success);
-				this.email.value = '';
-			} else {
-				Notification.show('danger', response.body.error);
-			}
+			this.runOnce(
+				this.form,
+				async () => {
+					if (!this.validate()) return;
+					const response = await Http.post<{ success: string }>('/api/account/forgot-password', {
+						email: this.email.value.trim(),
+					});
+					if (response.ok) {
+						Notification.show('success', response.body.success);
+						this.email.value = '';
+					} else {
+						Notification.show('danger', response.body.error);
+					}
+				},
+				[this.email]
+			);
 		});
 	}
 

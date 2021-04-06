@@ -14,6 +14,7 @@ export class Application {
 	auth: Auth;
 	page: string;
 	currentMatch: RouteMatch | undefined;
+	currentComponent: Component | undefined;
 	// Errors cache
 	pageNotFound: PageNotFound;
 	unauthorized: Unauthorized;
@@ -71,7 +72,11 @@ export class Application {
 
 	private renderComponent(component: Component) {
 		DOM.clear(this.main);
+		if (this.currentComponent && this.currentComponent.destroy) {
+			this.currentComponent.destroy();
+		}
 		this.page = component.constructor.name;
+		this.currentComponent = component;
 		component.render();
 		this.navigation.render();
 	}

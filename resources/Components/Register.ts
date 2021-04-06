@@ -32,6 +32,7 @@ export class Register extends Component {
 			placeholder: 'Username',
 			min: '4',
 			max: '100',
+			required: true,
 		});
 		this.labelEmail = DOM.create('label', {
 			htmlFor: 'register-email',
@@ -55,6 +56,7 @@ export class Register extends Component {
 			placeholder: 'Password',
 			min: '8',
 			max: '72',
+			required: true,
 		});
 		this.labelConfirmPassword = DOM.create('label', {
 			htmlFor: 'register-confirm-password',
@@ -67,6 +69,7 @@ export class Register extends Component {
 			placeholder: 'Confirm Password',
 			min: '8',
 			max: '72',
+			required: true,
 		});
 		this.submit = DOM.button('primary', 'user-add', 'Register');
 		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit] });
@@ -95,18 +98,24 @@ export class Register extends Component {
 	bind(): void {
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			if (!this.validate()) return;
-			const response = await Http.post<{ user: User }>('/api/register', {
-				username: this.username.value.trim(),
-				email: this.email.value.trim(),
-				password: this.password.value.trim(),
-			});
-			if (response.ok) {
-				Notification.show('success', 'Account created !');
-				this.application.loggedIn(response.body.user);
-			} else {
-				Notification.show('danger', `Error: ${response.body.error}`);
-			}
+			this.runOnce(
+				this.form,
+				async () => {
+					if (!this.validate()) return;
+					const response = await Http.post<{ user: User }>('/api/register', {
+						username: this.username.value.trim(),
+						email: this.email.value.trim(),
+						password: this.password.value.trim(),
+					});
+					if (response.ok) {
+						Notification.show('success', 'Account created !');
+						this.application.loggedIn(response.body.user);
+					} else {
+						Notification.show('danger', `Error: ${response.body.error}`);
+					}
+				},
+				[this.username, this.email, this.password, this.confirmPassword]
+			);
 		});
 	}
 
