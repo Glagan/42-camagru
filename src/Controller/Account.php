@@ -31,8 +31,15 @@ class Account extends Controller
 		// Generate a token that will be used when resetting the password
 		$token = UserToken::first(['user' => $user->id, 'scope' => 'password']);
 		if ($token !== false) {
-			// TODO: Avoid updating token if it's still valid
-			$token->remove();
+			$diff = $token->issued->diff(new \DateTime(), true);
+			// Remove old invalid token if it was more than 1 day ago
+			if ($diff->days > 1) {
+				$token->remove();
+			}
+			// Abort if the last code was sent less than 10 minutes ago
+			else if ($diff->i < 10) {
+				return $this->json(['error' => 'Wait a bit before asking for another code.'], Response::BAD_REQUEST);
+			}
 		}
 		$token = UserToken::generate($user->id, 'password');
 		$token->persist();
@@ -111,8 +118,15 @@ class Account extends Controller
 		// Generate a token that will be used in the verification link
 		$token = UserToken::first(['user' => $this->user->id, 'scope' => 'verification']);
 		if ($token !== false) {
-			// TODO: Avoid updating token if it's still valid
-			$token->remove();
+			$diff = $token->issued->diff(new \DateTime(), true);
+			// Remove old invalid token if it was more than 1 day ago
+			if ($diff->days > 1) {
+				$token->remove();
+			}
+			// Abort if the last code was sent less than 10 minutes ago
+			else if ($diff->i < 10) {
+				return $this->json(['error' => 'Wait a bit before asking for another code.'], Response::BAD_REQUEST);
+			}
 		}
 		$token = UserToken::generate($this->user->id, 'verification');
 		$token->persist();
