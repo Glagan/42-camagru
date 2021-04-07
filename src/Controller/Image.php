@@ -134,6 +134,8 @@ class Image extends Controller
 		if ($resource === false) {
 			return $this->json(['error' => 'Invalid or corrupted Image.'], Response::BAD_REQUEST);
 		}
+		\imagealphablending($resource, false);
+		\imagesavealpha($resource, true);
 		[$width, $height] = [\imagesx($resource), \imagesy($resource)];
 		if ($width < self::MIN_WIDTH || $height < self::MIN_HEIGHT) {
 			return $this->json(['error' => "Minimum dimensions are " . self::MIN_WIDTH . "x" . self::MIN_HEIGHT . "px."], Response::BAD_REQUEST);
@@ -167,9 +169,6 @@ class Image extends Controller
 		}
 		// Static upload
 		else {
-			\imagealphablending($resource, false);
-			\imagesavealpha($resource, true);
-
 			// Add decorations
 			foreach ($rawDecorations as $rawDecoration) {
 				$path = Env::get('Camagru', 'decorations') . "/{$rawDecoration['name']}";

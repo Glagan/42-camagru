@@ -40,8 +40,8 @@ export class SingleImage extends Component {
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: '#' });
-		this.imageSlot = DOM.create('img', { className: 'shadow-md' });
-		this.videoSlot = DOM.create('video', { className: 'shadow-md', autoplay: true, loop: true, volume: 0 });
+		this.imageSlot = DOM.create('img', { className: 'm-auto shadow-md' });
+		this.videoSlot = DOM.create('video', { className: 'm-auto shadow-md', autoplay: true, loop: true, volume: 0 });
 		this.author = DOM.create('a', { className: 'author' });
 		this.authorBadge = DOM.create('span');
 		this.likeCount = DOM.create('span', { textContent: '123' });

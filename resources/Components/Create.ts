@@ -250,7 +250,8 @@ export class Create extends Component {
 		});
 		this.submit.addEventListener('click', async (event) => {
 			event.preventDefault();
-			this.runOnce(
+			this.decorationSelector.classList.remove('active');
+			await this.runOnce(
 				this.submit,
 				async () => {
 					const ratio = {
@@ -272,6 +273,7 @@ export class Create extends Component {
 				},
 				[this.selectCamera, this.selectUpload, this.capture, this.cancelCapture, this.submit]
 			);
+			this.decorationSelector.classList.add('active');
 		});
 	}
 
