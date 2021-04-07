@@ -36,8 +36,8 @@ export class Create extends Component {
 	visibleDecorations!: HTMLElement;
 
 	decorations: { still: Decoration[]; animated: Decoration[] } = { still: [], animated: [] };
-	dragState: { [key: string]: { node: HTMLElement; initial: XYPosition; active: boolean; current: XYPosition } } = {};
-	currentDecorations: Decoration[] = [];
+	dragState!: { node: HTMLElement; initial: XYPosition; active: boolean; current: XYPosition };
+	currentDecoration: Decoration | undefined;
 	dataError: InvalidHttpResponse<{ error: string }> | undefined;
 
 	create(): void {
@@ -254,16 +254,20 @@ export class Create extends Component {
 			await this.runOnce(
 				this.submit,
 				async () => {
-					const ratio = {
-						x: MAX_WIDTH / this.preview.offsetWidth,
-						y: MAX_HEIGHT / this.preview.offsetHeight,
-					};
+					if (this.currentDecoration === undefined) {
+						Notification.show('danger', `You need to add one Decoration before submitting your creation.`);
+						return;
+					}
 					const response = await Http.post<{ success: string; id: number }>('/api/upload', {
 						upload: this.imagePreview.src,
-						decorations: this.currentDecorations.map((d) => {
-							const position = this.dragState[d.id].current;
-							return { id: d.id, position: { x: position.x * ratio.x, y: position.y * ratio.y } };
-						}),
+						decoration: {
+							id: this.currentDecoration.id,
+							position: this.dragState.current,
+							scale: {
+								x: MAX_WIDTH / this.preview.offsetWidth,
+								y: MAX_HEIGHT / this.preview.offsetHeight,
+							},
+						},
 					});
 					if (response.ok) {
 						Notification.show('success', `Nice.`);
@@ -301,47 +305,44 @@ export class Create extends Component {
 		node.style.setProperty('--tw-translate-y', `${position.y}px`);
 	}
 
-	private dragStart(event: TouchEvent | MouseEvent, id: number): void {
+	private dragStart(event: TouchEvent | MouseEvent): void {
 		event.preventDefault();
-		const state = this.dragState[id];
 
 		// Calculate
 		const currentState: XYPosition = { x: 0, y: 0 };
 		if (event.type === 'touchstart') {
-			currentState.x = (event as TouchEvent).touches[0].clientX - state.current.x;
-			currentState.y = (event as TouchEvent).touches[0].clientY - state.current.y;
+			currentState.x = (event as TouchEvent).touches[0].clientX - this.dragState.current.x;
+			currentState.y = (event as TouchEvent).touches[0].clientY - this.dragState.current.y;
 		} else {
-			currentState.x = (event as MouseEvent).clientX - state.current.x;
-			currentState.y = (event as MouseEvent).clientY - state.current.y;
+			currentState.x = (event as MouseEvent).clientX - this.dragState.current.x;
+			currentState.y = (event as MouseEvent).clientY - this.dragState.current.y;
 		}
 
 		// Save
-		this.dragState[id].initial = currentState;
-		if (event.target === state.node) {
-			this.dragState[id].active = true;
+		this.dragState.initial = currentState;
+		if (event.target === this.dragState.node) {
+			this.dragState.active = true;
 		}
 	}
 
-	private drag(event: TouchEvent | MouseEvent, id: number): void {
-		const state = this.dragState[id];
-		if (state.active) {
+	private drag(event: TouchEvent | MouseEvent): void {
+		if (this.dragState.active) {
 			event.preventDefault();
 			if (event.type === 'touchmove') {
-				state.current.x = (event as TouchEvent).touches[0].clientX - state.initial.x;
-				state.current.y = (event as TouchEvent).touches[0].clientY - state.initial.y;
+				this.dragState.current.x = (event as TouchEvent).touches[0].clientX - this.dragState.initial.x;
+				this.dragState.current.y = (event as TouchEvent).touches[0].clientY - this.dragState.initial.y;
 			} else {
-				state.current.x = (event as MouseEvent).clientX - state.initial.x;
-				state.current.y = (event as MouseEvent).clientY - state.initial.y;
+				this.dragState.current.x = (event as MouseEvent).clientX - this.dragState.initial.x;
+				this.dragState.current.y = (event as MouseEvent).clientY - this.dragState.initial.y;
 			}
-			this.translate(state.node, state.current);
+			this.translate(this.dragState.node, this.dragState.current);
 		}
 	}
 
-	private dragEnd(_event: TouchEvent | MouseEvent, id: number): void {
-		const state = this.dragState[id];
-		state.initial.x = state.current.x;
-		state.initial.y = state.current.y;
-		state.active = false;
+	private dragEnd(_event: TouchEvent | MouseEvent): void {
+		this.dragState.initial.x = this.dragState.current.x;
+		this.dragState.initial.y = this.dragState.current.y;
+		this.dragState.active = false;
 	}
 
 	private displayDecoration(decoration: Decoration, observer: IntersectionObserver): void {
@@ -354,9 +355,14 @@ export class Create extends Component {
 			event.preventDefault();
 			if (!this.decorationSelector.classList.contains('active')) return;
 
-			//this.currentDecorations.push(decoration);
-			this.currentDecorations = [decoration];
+			this.currentDecoration = decoration;
 			const layer = this.createDecoration(decoration);
+			this.dragState = {
+				node: layer,
+				initial: { x: 0, y: 0 },
+				active: false,
+				current: { x: 0, y: 0 },
+			};
 
 			// Default position
 			this.translate(layer, { x: 0, y: 0 });
@@ -367,18 +373,12 @@ export class Create extends Component {
 			layer.style.setProperty('--tw-scale-y', `${ratio.y}`);
 
 			// Adapted from https://www.kirupa.com/html5/drag.htm
-			this.dragState[decoration.id] = {
-				node: layer,
-				initial: { x: 0, y: 0 },
-				active: false,
-				current: { x: 0, y: 0 },
-			};
-			layer.addEventListener('touchstart', (e) => this.dragStart(e, decoration.id), false);
-			layer.addEventListener('touchend', (e) => this.dragEnd(e, decoration.id), false);
-			layer.addEventListener('touchmove', (e) => this.drag(e, decoration.id), false);
-			layer.addEventListener('mousedown', (e) => this.dragStart(e, decoration.id), false);
-			layer.addEventListener('mouseup', (e) => this.dragEnd(e, decoration.id), false);
-			layer.addEventListener('mousemove', (e) => this.drag(e, decoration.id), false);
+			layer.addEventListener('touchstart', (e) => this.dragStart(e), false);
+			layer.addEventListener('touchend', (e) => this.dragEnd(e), false);
+			layer.addEventListener('touchmove', (e) => this.drag(e), false);
+			layer.addEventListener('mousedown', (e) => this.dragStart(e), false);
+			layer.addEventListener('mouseup', (e) => this.dragEnd(e), false);
+			layer.addEventListener('mousemove', (e) => this.drag(e), false);
 
 			DOM.clear(this.visibleDecorations); // Remove with multiple decorations
 			this.visibleDecorations.appendChild(layer);
