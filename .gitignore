@@ -4,3 +4,6 @@ config.ini
 node_modules
 public/assets/*
 storage/tmp/*
+storage/decorations/*
+storage/uploads/*
+storage/.initialized
