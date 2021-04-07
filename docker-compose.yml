@@ -18,6 +18,7 @@ services:
             - '8080:80'
         volumes:
             - ./:/var/www/html/
+        command: sh /start.sh
     mysql:
         image: mysql:8.0
         networks:
