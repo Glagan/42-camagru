@@ -54,7 +54,7 @@ class Image extends Controller
 			'upload' => [
 				'type' => 'string',
 			],
-			'decorations' => [
+			'decoration' => [
 				'type' => 'array',
 			],
 		]);
@@ -90,44 +90,36 @@ class Image extends Controller
 			return $this->json(['error' => 'Empty or invalid upload.'], Response::BAD_REQUEST);
 		}
 
-		// Check decorations
-		$rawDecorations = $this->input->get('decorations');
-		$rawDecorations = \array_filter($rawDecorations, function ($decoration) {
-			return \is_array($decoration)
-			&& \array_key_exists('id', $decoration)
-			&& \array_key_exists('position', $decoration)
-			&& \is_array($decoration['position'])
-			&& \array_key_exists('x', $decoration['position'])
-			&& \array_key_exists('y', $decoration['position']);
-		});
-		if (\count($rawDecorations) < 1) {
-			return $this->json(['error' => 'You need to add at least one Decoration.'], Response::BAD_REQUEST);
+		// Check decoration
+		$rawDecoration = $this->input->get('decoration');
+		$validDecoration = (
+			\array_key_exists('id', $rawDecoration)
+			&& \array_key_exists('position', $rawDecoration)
+			&& \is_array($rawDecoration['position'])
+			&& \array_key_exists('x', $rawDecoration['position'])
+			&& \array_key_exists('y', $rawDecoration['position'])
+			&& \is_array($rawDecoration['scale'])
+			&& \array_key_exists('x', $rawDecoration['scale'])
+			&& \array_key_exists('y', $rawDecoration['scale']));
+		if (!$validDecoration) {
+			return $this->json(['error' => 'You need to add one valid Decoration.'], Response::BAD_REQUEST);
 		}
-		$decorations = Decoration::all([
-			'id' => \array_map(function ($d) {
-				return $d['id'];
-			}, $rawDecorations),
+		$decoration = Decoration::first([
+			'id' => $rawDecoration['id'],
 			'public' => true,
 		]);
+		if ($decoration === false) {
+			return $this->json(['error' => 'You need to add one valid Decoration.'], Response::BAD_REQUEST);
+		}
 
-		// Update raw decorations with the database for positions
-		$foundDecorations = 0;
-		foreach ($decorations as $decoration) {
-			$isAnimated = $isAnimated || $decoration->animated;
-			foreach ($rawDecorations as $key => $rawDecoration) {
-				if ($rawDecoration['id'] == $decoration->id) {
-					$rawDecorations[$key]['animated'] = $decoration->animated;
-					$rawDecorations[$key]['name'] = $decoration->name;
-					$rawDecorations[$key]['x'] = \round($rawDecoration['position']['x']);
-					$rawDecorations[$key]['y'] = \round($rawDecoration['position']['y']);
-					$foundDecorations++;
-					break;
-				}
-			}
-		}
-		if ($foundDecorations < 1) {
-			return $this->json(['error' => 'You need to add at least one valid Decoration.'], Response::BAD_REQUEST);
-		}
+		// Update raw decoration with the database for animated state and path
+		$isAnimated = $decoration->animated;
+		$rawDecoration['animated'] = $decoration->animated;
+		$rawDecoration['name'] = $decoration->name;
+		$rawDecoration['positionX'] = \round($rawDecoration['position']['x']);
+		$rawDecoration['positionY'] = \round($rawDecoration['position']['y']);
+		$rawDecoration['scaleX'] = \round($rawDecoration['scale']['x']);
+		$rawDecoration['scaleY'] = \round($rawDecoration['scale']['y']);
 
 		// Static background
 		$resource = \imagecreatefromstring($decodedUpload);
@@ -159,7 +151,7 @@ class Image extends Controller
 			// Add all decorations on the source
 			$ffmpeg = new FFMPEG();
 			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".webm";
-			$result = $ffmpeg->decorate($tmpPath, $rawDecorations, Env::get('Camagru', 'uploads') . "/{$output}");
+			$result = $ffmpeg->decorate($tmpPath, $rawDecoration, Env::get('Camagru', 'uploads') . "/{$output}");
 
 			// Clear
 			\unlink($tmpPath);
@@ -169,21 +161,18 @@ class Image extends Controller
 		}
 		// Static upload
 		else {
-			// Add decorations
-			foreach ($rawDecorations as $rawDecoration) {
-				$path = Env::get('Camagru', 'decorations') . "/{$rawDecoration['name']}";
-				$decorationResource = \imagecreatefromstring(\file_get_contents($path));
-				$position = $rawDecoration['position'];
-				$size = [\imagesx($decorationResource), \imagesy($decorationResource)];
-				$this->imagecopymerge_alpha(
-					$resource,
-					$decorationResource,
-					$position['x'], $position['y'],
-					0, 0,
-					$size[0], $size[1],
-					100
-				);
-			}
+			// Add decoration
+			$path = Env::get('Camagru', 'decorations') . "/{$rawDecoration['name']}";
+			$decorationResource = \imagecreatefromstring(\file_get_contents($path));
+			$size = ['x' => \imagesx($decorationResource), 'y' => \imagesy($decorationResource)];
+			$this->imagecopymerge_alpha(
+				$resource,
+				$decorationResource,
+				$rawDecoration['positionX'], $rawDecoration['positionY'],
+				0, 0,
+				$rawDecoration['scaleX'] * $size['x'], $rawDecoration['scaleY'] * $size['y'],
+				100
+			);
 
 			// Save
 			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".png";
