@@ -26,7 +26,7 @@ export class Navigation extends Component {
 	create() {
 		this.parent.id = 'navigation';
 		this.title = DOM.create('h1', {
-			className: 'text-6xl pb-4',
+			className: 'text-6xl md:text-4xl xl:text-6xl pb-4',
 			textContent: 'camagru',
 		});
 		this.user = DOM.create('div', { className: 'mb-2' });
@@ -42,7 +42,7 @@ export class Navigation extends Component {
 		this.account = DOM.button('secondary', 'user', 'Account');
 		this.preferences = DOM.button('secondary', 'cog', 'Preferences');
 		this.logout = DOM.button('error', 'logout', 'Logout');
-		this.back = DOM.button('secondary', 'chevron-left', 'Back Home');
+		this.back = DOM.button('secondary', 'chevron-left', 'Home');
 		this.selfImages = DOM.button('secondary', 'photograph', 'My Images');
 	}
 
