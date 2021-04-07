@@ -357,6 +357,36 @@ class Image extends Controller
 	 * @param int $id Image ID
 	 * @return \Camagru\Http\JSONResponse
 	 */
+	public function deleteSingle(int $id): JSONResponse
+	{
+		if ($id < 1) {
+			return $this->json(['error' => 'Invalid Image ID.'], Response::BAD_REQUEST);
+		}
+
+		// Image
+		$image = ImageModel::get($id);
+		if ($image === false) {
+			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
+		}
+		if ($this->user->id != $image->user) {
+			return $this->json(['error' => 'Forbidden.'], Response::FORBIDDEN);
+		}
+
+		// Delete
+		$result = \unlink(Env::get('Camagru', 'uploads') . "/{$image->name}");
+		if (!$result) {
+			return $this->json(['error' => 'Failed to delete file.'], Response::INTERNAL_SERVER_ERROR);
+		}
+		// Relations get automatically deleted
+		$image->remove();
+
+		return $this->json(['success' => 'Image deleted.']);
+	}
+
+	/**
+	 * @param int $id Image ID
+	 * @return \Camagru\Http\JSONResponse
+	 */
 	public function single(int $id): JSONResponse
 	{
 		if ($id < 1) {

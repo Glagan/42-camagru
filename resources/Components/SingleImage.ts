@@ -28,6 +28,7 @@ export class SingleImage extends Component {
 	likeCount!: HTMLElement;
 	comments!: HTMLElement;
 	commentCount!: HTMLElement;
+	delete!: HTMLButtonElement;
 	form!: HTMLFormElement;
 	commentLabel!: HTMLLabelElement;
 	inputWrapper!: HTMLElement;
@@ -55,12 +56,14 @@ export class SingleImage extends Component {
 			className: 'text-center cursor-pointer',
 			childs: [DOM.icon('chat', { classes: 'text-gray-400', width: 'w-10', height: 'h-10' }), this.commentCount],
 		});
+		this.delete = DOM.button('error', 'x-circle', 'Delete');
 		this.stats = DOM.create('div', {
 			className: 'flex flex-row flex-nowrap justify-evenly mt-2 items-center',
 			childs: [
 				DOM.create('div', { childs: [DOM.text('Created by '), this.author, this.authorBadge] }),
 				this.likes,
 				this.comments,
+				this.delete,
 			],
 		});
 		this.commentLabel = DOM.create('label', { htmlFor: 'comment-message', textContent: 'Comment' });
@@ -129,12 +132,36 @@ export class SingleImage extends Component {
 					Notification.show('success', response.body.success);
 				} else {
 					Notification.show('danger', response.body.error);
+					if (response.status == 404) {
+						this.application.navigate('/');
+					}
 				}
 			});
 		});
 		this.comments.addEventListener('click', (event) => {
 			event.preventDefault();
 			this.comment.focus();
+		});
+		this.delete.addEventListener('click', async (event) => {
+			if (
+				this.response &&
+				this.application.auth.loggedIn &&
+				this.response.user.id == this.application.auth.user.id
+			) {
+				await this.runOnce(
+					this.delete,
+					async () => {
+						const response = await Http.delete<{ success: string }>(`/api/${this.response!.image.id}`);
+						if (response.ok) {
+							Notification.show('success', response.body.success);
+						} else {
+							Notification.show('danger', response.body.error);
+						}
+					},
+					[this.delete, this.comment, this.submit]
+				);
+				this.application.navigate('/');
+			}
 		});
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
@@ -163,6 +190,9 @@ export class SingleImage extends Component {
 						Notification.show('success', response.body.success);
 					} else {
 						Notification.show('danger', response.body.error);
+						if (response.status == 404) {
+							this.application.navigate('/');
+						}
 					}
 				},
 				[this.comment, this.submit]
@@ -219,6 +249,9 @@ export class SingleImage extends Component {
 		}
 		// Display
 		if (!this.response) return;
+		if (!this.application.auth.loggedIn || this.response.user.id != this.application.auth.user.id) {
+			this.delete.remove();
+		}
 		this.header.textContent = `# ${this.response.image.id}`;
 		this.author.textContent = this.response.user.username;
 		this.author.href = `/user/${this.response.user.id}`;

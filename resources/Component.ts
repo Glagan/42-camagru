@@ -64,8 +64,8 @@ export abstract class Component {
 		node: HTMLElement,
 		fct: () => Promise<void>,
 		block?: (HTMLInputElement | HTMLButtonElement)[]
-	): Promise<void> {
-		if (node.dataset.pending) return;
+	): Promise<boolean> {
+		if (node.dataset.pending) return false;
 		node.dataset.pending = 'true';
 		if (block !== undefined) {
 			for (const node of block) {
@@ -87,5 +87,6 @@ export abstract class Component {
 				}
 			}
 		}
+		return true;
 	}
 }

@@ -50,6 +50,7 @@ $router->group(Controller\Image::class, function ($router) {
 	$router->get('/user/{id}(?:/{page})?', ['use' => 'user']);
 	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']);
 	$router->post('/{id}/comment', ['auth' => true, 'use' => 'comment']);
+	$router->delete('/{id}', ['auth' => true, 'use' => 'deleteSingle']);
 	$router->get('/{id}', ['use' => 'single']);
 });
 
