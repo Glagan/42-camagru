@@ -107,11 +107,27 @@ button.secondary:disabled,
 }
 
 #navigation {
-	@apply flex-1 text-center p-4 h-auto md:h-screen relative md:sticky top-0 w-full md:w-3/12;
+	@apply transition flex-1 fixed bottom-0 top-0 h-auto w-full md:h-screen md:sticky md:left-0 md:w-3/12 text-center p-4 z-40;
+	transition-property: background-color, left;
+	left: -100%;
+}
+
+#navigation.active {
+	@apply left-0 bg-gray-200 dark:bg-gray-600;
+}
+
+#small-navigation {
+	@apply transition fixed md:hidden bottom-4 right-4 p-2 cursor-pointer shadow-md hover:shadow-lg bg-gray-600 text-gray-100 dark:bg-gray-200 dark:text-gray-800 z-50;
+	transition-property: border-radius, background-color;
+	border-radius: 100%;
+}
+
+#navigation.active ~ #small-navigation {
+	@apply rounded-2xl;
 }
 
 #content {
-	@apply flex-grow flex-shrink-0 p-4 w-full md:w-9/12;
+	@apply flex-grow flex-shrink-0 p-4 w-full md:w-9/12 mb-16 md:mb-0;
 }
 
 .header {
@@ -124,10 +140,6 @@ button.secondary:disabled,
 
 .card img {
 	@apply shadow-md hover:shadow-lg;
-}
-
-.card:hover {
-	z-index: 10;
 }
 
 form {

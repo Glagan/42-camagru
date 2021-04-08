@@ -21,6 +21,7 @@ export type HeroIcon =
 	| 'information-circle'
 	| 'login'
 	| 'logout'
+	| 'menu'
 	| 'moon'
 	| 'photograph'
 	| 'plus-circle'
@@ -225,6 +226,7 @@ export class DOM {
 				],
 				options
 			),
+		menu: (options) => DOM.createIcon([{ d: 'M4 6h16M4 12h16M4 18h16' }], options),
 	};
 
 	static icon(name: HeroIcon, options?: IconOptions): SVGSVGElement {

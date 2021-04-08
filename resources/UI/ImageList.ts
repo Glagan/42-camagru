@@ -10,7 +10,7 @@ export class ImageList {
 	constructor(application: Application, images: ImageModel[]) {
 		this.application = application;
 		this.grid = DOM.create('div', {
-			className: 'grid grid-cols-2 lg:grid-cols-3 auto-rows-min justify-items-center items-center',
+			className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 auto-rows-min justify-items-center items-center',
 		});
 		this.images = images;
 	}
