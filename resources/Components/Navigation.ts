@@ -24,7 +24,6 @@ export class Navigation extends Component {
 	logout!: HTMLButtonElement;
 
 	create() {
-		this.parent.id = 'navigation';
 		this.title = DOM.create('h1', {
 			className: 'text-6xl md:text-4xl xl:text-6xl pb-4',
 			textContent: 'camagru',

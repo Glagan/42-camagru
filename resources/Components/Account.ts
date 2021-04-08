@@ -162,6 +162,9 @@ export class Account extends Component {
 						this.application.auth.user.email = this.email.value;
 						this.application.auth.user.receiveComments = this.receiveCommentsToggle.checkbox.checked;
 						this.application.auth.user.verified = response.body.verified;
+						this.password.value = '';
+						this.confirmPassword.value = '';
+						this.currentPassword.value = '';
 						// Update the navigation now
 						this.application.navigation.render();
 						Notification.show('success', response.body.success);

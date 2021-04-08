@@ -7,6 +7,7 @@ import { Router, Route, RouteMatch } from './Router';
 import { DOM } from './Utility/DOM';
 
 export class Application {
+	smallNavigation: HTMLElement;
 	navigation: Navigation;
 	main: HTMLElement;
 	loading: HTMLElement;
@@ -22,7 +23,13 @@ export class Application {
 	constructor(router: Router) {
 		this.auth = new Auth();
 		this.auth.status(); // Preload session status
-		this.navigation = new Navigation(this, document.getElementById('nav')!);
+		this.smallNavigation = document.getElementById('small-navigation')!;
+		this.smallNavigation.appendChild(DOM.icon('menu', { width: 'w-10', height: 'h-10' }));
+		this.navigation = new Navigation(this, document.getElementById('navigation')!);
+		this.smallNavigation.addEventListener('click', (event) => {
+			event.preventDefault();
+			this.navigation.parent.classList.toggle('active');
+		});
 		this.main = document.getElementById('content')!;
 		this.loading = DOM.create('div');
 		this.router = router;
@@ -95,6 +102,7 @@ export class Application {
 
 	async navigate(location: string, query?: string): Promise<void> {
 		history.pushState({ location, query }, '', location);
+		this.navigation.parent.classList.remove('active');
 		this.setLocation(location, query);
 	}
 }
