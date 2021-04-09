@@ -4,7 +4,7 @@ use Camagru\Model;
 
 /**
  * @property int $id
- * @property int $image
+ * @property int $creation
  * @property \DateTime $at
  */
 class Like extends Model
@@ -13,7 +13,7 @@ class Like extends Model
 	 * @var array
 	 */
 	protected static $fields = [
-		'image',
+		'creation',
 		'at',
 	];
 
@@ -21,7 +21,7 @@ class Like extends Model
 	 * @var array
 	 */
 	protected static $casts = [
-		'image' => Image::class,
+		'creation' => Creation::class,
 		'at' => 'date',
 	];
 }

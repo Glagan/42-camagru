@@ -4,7 +4,7 @@ use Camagru\Controller;
 use Camagru\Http\FileResponse;
 use Camagru\Http\Response;
 use Env;
-use Models\Image;
+use Models\Creation;
 
 class Upload extends Controller
 {
@@ -19,7 +19,7 @@ class Upload extends Controller
 	}
 
 	/**
-	 * @param int $id The Image ID
+	 * @param int $id The Creation ID
 	 * @return \Camagru\Http\FileResponse
 	 */
 	public function single(int $id): FileResponse
@@ -27,7 +27,7 @@ class Upload extends Controller
 		if ($id < 1) {
 			return $this->file($this->path('400.png'), Response::BAD_REQUEST);
 		}
-		$image = Image::get($id);
+		$image = Creation::get($id);
 		if ($image === false) {
 			return $this->file($this->path('404.png'), Response::NOT_FOUND);
 		}
