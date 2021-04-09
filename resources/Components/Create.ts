@@ -8,10 +8,8 @@ export type XYPosition = { x: number; y: number };
 
 const MIN_WIDTH = 854;
 const MAX_WIDTH = 2560;
-const OPTIMAL_WIDTH = 1920;
 const MIN_HEIGHT = 480;
 const MAX_HEIGHT = 1440;
-const OPTIMAL_HEIGHT = 1080;
 const LOADING_IMG =
 	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKAQMAAAC3/F3+AAAAA1BMVEUzzMx0ynDKAAAACklEQVR4XmPACwAAHgAB5s72BgAAAABJRU5ErkJggg==';
 const LOADING_VIDEO = `data:image/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAJ+EU2bdLtNu4tTq4QVSalmU6yB5U27jFOrhBZUrmtTrIIBHE27jFOrhBJUw2dTrIIBXE27jFOrhBxTu2tTrIICaOwBAAAAAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVJqWayKtexgw9CQE2AjUxhdmY1OC4yOS4xMDBXQY1MYXZmNTguMjkuMTAwRImIQEQAAAAAAAAWVK5ru64BAAAAAAAAMteBAXPFgQGcgQAitZyDdW5khoVWX1ZQOIOBASPjg4QCYloA4AEAAAAAAAAGsIEKuoEKElTDZ0C/c3MBAAAAAAAALmPAAQAAAAAAAABnyAEAAAAAAAAaRaOHRU5DT0RFUkSHjUxhdmY1OC4yOS4xMDBzcwEAAAAAAAA5Y8ABAAAAAAAABGPFgQFnyAEAAAAAAAAhRaOHRU5DT0RFUkSHlExhdmM1OC41NC4xMDAgbGlidnB4c3MBAAAAAAAAOmPAAQAAAAAAAARjxYEBZ8gBAAAAAAAAIkWjiERVUkFUSU9ORIeUMDA6MDA6MDAuMDQwMDAwMDAwAAAfQ7Z1wueBAKO9gQAAgLACAJ0BKgoACgAARwiFhYiFhIgCAgJ1qgP4Agz9KAD+90av/rgPzgPzgP5lv/8D9/gfv8D9/+BPABxTu2uRu4+zgQC3iveBAfGCAiHwgQM=`;
@@ -175,7 +173,10 @@ export class Create extends Component {
 	}
 
 	private getScale(): number {
-		return Math.max(this.preview.offsetWidth / OPTIMAL_WIDTH, this.preview.offsetHeight / OPTIMAL_HEIGHT);
+		return Math.max(
+			this.preview.offsetWidth / this.imagePreview.naturalWidth,
+			this.preview.offsetHeight / this.imagePreview.naturalHeight
+		);
 	}
 
 	private resize(): void {
@@ -227,7 +228,6 @@ export class Create extends Component {
 					// On next frame to wait for image to load
 					requestAnimationFrame(() => {
 						const [width, height] = [image.naturalWidth, image.naturalHeight];
-						console.log('found dimensions', width, height);
 						if (width < MIN_WIDTH || height < MIN_HEIGHT) {
 							Notification.show('warning', `Minimum dimensions are ${MIN_WIDTH}x${MIN_HEIGHT}px.`);
 							return;
@@ -291,7 +291,7 @@ export class Create extends Component {
 			);
 			this.decorationSelector.classList.add('active');
 		});
-		window.addEventListener('resize', this.resize, true);
+		window.addEventListener('resize', (_e) => this.resize(), true);
 	}
 
 	private createDecoration(decoration: Decoration, observer?: IntersectionObserver): HTMLElement {
@@ -317,7 +317,6 @@ export class Create extends Component {
 	private defaultPosition(decoration: Decoration, layer: HTMLElement): XYPosition {
 		const box = this.preview.getBoundingClientRect();
 		const dimensions = layer.getBoundingClientRect();
-		console.log('position for', box, dimensions);
 		const position = { x: 0, y: 0 };
 		switch (decoration.position) {
 			case 'top-right':
