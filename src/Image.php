@@ -64,6 +64,29 @@ class Image
 		$this->resource = $tmp;
 	}
 
+	public static function copy(\Image $image): \Image
+	{
+		$new = new Image();
+		$new->canvas($image->width(), $image->height());
+		$new->import($image);
+		return $new;
+	}
+
+	public function import(\Image $image): void
+	{
+		\imagecopy($this->resource, $image->resource, 0, 0, 0, 0, $this->width(), $this->height());
+	}
+
+	public function duplicate(): \Image
+	{
+		return Image::copy($this);
+	}
+
+	public function setAlphaBlending(bool $value): void
+	{
+		\imagealphablending($this->resource, $value);
+	}
+
 	public function width(): int
 	{
 		return \imagesx($this->resource);
@@ -82,7 +105,7 @@ class Image
 		$cut = Image::create($layer->width(), $layer->height());
 		\imagecopy($cut->resource, $this->resource, 0, 0, $x, $y, $layer->width(), $layer->height());
 		\imagecopy($cut->resource, $layer->resource, 0, 0, 0, 0, $layer->width(), $layer->height());
-		\imagecopymerge($this->resource, $cut->resource, $x, $y, 0, 0, $layer->width(), $layer->height(), 100);
+		\imagecopy($this->resource, $cut->resource, $x, $y, 0, 0, $layer->width(), $layer->height());
 	}
 
 	public function resize(int $width, int $height): void
