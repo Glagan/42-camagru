@@ -10,7 +10,7 @@ use Camagru\Model;
  * @property bool $private
  * @property \DateTime $at
  */
-class Image extends Model
+class Creation extends Model
 {
 	/**
 	 * @var array

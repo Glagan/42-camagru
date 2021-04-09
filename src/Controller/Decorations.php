@@ -4,7 +4,7 @@ use Camagru\Controller;
 use Camagru\Http\JSONResponse;
 use Models\Decoration as DecorationModel;
 
-class Decoration extends Controller
+class Decorations extends Controller
 {
 	/**
 	 * @return \Camagru\Http\JSONResponse

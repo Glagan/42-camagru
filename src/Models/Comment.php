@@ -4,7 +4,7 @@ use Camagru\Model;
 
 /**
  * @property int $id
- * @property int $image
+ * @property int $creation
  * @property int $user
  * @property \DateTime $at
  * @property string $message
@@ -15,7 +15,7 @@ class Comment extends Model
 	 * @var array
 	 */
 	protected static $fields = [
-		'image',
+		'creation',
 		'user',
 		'at',
 		'message',
@@ -25,7 +25,7 @@ class Comment extends Model
 	 * @var array
 	 */
 	protected static $casts = [
-		'image' => Image::class,
+		'creation' => Creation::class,
 		'user' => User::class,
 		'at' => 'date',
 	];

@@ -7,9 +7,11 @@ import { Http, InvalidHttpResponse } from '../Utility/Http';
 export type XYPosition = { x: number; y: number };
 
 const MIN_WIDTH = 854;
-const MAX_WIDTH = 1366;
+const MAX_WIDTH = 2560;
+const OPTIMAL_WIDTH = 1920;
 const MIN_HEIGHT = 480;
-const MAX_HEIGHT = 768;
+const MAX_HEIGHT = 1440;
+const OPTIMAL_HEIGHT = 1080;
 const LOADING_IMG =
 	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKAQMAAAC3/F3+AAAAA1BMVEUzzMx0ynDKAAAACklEQVR4XmPACwAAHgAB5s72BgAAAABJRU5ErkJggg==';
 const LOADING_VIDEO = `data:image/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAJ+EU2bdLtNu4tTq4QVSalmU6yB5U27jFOrhBZUrmtTrIIBHE27jFOrhBJUw2dTrIIBXE27jFOrhBxTu2tTrIICaOwBAAAAAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVJqWayKtexgw9CQE2AjUxhdmY1OC4yOS4xMDBXQY1MYXZmNTguMjkuMTAwRImIQEQAAAAAAAAWVK5ru64BAAAAAAAAMteBAXPFgQGcgQAitZyDdW5khoVWX1ZQOIOBASPjg4QCYloA4AEAAAAAAAAGsIEKuoEKElTDZ0C/c3MBAAAAAAAALmPAAQAAAAAAAABnyAEAAAAAAAAaRaOHRU5DT0RFUkSHjUxhdmY1OC4yOS4xMDBzcwEAAAAAAAA5Y8ABAAAAAAAABGPFgQFnyAEAAAAAAAAhRaOHRU5DT0RFUkSHlExhdmM1OC41NC4xMDAgbGlidnB4c3MBAAAAAAAAOmPAAQAAAAAAAARjxYEBZ8gBAAAAAAAAIkWjiERVUkFUSU9ORIeUMDA6MDA6MDAuMDQwMDAwMDAwAAAfQ7Z1wueBAKO9gQAAgLACAJ0BKgoACgAARwiFhYiFhIgCAgJ1qgP4Agz9KAD+90av/rgPzgPzgP5lv/8D9/gfv8D9/+BPABxTu2uRu4+zgQC3iveBAfGCAiHwgQM=`;
@@ -172,6 +174,18 @@ export class Create extends Component {
 		this.submit.disabled = false;
 	}
 
+	private getScale(): number {
+		return Math.max(this.preview.offsetWidth / OPTIMAL_WIDTH, this.preview.offsetHeight / OPTIMAL_HEIGHT);
+	}
+
+	private resize(): void {
+		if (this.dragState) {
+			const scale = this.getScale();
+			this.dragState.node.style.setProperty('--tw-scale-x', `${scale}`);
+			this.dragState.node.style.setProperty('--tw-scale-y', `${scale}`);
+		}
+	}
+
 	bind(): void {
 		this.videoPreview.addEventListener('loadedmetadata', (event) => {
 			this.videoPreview.play();
@@ -191,8 +205,8 @@ export class Create extends Component {
 				reader.addEventListener('load', () => {
 					const result = reader.result as string;
 					// Check size, approximation
-					if (3 * (result.length / 4) >= 5_000_000) {
-						Notification.show('danger', `Size limit is 5 MB.`);
+					if (3 * (result.length / 4) >= 10_000_000) {
+						Notification.show('danger', `Size limit is 10 MB.`);
 						return;
 					}
 					// Check extension
@@ -263,14 +277,12 @@ export class Create extends Component {
 						decoration: {
 							id: this.currentDecoration.id,
 							position: this.dragState.current,
-							scale: {
-								x: MAX_WIDTH / this.preview.offsetWidth,
-								y: MAX_HEIGHT / this.preview.offsetHeight,
-							},
 						},
+						scale: this.getScale(),
 					});
 					if (response.ok) {
-						Notification.show('success', `Nice.`);
+						Notification.show('success', `Image created.`);
+						//this.application.navigate(`/${response.body.id}`);
 					} else {
 						Notification.show('danger', `Could not upload creation: ${response.body.error}`);
 					}
@@ -279,6 +291,7 @@ export class Create extends Component {
 			);
 			this.decorationSelector.classList.add('active');
 		});
+		window.addEventListener('resize', this.resize, true);
 	}
 
 	private createDecoration(decoration: Decoration, observer?: IntersectionObserver): HTMLElement {
@@ -298,6 +311,27 @@ export class Create extends Component {
 		});
 		if (observer) observer.observe(node);
 		return node;
+	}
+
+	// TODO: Fix
+	private defaultPosition(decoration: Decoration, layer: HTMLElement): XYPosition {
+		const box = this.preview.getBoundingClientRect();
+		const dimensions = layer.getBoundingClientRect();
+		console.log('position for', box, dimensions);
+		const position = { x: 0, y: 0 };
+		switch (decoration.position) {
+			case 'top-right':
+				position.x = box.width - dimensions.width;
+				break;
+			case 'bottom-left':
+				position.y = box.height - dimensions.height;
+				break;
+			case 'bottom-right':
+				position.x = box.width - dimensions.width;
+				position.y = box.height - dimensions.height;
+				break;
+		}
+		return position;
 	}
 
 	private translate(node: HTMLElement, position: XYPosition): void {
@@ -355,22 +389,24 @@ export class Create extends Component {
 			event.preventDefault();
 			if (!this.decorationSelector.classList.contains('active')) return;
 
+			// Initialize
 			this.currentDecoration = decoration;
 			const layer = this.createDecoration(decoration);
-			this.dragState = {
-				node: layer,
-				initial: { x: 0, y: 0 },
-				active: false,
-				current: { x: 0, y: 0 },
-			};
+			this.dragState = { node: layer, initial: { x: 0, y: 0 }, active: false, current: { x: 0, y: 0 } };
+			DOM.clear(this.visibleDecorations);
+			this.visibleDecorations.appendChild(layer); // Append first
 
 			// Default position
-			this.translate(layer, { x: 0, y: 0 });
-
-			// Calculate ratio and update decorations -- ratio = WIDTH / previewWidth;
-			const ratio = { x: this.preview.offsetWidth / MAX_WIDTH, y: this.preview.offsetHeight / MAX_HEIGHT };
-			layer.style.setProperty('--tw-scale-x', `${ratio.x}`);
-			layer.style.setProperty('--tw-scale-y', `${ratio.y}`);
+			requestAnimationFrame(() => {
+				const position = this.defaultPosition(decoration, layer);
+				this.dragState.initial.x = position.x;
+				this.dragState.current.x = position.x;
+				this.dragState.initial.y = position.y;
+				this.dragState.current.y = position.y;
+				// TODO: Scale fit to container instead of optimal width
+				this.resize();
+				this.translate(layer, position);
+			});
 
 			// Adapted from https://www.kirupa.com/html5/drag.htm
 			layer.addEventListener('touchstart', (e) => this.dragStart(e), false);
@@ -379,9 +415,6 @@ export class Create extends Component {
 			layer.addEventListener('mousedown', (e) => this.dragStart(e), false);
 			layer.addEventListener('mouseup', (e) => this.dragEnd(e), false);
 			layer.addEventListener('mousemove', (e) => this.drag(e), false);
-
-			DOM.clear(this.visibleDecorations); // Remove with multiple decorations
-			this.visibleDecorations.appendChild(layer);
 		});
 		this.decorationSelector.appendChild(card);
 	}
@@ -414,5 +447,9 @@ export class Create extends Component {
 		this.submit.disabled = true;
 		DOM.append(this.parent, this.sourceSelection, this.previewRow, this.actions, this.decorationSelector);
 		this.cameraMode();
+	}
+
+	destroy(): void {
+		window.removeEventListener('resize', this.resize);
 	}
 }

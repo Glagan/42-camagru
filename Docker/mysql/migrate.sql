@@ -12,21 +12,21 @@ SET NAMES utf8mb4;
 DROP TABLE IF EXISTS `comments`;
 CREATE TABLE `comments` (
 	`id` bigint unsigned NOT NULL AUTO_INCREMENT,
-	`image` int unsigned NOT NULL,
+	`creation` int unsigned NOT NULL,
 	`user` int unsigned NOT NULL,
 	`message` text COLLATE utf8mb4_unicode_ci NOT NULL,
 	`at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`edited` datetime DEFAULT NULL,
 	`deleted` tinyint NOT NULL DEFAULT '0',
 	PRIMARY KEY (`id`),
-	KEY `image` (`image`),
+	KEY `creation` (`creation`),
 	KEY `user` (`user`),
-	CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`image`) REFERENCES `images` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`creation`) REFERENCES `creations` (`id`) ON DELETE CASCADE,
 	CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `images`;
-CREATE TABLE `images` (
+DROP TABLE IF EXISTS `creations`;
+CREATE TABLE `creations` (
 	`id` int unsigned NOT NULL AUTO_INCREMENT,
 	`user` int unsigned NOT NULL,
 	`name` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE `images` (
 	`at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`),
 	KEY `user` (`user`),
-	CONSTRAINT `images_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE
+	CONSTRAINT `creations_ibfk_1` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -43,12 +43,12 @@ DROP TABLE IF EXISTS `likes`;
 CREATE TABLE `likes` (
 	`id` bigint unsigned NOT NULL AUTO_INCREMENT,
 	`user` int unsigned NOT NULL,
-	`image` int unsigned NOT NULL,
+	`creation` int unsigned NOT NULL,
 	`at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`),
-	KEY `image` (`image`),
+	KEY `creation` (`creation`),
 	KEY `user` (`user`),
-	CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`image`) REFERENCES `images` (`id`) ON DELETE CASCADE,
+	CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`creation`) REFERENCES `creations` (`id`) ON DELETE CASCADE,
 	CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`user`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

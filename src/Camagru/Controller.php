@@ -97,6 +97,8 @@ abstract class Controller
 							throw new ValidateException("{$field} need to be an array.");
 						} else if ($validator['type'] == 'string' && !\is_string($value)) {
 							throw new ValidateException("{$field} need to be a string.");
+						} else if ($validator['type'] == 'int' && !\is_numeric($value)) {
+							throw new ValidateException("{$field} need to be an integer.");
 						}
 					}
 					// Validity

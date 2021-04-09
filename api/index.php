@@ -43,9 +43,9 @@ $router->group(Controller\Upload::class, function ($router) {
 	$router->get('/uploads/{id}', ['noPrefix' => true, 'use' => 'single']);
 });
 
-// Image
-$router->group(Controller\Image::class, function ($router) {
-	$router->post('/upload', ['auth' => true, 'use' => 'upload']); // TODO
+// Creations
+$router->post('/upload', ['auth' => true, 'use' => 'Controller\Create@upload']);
+$router->group(Controller\Creations::class, function ($router) {
 	$router->get('/list(?:/{page})?', ['use' => 'list']);
 	$router->get('/user/{id}(?:/{page})?', ['use' => 'user']);
 	$router->put('/{id}/like', ['auth' => true, 'use' => 'like']);
@@ -54,8 +54,8 @@ $router->group(Controller\Image::class, function ($router) {
 	$router->get('/{id}', ['use' => 'single']);
 });
 
-// Image
-$router->group(Controller\Decoration::class, function ($router) {
+// Decorations
+$router->group(Controller\Decorations::class, function ($router) {
 	$router->get('/decorations/{category:still|animated}', ['use' => 'filtered']);
 	$router->get('/decorations', ['use' => 'list']);
 });

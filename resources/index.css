@@ -256,8 +256,8 @@ input.error {
 }
 
 .preview-container {
-	max-width: 1366px;
-	max-height: 768px;
+	max-width: 2560px;
+	max-height: 1440px;
 }
 
 .preview {
