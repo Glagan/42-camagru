@@ -87,8 +87,8 @@ class Create extends Controller
 		$isAnimated = $decoration->animated;
 		$rawDecoration['animated'] = $decoration->animated;
 		$rawDecoration['name'] = $decoration->name;
-		$rawDecoration['positionX'] = \round($rawDecoration['position']['x']);
-		$rawDecoration['positionY'] = \round($rawDecoration['position']['y']);
+		$rawDecoration['x'] = \round($rawDecoration['position']['x']);
+		$rawDecoration['y'] = \round($rawDecoration['position']['y']);
 
 		// Static background
 		$image = Image::fromString($decodedUpload);
@@ -117,7 +117,7 @@ class Create extends Controller
 			// Add all decorations on the source
 			$ffmpeg = new FFMPEG();
 			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".webm";
-			$result = $ffmpeg->decorate($path, $rawDecoration, Env::get('Camagru', 'uploads') . "/{$output}");
+			$result = $ffmpeg->decorate($path, $rawDecoration, $scale, Env::get('Camagru', 'uploads') . "/{$output}");
 
 			// Clear
 			\unlink($path);
@@ -131,7 +131,7 @@ class Create extends Controller
 			$path = Env::get('Camagru', 'decorations') . "/{$rawDecoration['name']}";
 			$decorationResource = Image::fromString(\file_get_contents($path));
 			$decorationResource->resize($decorationResource->width() * $scale, $decorationResource->height() * $scale);
-			$image->merge($decorationResource, $rawDecoration['positionX'], $rawDecoration['positionY']);
+			$image->merge($decorationResource, $rawDecoration['x'], $rawDecoration['y']);
 			// Save
 			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".png";
 			$saved = $image->save(Env::get('Camagru', 'uploads') . "/{$output}");
