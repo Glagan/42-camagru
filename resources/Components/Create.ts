@@ -33,8 +33,8 @@ export class Create extends Component {
 	cancelCapture!: HTMLButtonElement;
 	submit!: HTMLButtonElement;
 	decorationSelector!: HTMLElement;
-	visibleDecorations!: HTMLElement;
 
+	visibleDecoration!: HTMLElement;
 	decorations: { still: Decoration[]; animated: Decoration[] } = { still: [], animated: [] };
 	dragState!: { node: HTMLElement; initial: XYPosition; active: boolean; current: XYPosition };
 	currentDecoration: Decoration | undefined;
@@ -42,14 +42,21 @@ export class Create extends Component {
 
 	create(): void {
 		this.layers = [];
-		this.videoPreview = DOM.create('video', { className: 'hidden preview', loop: true, autoplay: true, volume: 0 });
+		this.videoPreview = DOM.create('video', {
+			className: 'hidden preview',
+			loop: true,
+			autoplay: true,
+			volume: 0,
+			playsInline: true,
+			muted: true,
+		});
 		this.imagePreview = DOM.create('img', { className: 'hidden preview' });
 		this.allowCamera = Alert.make('info', 'Allow the Camera permission on the top left to be able to use it.');
 		this.noCamera = Alert.make('danger', 'Error while accessing your Camera.');
-		this.visibleDecorations = DOM.create('div', { className: 'preview-decorations' });
+		this.visibleDecoration = DOM.create('div', { className: 'preview-decorations' });
 		this.preview = DOM.create('div', {
 			className: 'relative preview-container',
-			childs: [this.videoPreview, this.imagePreview, this.allowCamera, this.noCamera, this.visibleDecorations],
+			childs: [this.videoPreview, this.imagePreview, this.allowCamera, this.noCamera, this.visibleDecoration],
 		});
 		// sticky top-4 z-30 && bg-gray-200 dark:bg-gray-600
 		this.previewRow = DOM.create('div', {
@@ -120,6 +127,9 @@ export class Create extends Component {
 
 	private cameraMode(): void {
 		this.hidePreviews();
+		DOM.clear(this.visibleDecoration);
+		delete this.currentDecoration;
+		this.imagePreview.src = '';
 		this.enableCapture();
 		this.submit.disabled = true;
 		this.allowCamera.classList.remove('hidden');
@@ -173,7 +183,12 @@ export class Create extends Component {
 	}
 
 	private getScale(): number {
-		// TODO: Camera mode has captures orcamera video feed size instead of image preview
+		if (this.videoPreview.readyState == 4 && this.imagePreview.src != '') {
+			return Math.min(
+				this.preview.offsetWidth / this.videoPreview.videoWidth,
+				this.preview.offsetHeight / this.videoPreview.videoHeight
+			);
+		}
 		return Math.min(
 			this.preview.offsetWidth / this.imagePreview.naturalWidth,
 			this.preview.offsetHeight / this.imagePreview.naturalHeight
@@ -261,6 +276,7 @@ export class Create extends Component {
 			this.videoPreview.play();
 			this.capture.classList.remove('hidden');
 			this.cancelCapture.classList.add('hidden');
+			this.imagePreview.src = '';
 			this.submit.disabled = true;
 		});
 		this.submit.addEventListener('click', async (event) => {
@@ -310,6 +326,8 @@ export class Create extends Component {
 			autoplay: true,
 			loop: true,
 			volume: 0,
+			playsInline: true,
+			muted: true,
 		});
 		if (observer) observer.observe(node);
 		return node;
@@ -394,8 +412,8 @@ export class Create extends Component {
 			this.currentDecoration = decoration;
 			const layer = this.createDecoration(decoration);
 			this.dragState = { node: layer, initial: { x: 0, y: 0 }, active: false, current: { x: 0, y: 0 } };
-			DOM.clear(this.visibleDecorations);
-			this.visibleDecorations.appendChild(layer); // Append first
+			DOM.clear(this.visibleDecoration);
+			this.visibleDecoration.appendChild(layer); // Append first
 
 			// Default position
 			requestAnimationFrame(() => {
