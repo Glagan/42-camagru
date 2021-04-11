@@ -173,7 +173,8 @@ export class Create extends Component {
 	}
 
 	private getScale(): number {
-		return Math.max(
+		// TODO: Camera mode has captures orcamera video feed size instead of image preview
+		return Math.min(
 			this.preview.offsetWidth / this.imagePreview.naturalWidth,
 			this.preview.offsetHeight / this.imagePreview.naturalHeight
 		);
@@ -277,6 +278,7 @@ export class Create extends Component {
 						decoration: {
 							id: this.currentDecoration.id,
 							position: this.dragState.current,
+							size: { width: this.dragState.node.offsetWidth, height: this.dragState.node.offsetHeight },
 						},
 						scale: this.getScale(),
 					});
@@ -402,7 +404,6 @@ export class Create extends Component {
 				this.dragState.current.x = position.x;
 				this.dragState.initial.y = position.y;
 				this.dragState.current.y = position.y;
-				// TODO: Scale fit to container instead of optimal width
 				this.resize();
 				this.translate(layer, position);
 			});

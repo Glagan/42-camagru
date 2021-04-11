@@ -64,29 +64,6 @@ class Image
 		$this->resource = $tmp;
 	}
 
-	public static function copy(\Image $image): \Image
-	{
-		$new = new Image();
-		$new->canvas($image->width(), $image->height());
-		$new->import($image);
-		return $new;
-	}
-
-	public function import(\Image $image): void
-	{
-		\imagecopy($this->resource, $image->resource, 0, 0, 0, 0, $this->width(), $this->height());
-	}
-
-	public function duplicate(): \Image
-	{
-		return Image::copy($this);
-	}
-
-	public function setAlphaBlending(bool $value): void
-	{
-		\imagealphablending($this->resource, $value);
-	}
-
 	public function width(): int
 	{
 		return \imagesx($this->resource);

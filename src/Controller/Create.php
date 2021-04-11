@@ -71,7 +71,11 @@ class Create extends Controller
 			&& \array_key_exists('position', $rawDecoration)
 			&& \is_array($rawDecoration['position'])
 			&& \array_key_exists('x', $rawDecoration['position'])
-			&& \array_key_exists('y', $rawDecoration['position']));
+			&& \array_key_exists('y', $rawDecoration['position'])
+			&& \array_key_exists('size', $rawDecoration)
+			&& \is_array($rawDecoration['size'])
+			&& \array_key_exists('width', $rawDecoration['size'])
+			&& \array_key_exists('height', $rawDecoration['size']));
 		if (!$validDecoration) {
 			return $this->json(['error' => 'You need to add one valid Decoration.'], Response::BAD_REQUEST);
 		}
@@ -87,8 +91,12 @@ class Create extends Controller
 		$isAnimated = $decoration->animated;
 		$rawDecoration['animated'] = $decoration->animated;
 		$rawDecoration['name'] = $decoration->name;
-		$rawDecoration['x'] = \round($rawDecoration['position']['x']);
-		$rawDecoration['y'] = \round($rawDecoration['position']['y']);
+		$scale = $this->input->get('scale');
+		if ($scale <= 0) {
+			return $this->json(['error' => 'The Image scale must be more than 0.'], Response::BAD_REQUEST);
+		}
+		$rawDecoration['x'] = \round($rawDecoration['position']['x'] / $scale);
+		$rawDecoration['y'] = \round($rawDecoration['position']['y'] / $scale);
 
 		// Static background
 		$image = Image::fromString($decodedUpload);
@@ -102,7 +110,6 @@ class Create extends Controller
 			return $this->json(['error' => "Maximum dimensions are " . self::MAX_WIDTH . "x" . self::MAX_HEIGHT . "px."], Response::BAD_REQUEST);
 		}
 		$now = (new \DateTime())->format('His');
-		$scale = $this->input->get('scale');
 
 		// Animated upload
 		if ($isAnimated) {
@@ -129,9 +136,11 @@ class Create extends Controller
 		else {
 			// Load decoration
 			$path = Env::get('Camagru', 'decorations') . "/{$rawDecoration['name']}";
-			$decorationResource = Image::fromString(\file_get_contents($path));
-			$decorationResource->resize($decorationResource->width() * $scale, $decorationResource->height() * $scale);
-			$image->merge($decorationResource, $rawDecoration['x'], $rawDecoration['y']);
+			$dResource = Image::fromString(\file_get_contents($path));
+			$dSize = $rawDecoration['size'];
+			$dScale = \min($dSize['width'] / $dResource->width(), $dSize['height'] / $dResource->height());
+			$dResource->resize(\round($dResource->width() * $dScale), \round($dResource->height() * $dScale));
+			$image->merge($dResource, $rawDecoration['x'], $rawDecoration['y']);
 			// Save
 			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".png";
 			$saved = $image->save(Env::get('Camagru', 'uploads') . "/{$output}");
