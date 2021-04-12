@@ -10,7 +10,7 @@ class FFMPEG
 	public function decorate(string $source, array $decoration, int $scale, string $output): bool
 	{
 		$filter = ["[0]format=rgba[background];"];
-		$filter[] = "[1:v]format=rgba,scale=iw*{$scale}:ih*{$scale}[decoration];";
+		$filter[] = "[1:v]format=rgba[decoration];";
 		$filter[] = "[background][decoration]overlay={$decoration['x']}:{$decoration['y']}";
 		$filter = \implode('', $filter);
 		$command = ["ffmpeg"];

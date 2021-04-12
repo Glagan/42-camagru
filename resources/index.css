@@ -280,6 +280,7 @@ input.error {
 .preview-decorations video {
 	@apply transform-gpu;
 	transform-origin: top left;
+	max-width: none;
 }
 
 .decorations {
