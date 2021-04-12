@@ -12,7 +12,7 @@ export class List extends Component {
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: '# All' });
-		this.imageList = new ImageList(this.application, []);
+		this.imageList = new ImageList(this.application, '/api/list');
 	}
 
 	async data() {

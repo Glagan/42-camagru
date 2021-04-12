@@ -14,22 +14,25 @@ export class SingleUser extends Component {
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: '# All' });
-		this.imageList = new ImageList(this.application, []);
+		this.imageList = new ImageList(this.application, '');
 	}
 
 	async data(params: RegExpMatchArray) {
 		const id = parseInt(params[1]);
 		if (!isNaN(id) && id > 0) {
 			this.id = id;
-		}
-		const response = await Http.get<{ user: PublicUser; images: ImageModel[] }>(`/api/user/${this.id}`);
-		if (response.ok) {
-			this.user = response.body.user;
-			this.imageList.images = response.body.images;
+			this.imageList.url = `/api/user/${this.id}`;
+			const response = await Http.get<{ user: PublicUser; images: ImageModel[] }>(`/api/user/${this.id}`);
+			if (response.ok) {
+				this.user = response.body.user;
+				this.imageList.images = response.body.images;
+			} else {
+				this.imageList.images = [];
+				this.dataError = response;
+				Notification.show('danger', response.body.error);
+			}
 		} else {
-			this.imageList.images = [];
-			this.dataError = response;
-			Notification.show('danger', response.body.error);
+			this.dataError = { ok: false, headers: {}, status: 400, body: { error: 'Invalid User ID.' } };
 		}
 	}
 
