@@ -31,7 +31,7 @@ export class Application {
 			this.navigation.parent.classList.toggle('active');
 		});
 		this.main = document.getElementById('content')!;
-		this.loading = DOM.create('div');
+		this.loading = document.getElementById('loading')!;
 		this.router = router;
 		this.page = '';
 		this.pageNotFound = new PageNotFound(this, this.main);
@@ -61,7 +61,6 @@ export class Application {
 	}
 
 	private async createComponent(route: Route, params: RegExpMatchArray): Promise<Component> {
-		// TODO: "Loading" Component
 		const _class = route.component;
 		if (_class.auth !== undefined) {
 			const loggedIn = await this.auth.isLoggedIn;
@@ -96,6 +95,8 @@ export class Application {
 			return;
 		}
 		this.currentMatch = match;
+		DOM.clear(this.main);
+		DOM.append(this.main, this.loading);
 		const component = await this.createComponent(match.route, match.params);
 		this.renderComponent(component);
 	}

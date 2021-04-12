@@ -127,7 +127,13 @@ button.secondary:disabled,
 }
 
 #content {
-	@apply flex-grow flex-shrink-0 p-4 w-full md:w-9/12 mb-16 md:mb-0;
+	@apply relative flex-grow flex-shrink-0 p-4 w-full md:w-9/12 mb-16 md:mb-0;
+}
+
+#loading {
+	@apply transform-gpu absolute m-auto top-1/2 left-1/2;
+	--tw-translate-x: -50%;
+	--tw-translate-y: -50%;
 }
 
 .header {
