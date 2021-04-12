@@ -183,7 +183,7 @@ class Query
 			} else if (\is_string($key)) {
 				if ($isArray) {
 					// Check if the value is an array for an IN condition if there is only 2 arguments
-					if (\count($value) === 2) {
+					if (\count($value) === 2 && Operator::isOperator($value[0])) {
 						$conditions[] = ['column' => $key, 'operator' => $value[0], 'value' => $value[1]];
 					}
 					// Consider an array value as an IN condition
