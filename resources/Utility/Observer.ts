@@ -1,5 +1,5 @@
 export class Observer {
-	static get() {
+	static get(callback?: (node: HTMLElement) => Promise<void>) {
 		// https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
 		return new IntersectionObserver((entries, observer) => {
 			for (const entry of entries) {
@@ -7,6 +7,7 @@ export class Observer {
 				const img = entry.target as HTMLImageElement;
 				img.src = img.dataset.src!;
 				observer.unobserve(entry.target);
+				if (callback) callback(img);
 			}
 		});
 	}

@@ -77,6 +77,11 @@ class Creations extends Controller
 			$result[] = $image->toArray(self::MODEL_COLUMNS);
 		}
 
+		if ($page > 1) {
+			return $this->json([
+				'images' => $result,
+			]);
+		}
 		return $this->json([
 			'user' => $user->toArray(['id', 'username', 'verified']),
 			'images' => $result,
