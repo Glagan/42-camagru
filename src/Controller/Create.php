@@ -6,6 +6,7 @@ use Camagru\Http\Response;
 use Env;
 use FFMPEG;
 use Image;
+use Log;
 use Models\Creation;
 use Models\Decoration;
 
@@ -71,11 +72,7 @@ class Create extends Controller
 			&& \array_key_exists('position', $rawDecoration)
 			&& \is_array($rawDecoration['position'])
 			&& \array_key_exists('x', $rawDecoration['position'])
-			&& \array_key_exists('y', $rawDecoration['position'])
-			&& \array_key_exists('size', $rawDecoration)
-			&& \is_array($rawDecoration['size'])
-			&& \array_key_exists('width', $rawDecoration['size'])
-			&& \array_key_exists('height', $rawDecoration['size']));
+			&& \array_key_exists('y', $rawDecoration['position']));
 		if (!$validDecoration) {
 			return $this->json(['error' => 'You need to add one valid Decoration.'], Response::BAD_REQUEST);
 		}
@@ -111,6 +108,8 @@ class Create extends Controller
 		}
 		$now = (new \DateTime())->format('His');
 
+		Log::debug('position ' . $rawDecoration['x'] . 'x' . $rawDecoration['y'] . "\nscale " . $scale);
+
 		// Animated upload
 		if ($isAnimated) {
 			// Save backgrond image for FFMPEG
@@ -136,11 +135,8 @@ class Create extends Controller
 		else {
 			// Load decoration
 			$path = Env::get('Camagru', 'decorations') . "/{$rawDecoration['name']}";
-			$dResource = Image::fromString(\file_get_contents($path));
-			$dSize = $rawDecoration['size'];
-			$dScale = \min($dSize['width'] / $dResource->width(), $dSize['height'] / $dResource->height());
-			$dResource->resize(\round($dResource->width() * $dScale), \round($dResource->height() * $dScale));
-			$image->merge($dResource, $rawDecoration['x'], $rawDecoration['y']);
+			$decorationResource = Image::fromString(\file_get_contents($path));
+			$image->merge($decorationResource, $rawDecoration['x'], $rawDecoration['y']);
 			// Save
 			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".png";
 			$saved = $image->save(Env::get('Camagru', 'uploads') . "/{$output}");

@@ -184,15 +184,9 @@ export class Create extends Component {
 
 	private getScale(): number {
 		if (this.videoPreview.readyState == 4 && this.imagePreview.src != '') {
-			return Math.min(
-				this.preview.offsetWidth / this.videoPreview.videoWidth,
-				this.preview.offsetHeight / this.videoPreview.videoHeight
-			);
+			return this.preview.offsetWidth / this.videoPreview.videoWidth;
 		}
-		return Math.min(
-			this.preview.offsetWidth / this.imagePreview.naturalWidth,
-			this.preview.offsetHeight / this.imagePreview.naturalHeight
-		);
+		return this.preview.offsetWidth / this.imagePreview.naturalWidth;
 	}
 
 	private resize(): void {
@@ -248,7 +242,6 @@ export class Create extends Component {
 					// On next frame to wait for image to load
 					let tries = 0;
 					while (tries < 5 && (image.naturalWidth === 0 || image.naturalHeight === 0)) {
-						console.log('try to find image dimension for the', tries, 'time');
 						const [width, height] = await new Promise((resolve) =>
 							requestAnimationFrame(() => resolve([image.naturalWidth, image.naturalHeight]))
 						);
@@ -306,11 +299,7 @@ export class Create extends Component {
 					}
 					const response = await Http.post<{ success: string; id: number }>('/api/upload', {
 						upload: this.imagePreview.src,
-						decoration: {
-							id: this.currentDecoration.id,
-							position: this.dragState.current,
-							size: { width: this.dragState.node.offsetWidth, height: this.dragState.node.offsetHeight },
-						},
+						decoration: { id: this.currentDecoration.id, position: this.dragState.current },
 						scale: this.getScale(),
 					});
 					if (response.ok) {
