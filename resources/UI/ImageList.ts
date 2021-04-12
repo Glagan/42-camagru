@@ -1,6 +1,8 @@
 import { Application } from '../Application';
 import { DOM } from '../Utility/DOM';
+import { Observer } from '../Utility/Observer';
 import { Alert } from './Alert';
+import { LOADING_IMG, LOADING_VIDEO } from './Loading';
 
 export class ImageList {
 	application: Application;
@@ -22,13 +24,16 @@ export class ImageList {
 			this.grid.appendChild(alert);
 			return;
 		} else {
+			const observer = Observer.get();
 			for (const image of this.images) {
 				const display = DOM.create(image.animated ? 'video' : 'img', {
-					src: `/uploads/${image.id}`,
+					src: image.animated ? LOADING_VIDEO : LOADING_IMG,
+					dataset: { src: `/uploads/${image.id}` },
 					autoplay: true,
 					loop: true,
 					volume: 0,
 				});
+				observer.observe(display);
 				const link = DOM.create('a', { href: `/${image.id}`, childs: [display] });
 				const card = DOM.create('div', { className: 'card', childs: [link] });
 				link.addEventListener('click', (event) => {

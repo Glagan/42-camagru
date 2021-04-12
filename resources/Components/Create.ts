@@ -1,8 +1,10 @@
 import { Component } from '../Component';
 import { Alert } from '../UI/Alert';
+import { LOADING_IMG, LOADING_VIDEO } from '../UI/Loading';
 import { Notification } from '../UI/Notification';
 import { DOM } from '../Utility/DOM';
 import { Http, InvalidHttpResponse } from '../Utility/Http';
+import { Observer } from '../Utility/Observer';
 
 export type XYPosition = { x: number; y: number };
 
@@ -10,9 +12,6 @@ const MIN_WIDTH = 854;
 const MAX_WIDTH = 2560;
 const MIN_HEIGHT = 480;
 const MAX_HEIGHT = 1440;
-const LOADING_IMG =
-	'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKAQMAAAC3/F3+AAAAA1BMVEUzzMx0ynDKAAAACklEQVR4XmPACwAAHgAB5s72BgAAAABJRU5ErkJggg==';
-const LOADING_VIDEO = `data:image/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAJ+EU2bdLtNu4tTq4QVSalmU6yB5U27jFOrhBZUrmtTrIIBHE27jFOrhBJUw2dTrIIBXE27jFOrhBxTu2tTrIICaOwBAAAAAAAAnAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABVJqWayKtexgw9CQE2AjUxhdmY1OC4yOS4xMDBXQY1MYXZmNTguMjkuMTAwRImIQEQAAAAAAAAWVK5ru64BAAAAAAAAMteBAXPFgQGcgQAitZyDdW5khoVWX1ZQOIOBASPjg4QCYloA4AEAAAAAAAAGsIEKuoEKElTDZ0C/c3MBAAAAAAAALmPAAQAAAAAAAABnyAEAAAAAAAAaRaOHRU5DT0RFUkSHjUxhdmY1OC4yOS4xMDBzcwEAAAAAAAA5Y8ABAAAAAAAABGPFgQFnyAEAAAAAAAAhRaOHRU5DT0RFUkSHlExhdmM1OC41NC4xMDAgbGlidnB4c3MBAAAAAAAAOmPAAQAAAAAAAARjxYEBZ8gBAAAAAAAAIkWjiERVUkFUSU9ORIeUMDA6MDA6MDAuMDQwMDAwMDAwAAAfQ7Z1wueBAKO9gQAAgLACAJ0BKgoACgAARwiFhYiFhIgCAgJ1qgP4Agz9KAD+90av/rgPzgPzgP5lv/8D9/gfv8D9/+BPABxTu2uRu4+zgQC3iveBAfGCAiHwgQM=`;
 
 export class Create extends Component {
 	static auth = true;
@@ -303,7 +302,7 @@ export class Create extends Component {
 					});
 					if (response.ok) {
 						Notification.show('success', `Image created.`);
-						//this.application.navigate(`/${response.body.id}`);
+						this.application.navigate(`/${response.body.id}`);
 					} else {
 						Notification.show('danger', `Could not upload creation: ${response.body.error}`);
 					}
@@ -478,15 +477,7 @@ export class Create extends Component {
 			this.genericError(`${this.dataError.status}`, 'Error', this.dataError.body.error);
 			return;
 		}
-		// https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
-		const observer = new IntersectionObserver((entries, observer) => {
-			for (const entry of entries) {
-				if (!entry.isIntersecting) return;
-				const img = entry.target as HTMLImageElement;
-				img.src = img.dataset.src!;
-				observer.unobserve(entry.target);
-			}
-		});
+		const observer = Observer.get();
 		for (const decoration of this.decorations.still) {
 			this.displayDecoration(decoration, observer);
 		}
