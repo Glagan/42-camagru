@@ -138,8 +138,12 @@ button.secondary:disabled,
 	@apply transition cursor-pointer;
 }
 
-.card img {
+.card img,
+.card video {
 	@apply shadow-md hover:shadow-lg;
+	min-width: 100px;
+	min-height: 100px;
+	object-fit: contain;
 }
 
 form {

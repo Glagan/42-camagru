@@ -79,19 +79,7 @@ class Image
 	 **/
 	public function merge(\Image $layer, int $x, int $y): void
 	{
-		$cut = Image::create($layer->width(), $layer->height());
-		\imagecopy($cut->resource, $this->resource, 0, 0, $x, $y, $layer->width(), $layer->height());
-		\imagecopy($cut->resource, $layer->resource, 0, 0, 0, 0, $layer->width(), $layer->height());
-		\imagecopy($this->resource, $cut->resource, $x, $y, 0, 0, $layer->width(), $layer->height());
-	}
-
-	public function resize(int $width, int $height): void
-	{
-		$tmp = Image::create($width, $height);
-		\imagecopyresampled($tmp->resource, $this->resource, 0, 0, 0, 0, $width, $height, $this->width(), $this->height());
-		\imagedestroy($this->resource);
-		$this->resource = $tmp->resource;
-		$tmp->resource = null; // Avoid resource reference being destroyed
+		\imagecopy($this->resource, $layer->resource, $x, $y, 0, 0, $layer->width(), $layer->height());
 	}
 
 	public function save(string $path): bool
