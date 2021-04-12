@@ -25,7 +25,7 @@ export class Validator {
 	}
 
 	static username(value: string): string | true {
-		return value.length < 4 ? 'Username is too short.' : true;
+		return value.length < 3 ? 'Username is too short.' : true;
 	}
 
 	static email(value: string): string | true {

@@ -20,7 +20,7 @@ class Authentication extends Controller
 	{
 		$this->validate([
 			'username' => [
-				'min' => 4,
+				'min' => 3,
 				'max' => 100,
 			],
 			'email' => [
@@ -114,7 +114,7 @@ class Authentication extends Controller
 	{
 		$this->validate([
 			'username' => [
-				'min' => 4,
+				'min' => 3,
 				'max' => 100,
 			],
 			'password' => [

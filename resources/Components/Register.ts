@@ -30,7 +30,7 @@ export class Register extends Component {
 			id: 'register-username',
 			name: 'username',
 			placeholder: 'Username',
-			min: '4',
+			min: '3',
 			max: '100',
 			required: true,
 		});
