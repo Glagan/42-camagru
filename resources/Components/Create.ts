@@ -219,7 +219,7 @@ export class Create extends Component {
 			if (this.uploadInput.value && this.uploadInput.files?.length) {
 				const reader = new FileReader();
 				reader.readAsDataURL(this.uploadInput.files[0]);
-				reader.addEventListener('load', () => {
+				reader.addEventListener('load', async () => {
 					const result = reader.result as string;
 					// Check size, approximation
 					if (3 * (result.length / 4) >= 10_000_000) {
@@ -238,23 +238,38 @@ export class Create extends Component {
 						Notification.show('danger', `You can only add png, jpeg, jpg, webp or bmp files.`);
 						return;
 					}
+					// Remove video preview if there was one
+					this.videoPreview.pause();
+					this.videoPreview.removeAttribute('src');
+					this.videoPreview.load();
 					// Check dimensions
 					const image = new Image();
 					image.src = result;
 					// On next frame to wait for image to load
-					requestAnimationFrame(() => {
-						const [width, height] = [image.naturalWidth, image.naturalHeight];
-						if (width < MIN_WIDTH || height < MIN_HEIGHT) {
-							Notification.show('warning', `Minimum dimensions are ${MIN_WIDTH}x${MIN_HEIGHT}px.`);
-							return;
+					let tries = 0;
+					while (tries < 5 && (image.naturalWidth === 0 || image.naturalHeight === 0)) {
+						console.log('try to find image dimension for the', tries, 'time');
+						const [width, height] = await new Promise((resolve) =>
+							requestAnimationFrame(() => resolve([image.naturalWidth, image.naturalHeight]))
+						);
+						if (image.naturalWidth > 0 && image.naturalHeight > 0) {
+							if (width < MIN_WIDTH || height < MIN_HEIGHT) {
+								Notification.show('warning', `Minimum dimensions are ${MIN_WIDTH}x${MIN_HEIGHT}px.`);
+								return;
+							}
+							if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+								Notification.show('warning', `Maximum dimensions are ${MAX_WIDTH}x${MAX_HEIGHT}px.`);
+								return;
+							}
 						}
-						if (width > MAX_WIDTH || height > MAX_HEIGHT) {
-							Notification.show('warning', `Maximum dimensions are ${MAX_WIDTH}x${MAX_HEIGHT}px.`);
-							return;
-						}
-						// Display
-						this.uploadMode(result);
-					});
+						tries++;
+					}
+					if (tries >= 5) {
+						Notification.show('danger', `Failed to find Image dimensions.`);
+						return;
+					}
+					// Display
+					this.uploadMode(result);
 				});
 			}
 		});
