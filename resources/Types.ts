@@ -24,7 +24,16 @@ interface ImageModel {
 	at: string;
 }
 
-type DecorationPosition = 'top-left' | 'top-right' | 'bottom-right' | 'bottom-left';
+type DecorationPosition =
+	| 'top-left'
+	| 'top-right'
+	| 'top-center'
+	| 'center-center'
+	| 'center-left'
+	| 'center-right'
+	| 'bottom-left'
+	| 'bottom-right'
+	| 'bottom-center';
 interface Decoration {
 	id: number;
 	name: string;

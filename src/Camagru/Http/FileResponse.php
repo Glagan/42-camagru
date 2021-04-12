@@ -21,7 +21,6 @@ class FileResponse extends Response
 	 */
 	public function loadFile($path): self
 	{
-		// TODO: Handle errors
 		if (!\file_exists($path)) {
 			return $this;
 		}

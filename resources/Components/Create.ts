@@ -221,14 +221,13 @@ export class Create extends Component {
 						return;
 					}
 					// Check extension
-					const mime = /data:(image|video)\/([a-zA-Z]{2,5});base64,/.exec(result);
-					if (mime === null || mime[1] == 'video') {
+					const mime = /data:image\/([a-zA-Z]{2,5});base64,/.exec(result);
+					if (mime === null) {
 						Notification.show('danger', `No valid file type found.`);
 						return;
 					}
-					const type = mime[1].toLocaleLowerCase();
-					const extension = mime[2].toLocaleLowerCase();
-					if (type !== 'image' || ['png', 'jpeg', 'jpg', 'webp', 'bmp'].indexOf(extension) < 0) {
+					const extension = mime[1].toLocaleLowerCase();
+					if (['png', 'jpeg', 'jpg', 'webp', 'bmp'].indexOf(extension) < 0) {
 						Notification.show('danger', `You can only add png, jpeg, jpg, webp or bmp files.`);
 						return;
 					}
@@ -239,7 +238,7 @@ export class Create extends Component {
 					// Check dimensions
 					const image = new Image();
 					image.src = result;
-					// On next frame to wait for image to load
+					// Wait for the image to load, no events with base64 images
 					let tries = 0;
 					while (tries < 5 && (image.naturalWidth === 0 || image.naturalHeight === 0)) {
 						const [width, height] = await new Promise((resolve) =>
@@ -337,21 +336,52 @@ export class Create extends Component {
 		return node;
 	}
 
-	// TODO: Fix
-	private defaultPosition(decoration: Decoration, layer: HTMLElement): XYPosition {
-		const box = this.preview.getBoundingClientRect();
-		const dimensions = layer.getBoundingClientRect();
+	private async defaultPosition(decoration: Decoration, layer: HTMLElement): Promise<XYPosition> {
 		const position = { x: 0, y: 0 };
+		// Nothing to wait for if the position is top left
+		if (decoration.position === 'top-left') {
+			return position;
+		}
+		// Wait for the Video or Image to load to have the real dimensions
+		if (
+			(layer.tagName === 'IMG' && !(layer as HTMLImageElement).complete) ||
+			(layer.tagName === 'VIDEO' && (layer as HTMLVideoElement).readyState !== 4)
+		) {
+			await new Promise<void>((resolve) => {
+				layer.addEventListener('loadeddata', () => resolve());
+			});
+		}
+		// We need the translation computed position of the decoration
+		const node = layer.getBoundingClientRect();
 		switch (decoration.position) {
+			case 'top-center':
+				position.x = this.preview.offsetWidth / 2 - node.width / 2;
+				break;
 			case 'top-right':
-				position.x = box.width - dimensions.width;
+				position.x = this.preview.offsetWidth - node.width;
+				break;
+			case 'center-left':
+				position.x = this.preview.offsetWidth / 2 - node.width / 2;
+				position.y = this.preview.offsetHeight - node.height;
+				break;
+			case 'center-center':
+				position.x = this.preview.offsetWidth / 2 - node.width / 2;
+				position.y = this.preview.offsetHeight / 2 - node.height / 2;
+				break;
+			case 'center-right':
+				position.x = this.preview.offsetWidth - node.width;
+				position.y = this.preview.offsetHeight / 2 - node.height / 2;
 				break;
 			case 'bottom-left':
-				position.y = box.height - dimensions.height;
+				position.y = this.preview.offsetHeight - node.height;
+				break;
+			case 'bottom-center':
+				position.y = this.preview.offsetHeight - node.height;
+				position.x = this.preview.offsetWidth / 2 - node.width / 2;
 				break;
 			case 'bottom-right':
-				position.x = box.width - dimensions.width;
-				position.y = box.height - dimensions.height;
+				position.x = this.preview.offsetWidth - node.width;
+				position.y = this.preview.offsetHeight - node.height;
 				break;
 		}
 		return position;
@@ -419,17 +449,6 @@ export class Create extends Component {
 			DOM.clear(this.visibleDecoration);
 			this.visibleDecoration.appendChild(layer); // Append first
 
-			// Default position
-			requestAnimationFrame(() => {
-				const position = this.defaultPosition(decoration, layer);
-				this.dragState.initial.x = position.x;
-				this.dragState.current.x = position.x;
-				this.dragState.initial.y = position.y;
-				this.dragState.current.y = position.y;
-				this.resize();
-				this.translate(layer, position);
-			});
-
 			// Adapted from https://www.kirupa.com/html5/drag.htm
 			layer.addEventListener('touchstart', (e) => this.dragStart(e), false);
 			layer.addEventListener('touchend', (e) => this.dragEnd(e), false);
@@ -437,6 +456,15 @@ export class Create extends Component {
 			layer.addEventListener('mousedown', (e) => this.dragStart(e), false);
 			layer.addEventListener('mouseup', (e) => this.dragEnd(e), false);
 			layer.addEventListener('mousemove', (e) => this.drag(e), false);
+
+			// Default position
+			requestAnimationFrame(async () => {
+				this.resize();
+				const position = await this.defaultPosition(decoration, layer);
+				this.dragState.initial = { ...position };
+				this.dragState.current = { ...position };
+				this.translate(layer, position);
+			});
 		});
 		this.decorationSelector.appendChild(card);
 	}
