@@ -11,7 +11,18 @@
 	<div class="max-w-full xl:container w-full xl:w-9/12 mx-auto">
 		<div class="flex flex-column md:flex-row flex-wrap md:flex-nowrap justify-between">
 			<div id="navigation"></div>
-			<div id="content"></div>
+			<div id="content">
+				<svg id="loading" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="shape-rendering: auto;" width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+					<circle cx="50" cy="50" r="0" fill="none" stroke="#93dbe9" stroke-width="2">
+						<animate attributeName="r" repeatCount="indefinite" dur="1s" values="0;40" keyTimes="0;1" keySplines="0 0.2 0.8 1" calcMode="spline" begin="0s"></animate>
+						<animate attributeName="opacity" repeatCount="indefinite" dur="1s" values="1;0" keyTimes="0;1" keySplines="0.2 0 0.8 1" calcMode="spline" begin="0s"></animate>
+					</circle>
+					<circle cx="50" cy="50" r="0" fill="none" stroke="#689cc5" stroke-width="2">
+						<animate attributeName="r" repeatCount="indefinite" dur="1s" values="0;40" keyTimes="0;1" keySplines="0 0.2 0.8 1" calcMode="spline" begin="-0.5s"></animate>
+						<animate attributeName="opacity" repeatCount="indefinite" dur="1s" values="1;0" keyTimes="0;1" keySplines="0.2 0 0.8 1" calcMode="spline" begin="-0.5s"></animate>
+					</circle>
+				</svg>
+			</div>
 			<div id="small-navigation"></div>
 		</div>
 	</div>
