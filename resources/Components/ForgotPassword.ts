@@ -15,7 +15,7 @@ export class ForgotPassword extends Component {
 	email!: HTMLInputElement;
 	footer!: HTMLElement;
 	submit!: HTMLButtonElement;
-	codePage!: HTMLButtonElement;
+	codePage!: HTMLAnchorElement;
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: 'Password Reset' });
@@ -35,7 +35,7 @@ export class ForgotPassword extends Component {
 			required: true,
 		});
 		this.submit = DOM.button('primary', 'at-symbol', 'Send Reset Link');
-		this.codePage = DOM.button('secondary', 'clipboard-list', 'I already have a code');
+		this.codePage = DOM.link('secondary', 'clipboard-list', 'I already have a code', '/reset-password');
 		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit, this.codePage] });
 		this.form = DOM.create('form', {
 			className: 'flex flex-col flex-wrap items-stretch',
@@ -45,7 +45,7 @@ export class ForgotPassword extends Component {
 	}
 
 	bind(): void {
-		this.link(this.codePage, '/reset-password');
+		this.link(this.codePage);
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
 			this.runOnce(

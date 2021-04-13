@@ -13,15 +13,15 @@ export class Navigation extends Component {
 	warningBadge!: HTMLElement;
 	verifiedBadge!: HTMLElement;
 	links!: HTMLElement;
-	createButton!: HTMLButtonElement;
-	verify!: HTMLButtonElement;
-	login!: HTMLButtonElement;
-	register!: HTMLButtonElement;
-	back!: HTMLButtonElement;
-	selfImages!: HTMLButtonElement;
-	account!: HTMLButtonElement;
-	preferences!: HTMLButtonElement;
-	logout!: HTMLButtonElement;
+	createButton!: HTMLAnchorElement;
+	verify!: HTMLAnchorElement;
+	login!: HTMLAnchorElement;
+	register!: HTMLAnchorElement;
+	back!: HTMLAnchorElement;
+	selfImages!: HTMLAnchorElement;
+	account!: HTMLAnchorElement;
+	preferences!: HTMLAnchorElement;
+	logout!: HTMLAnchorElement;
 
 	create() {
 		this.title = DOM.create('h1', {
@@ -34,29 +34,26 @@ export class Navigation extends Component {
 		this.links = DOM.create('div', {
 			className: 'links flex flex-col flex-wrap items-center',
 		});
-		this.createButton = DOM.button('primary', 'camera', 'Create');
-		this.verify = DOM.button('success', 'at-symbol', 'Verify Account');
-		this.login = DOM.button('success', 'login', 'Login');
-		this.register = DOM.button('success', 'user-add', 'Register');
-		this.account = DOM.button('secondary', 'user', 'Account');
-		this.preferences = DOM.button('secondary', 'cog', 'Preferences');
-		this.logout = DOM.button('error', 'logout', 'Logout');
-		this.back = DOM.button('secondary', 'chevron-left', 'Home');
-		this.selfImages = DOM.button('secondary', 'photograph', 'My Images');
+		this.createButton = DOM.link('primary', 'camera', 'Create', '/create');
+		this.verify = DOM.link('success', 'at-symbol', 'Verify Account', '/verify');
+		this.login = DOM.link('success', 'login', 'Login', '/login');
+		this.register = DOM.link('success', 'user-add', 'Register', '/register');
+		this.account = DOM.link('secondary', 'user', 'Account', '/account');
+		this.preferences = DOM.link('secondary', 'cog', 'Preferences', '/preferences');
+		this.logout = DOM.link('error', 'logout', 'Logout', '/');
+		this.back = DOM.link('secondary', 'chevron-left', 'Home', '/');
+		this.selfImages = DOM.link('secondary', 'photograph', 'My Images', '/');
 	}
 
 	bind() {
-		this.link(this.verify, '/verify');
-		this.link(this.createButton, '/create');
-		this.link(this.login, '/login');
-		this.link(this.register, '/register');
-		this.link(this.account, '/account');
-		this.link(this.preferences, '/preferences');
-		this.link(this.back, '/');
-		this.selfImages.addEventListener('click', (event) => {
-			event.preventDefault();
-			this.application.navigate(`/user/${this.application.auth.user.id}`);
-		});
+		this.link(this.createButton);
+		this.link(this.verify);
+		this.link(this.login);
+		this.link(this.register);
+		this.link(this.account);
+		this.link(this.preferences);
+		this.link(this.back);
+		this.link(this.selfImages);
 		this.logout.addEventListener('click', async (event) => {
 			event.preventDefault();
 			const response = await Http.delete('/api/logout');
@@ -75,6 +72,7 @@ export class Navigation extends Component {
 	private displayLoggedInUser() {
 		const authUser = this.application.auth.user;
 		this.user.textContent = authUser.username;
+		this.selfImages.href = `/user/${this.application.auth.user.id}`;
 		if (authUser.verified) {
 			this.user.appendChild(this.verifiedBadge);
 		} else {
@@ -95,7 +93,7 @@ export class Navigation extends Component {
 				this.links.appendChild(this.createButton);
 				if (!auth.user.verified) {
 					this.createButton.title = 'You need to Verify your account to create Images !';
-					this.createButton.disabled = true;
+					this.createButton.classList.add('disabled');
 				}
 			}
 			if (this.application.page !== List.name) {

@@ -28,10 +28,22 @@ export abstract class Component {
 		}
 	}
 
-	protected link(node: HTMLButtonElement, location: string): void {
+	protected link(node: HTMLAnchorElement): void;
+	protected link(node: HTMLElement, location?: string): void {
 		node.addEventListener('click', (event) => {
 			event.preventDefault();
-			this.application.navigate(location);
+			let path: string;
+			// Find path from anchor
+			if (node instanceof HTMLAnchorElement) {
+				path = node.pathname;
+			} else if (location) {
+				path = location;
+			} else {
+				path = '/';
+			}
+			// Make sure that the path starts with /
+			if (path[0] != '/') path = `/${path}`;
+			this.application.navigate(path);
 		});
 	}
 
@@ -63,16 +75,24 @@ export abstract class Component {
 	async runOnce(
 		node: HTMLElement,
 		fct: () => Promise<void>,
-		block?: (HTMLInputElement | HTMLButtonElement)[]
+		block?: (HTMLInputElement | HTMLButtonElement | HTMLAnchorElement)[]
 	): Promise<boolean> {
 		if (node.dataset.pending) return false;
 		node.dataset.pending = 'true';
 		if (block !== undefined) {
 			for (const node of block) {
-				if (node.disabled) {
-					node.dataset.alreadyDisabled = 'true';
+				if (node instanceof HTMLAnchorElement) {
+					if (node.classList.contains('disabled')) {
+						node.dataset.alreadyDisabled = 'true';
+					} else {
+						node.classList.add('disabled');
+					}
 				} else {
-					node.disabled = true;
+					if (node.disabled) {
+						node.dataset.alreadyDisabled = 'true';
+					} else {
+						node.disabled = true;
+					}
 				}
 			}
 		}
@@ -82,6 +102,8 @@ export abstract class Component {
 			for (const node of block) {
 				if (node.dataset.alreadyDisabled) {
 					delete node.dataset.alreadyDisabled;
+				} else if (node instanceof HTMLAnchorElement) {
+					node.classList.remove('disabled');
 				} else {
 					node.disabled = false;
 				}

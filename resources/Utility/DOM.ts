@@ -234,13 +234,21 @@ export class DOM {
 	}
 
 	static button(type: ButtonType, iconName: HeroIcon, textContent?: string): HTMLButtonElement {
-		const button = document.createElement('button');
-		button.classList.add(type);
-		button.appendChild(DOM.icon(iconName));
+		const button = DOM.create('button', { className: `${type}`, childs: [DOM.icon(iconName)] });
 		if (textContent) {
-			const content = document.createElement('span');
-			content.textContent = textContent;
-			button.appendChild(content);
+			button.appendChild(DOM.create('span', { textContent }));
+		}
+		return button;
+	}
+
+	static link(type: ButtonType, iconName: HeroIcon, textContent: string, href: string): HTMLAnchorElement {
+		const button = DOM.create('a', {
+			className: `button ${type}`,
+			href,
+			childs: [DOM.icon(iconName)],
+		});
+		if (textContent) {
+			button.appendChild(DOM.create('span', { textContent }));
 		}
 		return button;
 	}
