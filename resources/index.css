@@ -36,19 +36,19 @@
 	@apply border border-green-700 bg-green-500 text-green-700;
 }
 
-.links button {
+.links a {
 	@apply mb-2;
 	max-width: 80%;
 	width: 20rem;
 }
 
-.links button:last-of-type {
+.links a:last-of-type {
 	@apply mb-0;
 }
 
 button,
 .button {
-	@apply inline-flex items-center transition rounded-md border py-1 px-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
+	@apply inline-flex items-center transition rounded-md border py-1 px-2 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
 }
 
 button svg,
@@ -62,7 +62,7 @@ button svg:last-child,
 }
 
 button:disabled,
-.button:disabled {
+.button.disabled {
 	@apply shadow-inner;
 }
 
@@ -72,7 +72,7 @@ button.primary,
 }
 
 button.primary:disabled,
-.button.primary:disabled {
+.button.primary.disabled {
 	@apply bg-blue-300;
 }
 
@@ -82,7 +82,7 @@ button.success,
 }
 
 button.success:disabled,
-.button.success:disabled {
+.button.success.disabled {
 	@apply bg-green-300;
 }
 
@@ -92,7 +92,7 @@ button.error,
 }
 
 button.error:disabled,
-.button.error:disabled {
+.button.error.disabled {
 	@apply bg-red-300;
 }
 
@@ -102,7 +102,7 @@ button.secondary,
 }
 
 button.secondary:disabled,
-.button.secondary:disabled {
+.button.secondary.disabled {
 	@apply bg-gray-300;
 }
 
@@ -284,6 +284,7 @@ input.error {
 	@apply absolute left-0 top-0 right-0 bottom-0 overflow-hidden;
 	touch-action: none;
 }
+
 .preview-decorations img,
 .preview-decorations video {
 	@apply transform-gpu;
@@ -303,6 +304,8 @@ input.error {
 .decorations img,
 .decorations video {
 	@apply rounded overflow-hidden bg-transparent cursor-pointer bg-opacity-0 select-none;
+	min-width: 100px;
+	min-height: 100px;
 	max-height: 10vh;
 	object-fit: contain;
 }

@@ -16,7 +16,7 @@ export class Login extends Component {
 	password!: HTMLInputElement;
 	rememberMe!: { label: HTMLLabelElement; checkbox: HTMLInputElement };
 	footer!: HTMLElement;
-	forgotPassword!: HTMLButtonElement;
+	forgotPassword!: HTMLAnchorElement;
 	submit!: HTMLButtonElement;
 
 	create(): void {
@@ -48,7 +48,7 @@ export class Login extends Component {
 			required: true,
 		});
 		this.rememberMe = Toggle.make('Stay connected', { name: 'rememberMe' });
-		this.forgotPassword = DOM.button('secondary', 'at-symbol', 'Forgot Password');
+		this.forgotPassword = DOM.link('secondary', 'at-symbol', 'Forgot Password', '/forgot-password');
 		this.submit = DOM.button('primary', 'login', 'Login');
 		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit, this.forgotPassword] });
 		this.form = DOM.create('form', {
@@ -67,7 +67,7 @@ export class Login extends Component {
 	}
 
 	bind(): void {
-		this.link(this.forgotPassword, '/forgot-password');
+		this.link(this.forgotPassword);
 		this.form.addEventListener('submit', async (event) => {
 			event.preventDefault();
 			this.runOnce(
