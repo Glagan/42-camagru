@@ -197,12 +197,8 @@ class Creations extends Controller
 			return $this->json(['error' => 'Forbidden.'], Response::FORBIDDEN);
 		}
 
-		// Delete
-		$result = \unlink(Env::get('Camagru', 'uploads') . "/{$image->name}");
-		if (!$result) {
-			return $this->json(['error' => 'Failed to delete file.'], Response::INTERNAL_SERVER_ERROR);
-		}
 		// Relations get automatically deleted
+		unlink(Env::get('Camagru', 'uploads') . "/{$image->name}");
 		$image->remove();
 
 		return $this->json(['success' => 'Image deleted.']);

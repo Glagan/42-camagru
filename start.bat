@@ -1,3 +1,1 @@
-npm install
-npm run build
-docker-compose up
+npm install & npm run build & docker-compose up
