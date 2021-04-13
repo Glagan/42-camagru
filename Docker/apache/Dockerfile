@@ -10,5 +10,5 @@ RUN echo "Include /usr/local/apache2/conf/camagru.apache.conf" \
 	>> /usr/local/apache2/conf/httpd.conf
 
 # Script to download resources on startup
-COPY start.sh /start.s
+COPY start.sh /start.sh
 ENTRYPOINT []

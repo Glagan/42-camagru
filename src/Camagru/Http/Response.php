@@ -131,6 +131,13 @@ class Response
 	 */
 	public function render()
 	{
+		// Add default CSP
+		$this->headers->add(Header::CSP, "default-src 'none'");
+		$this->headers->add(Header::X_FRAMES_OPTIONS, 'deny');
+		$this->headers->add(Header::X_XSS_PROTECTION, '1; mode=block');
+		$this->headers->add(Header::X_CONTENTTYPE_OPTIONS, 'nosniff');
+		$this->headers->add(Header::STRICT_TRANSPORT_SECURITY, 'max-age=63072000; includeSubDomains; preload');
+
 		// Convert body to a string if it's an array
 		if (\is_array($this->content)) {
 			$this->content = \json_encode($this->content);
