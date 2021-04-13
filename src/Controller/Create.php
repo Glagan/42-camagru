@@ -6,7 +6,6 @@ use Camagru\Http\Response;
 use Env;
 use FFMPEG;
 use Image;
-use Log;
 use Models\Creation;
 use Models\Decoration;
 
@@ -107,8 +106,6 @@ class Create extends Controller
 			return $this->json(['error' => "Maximum dimensions are " . self::MAX_WIDTH . "x" . self::MAX_HEIGHT . "px."], Response::BAD_REQUEST);
 		}
 		$now = (new \DateTime())->format('His');
-
-		Log::debug('position ' . $rawDecoration['x'] . 'x' . $rawDecoration['y'] . "\nscale " . $scale);
 
 		// Animated upload
 		if ($isAnimated) {

@@ -1,6 +1,14 @@
 <?php require_once __DIR__ . '/../src/autoload.php';
 
 \session_name('session');
+\session_set_cookie_params([
+	'lifetime' => time() + 60 * 60, // 1 hour
+	'path' => '/',
+	'domain' => $_SERVER['HTTP_HOST'],
+	'secure' => true,
+	'httponly' => true,
+	'samesite' => 'Strict',
+]);
 \session_start();
 
 // Set ExceptionHandler
