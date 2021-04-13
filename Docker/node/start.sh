@@ -19,5 +19,5 @@ if [ ! -f "/app/storage/.initialized" ]; then
 	wget https://ramune.nikurasu.org/camagru/uploads.zip -P /tmp
 	unzip -o /tmp/uploads.zip -d /app/storage/uploads
 	touch /app/storage/.initialized
-	echo 'Done.'
+	echo 'Done ! Available at http://localhost:8080'
 fi
