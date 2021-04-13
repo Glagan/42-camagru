@@ -1,14 +1,22 @@
-version: '3.2'
+version: '3.7'
 services:
+    bootstrap:
+        build: './Docker/node'
+        volumes:
+            - ./:/app
+        command: sh ./start.sh
     php:
         build: './Docker/php'
+        depends_on:
+            - bootstrap
         networks:
             - backend
         volumes:
-            - .:/var/www/html/
+            - ./:/var/www/html/
     apache:
         build: './Docker/apache'
         depends_on:
+            - bootstrap
             - php
             - mysql
         networks:
@@ -18,9 +26,10 @@ services:
             - '8080:80'
         volumes:
             - ./:/var/www/html/
-        command: sh /start.sh
     mysql:
-        image: mysql:8.0
+        image: mysql:8.0.23
+        depends_on:
+            - bootstrap
         networks:
             - backend
         environment:
@@ -35,8 +44,8 @@ services:
             - persistent:/var/lib/mysql
     adminer:
         image: adminer:4.8.0-standalone
-        restart: always
         depends_on:
+            - bootstrap
             - php
             - mysql
         networks:
