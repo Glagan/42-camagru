@@ -125,7 +125,7 @@ class Create extends Controller
 			// Clear
 			\unlink($path);
 			if ($result === false) {
-				return $this->json(['error' => 'Failed to generate animated Image.'], Response::BAD_REQUEST);
+				return $this->json(['error' => 'Failed to generate animated Image.'], Response::INTERNAL_SERVER_ERROR);
 			}
 		}
 		// Static upload
