@@ -103,16 +103,14 @@ class Log
 	 */
 	public static function debug(...$values): void
 	{
-		if (Env::get('Camagru', 'mode') == 'debug') {
-			$log = static::getInstance();
-			$i = 0;
-			foreach ($values as $value) {
-				if ($i == 0) {
-					$log->line($value);
-					$i++;
-				} else {
-					$log->continueLine($value);
-				}
+		$log = static::getInstance();
+		$i = 0;
+		foreach ($values as $value) {
+			if ($i == 0) {
+				$log->line($value);
+				$i++;
+			} else {
+				$log->continueLine($value);
 			}
 		}
 	}

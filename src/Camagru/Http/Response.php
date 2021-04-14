@@ -150,10 +150,10 @@ class Response
 		}
 
 		// Content-Length
-		if (Env::get('Camagru', 'mode') != 'debug') {
+		/*if (Env::get('Camagru', 'mode') != 'debug') {
 			$contentLength = \strlen($this->content);
 			$this->headers->add(Header::CONTENT_LENGTH, $contentLength);
-		}
+		}*/
 
 		// Add headers
 		foreach ($this->headers->all() as $key => $value) {
