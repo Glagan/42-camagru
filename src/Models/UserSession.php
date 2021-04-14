@@ -62,10 +62,11 @@ class UserSession extends Model
 	 */
 	private function setSessionCookie(string $session, int $lifetime): void
 	{
+		$domain = (\strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? $_SERVER['HTTP_HOST'] : false;
 		$setCookie = \setcookie('session', $session, [
 			'expires' => time() + $lifetime,
 			'path' => '/',
-			'domain' => $_SERVER['HTTP_HOST'],
+			'domain' => $domain,
 			'secure' => true,
 			'httponly' => true,
 			'samesite' => 'Strict',

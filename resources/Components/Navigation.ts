@@ -56,10 +56,9 @@ export class Navigation extends Component {
 		this.link(this.selfImages);
 		this.logout.addEventListener('click', async (event) => {
 			event.preventDefault();
-			const response = await Http.delete('/api/logout');
-			if (response.ok) {
-				this.application.loggedOut();
-			}
+			await Http.delete('/api/logout');
+			// Always refresh Components
+			this.application.loggedOut();
 		});
 	}
 
@@ -75,8 +74,12 @@ export class Navigation extends Component {
 		this.selfImages.href = `/user/${this.application.auth.user.id}`;
 		if (authUser.verified) {
 			this.user.appendChild(this.verifiedBadge);
+			this.createButton.title = '';
+			this.createButton.classList.remove('disabled');
 		} else {
 			this.user.appendChild(this.warningBadge);
+			this.createButton.title = 'You need to Verify your account to create Images !';
+			this.createButton.classList.add('disabled');
 		}
 	}
 
@@ -91,10 +94,6 @@ export class Navigation extends Component {
 			}
 			if (this.application.page !== Create.name) {
 				this.links.appendChild(this.createButton);
-				if (!auth.user.verified) {
-					this.createButton.title = 'You need to Verify your account to create Images !';
-					this.createButton.classList.add('disabled');
-				}
 			}
 			if (this.application.page !== List.name) {
 				this.links.appendChild(this.back);
