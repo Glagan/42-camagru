@@ -60,7 +60,7 @@ export class ResetPassword extends Component {
 			max: '72',
 			required: true,
 		});
-		this.submit = DOM.button('primary', 'at-symbol', 'Send Reset Link');
+		this.submit = DOM.button('primary', 'at-symbol', 'Reset Password');
 		this.forgotPage = DOM.link('secondary', 'chevron-left', "I don't have a code", '/forgot-password');
 		this.footer = DOM.create('div', { className: 'footer', childs: [this.submit, this.forgotPage] });
 		this.form = DOM.create('form', {
