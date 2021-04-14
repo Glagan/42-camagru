@@ -1,10 +1,11 @@
 <?php require_once __DIR__ . '/../src/autoload.php';
 
 \session_name('session');
+$domain = (\strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? $_SERVER['HTTP_HOST'] : false;
 \session_set_cookie_params([
 	'lifetime' => time() + 60 * 60, // 1 hour
 	'path' => '/',
-	'domain' => $_SERVER['HTTP_HOST'],
+	'domain' => $domain,
 	'secure' => true,
 	'httponly' => true,
 	'samesite' => 'Strict',

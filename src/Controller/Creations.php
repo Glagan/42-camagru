@@ -162,17 +162,19 @@ class Creations extends Controller
 		$comment->persist();
 
 		// Send an email to the Image author if he have the option enabled
-		$author = User::get($image->user);
-		if ($author->receiveComments) {
-			$link = Env::get('Camagru', 'url') . "/{$image->id}";
-			Mail::send(
-				$author,
-				'[camagru] New comment',
-				[
-					"<b>{$this->user->username}</b> posted a new comment on one of your creations !",
-					"You can see it there: <a href=\"{$link}\" rel=\"noreferer noopener\">{$link}</a>",
-				]
-			);
+		if ($image->user !== $this->user->id) {
+			$author = User::get($image->user);
+			if ($author->receiveComments) {
+				$link = Env::get('Camagru', 'url') . "/{$image->id}";
+				Mail::send(
+					$author,
+					'[camagru] New comment',
+					[
+						"<b>{$this->user->username}</b> posted a new comment on one of your creations !",
+						"You can see it there: <a href=\"{$link}\" rel=\"noreferer noopener\">{$link}</a>",
+					]
+				);
+			}
 		}
 
 		return $this->json(['success' => 'Comment added.', 'id' => $comment->id]);
