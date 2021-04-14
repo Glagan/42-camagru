@@ -10,7 +10,7 @@ if [ ! -f "/app/storage/.initialized" ]; then
 	echo 'Building assets...'
 	npm run build
 	# Create folder is they still don't exist somehow
-	mkdir -p /app/storage/decorations /app/storage/uploads
+	mkdir -p /app/storage/decorations /app/storage/uploads /app/storage/tmp /app/storage/logs
 	# Download decorations
 	echo 'Downloading Decorations...'
 	wget -q --show-progress https://ramune.nikurasu.org/camagru/decorations.zip -P /tmp

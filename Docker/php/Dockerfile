@@ -12,3 +12,7 @@ RUN echo "curl.cainfo = /usr/local/etc/php/cacert-2021-01-19.pem" \
 	>> /usr/local/etc/php/php.ini
 RUN echo "openssl.cafile = /usr/local/etc/php/cacert-2021-01-19.pem" \
 	>> /usr/local/etc/php/php.ini
+
+# Override Docker entrypoint
+COPY start.sh /start.sh
+ENTRYPOINT []

@@ -4,7 +4,7 @@ services:
         build: './Docker/node'
         volumes:
             - ./:/app
-        command: sh ./start.sh
+        command: sh /start.sh
     php:
         build: './Docker/php'
         depends_on:
@@ -13,6 +13,7 @@ services:
             - backend
         volumes:
             - ./:/var/www/html/
+        command: sh /start.sh
     apache:
         build: './Docker/apache'
         depends_on:
