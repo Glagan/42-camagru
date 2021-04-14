@@ -182,7 +182,7 @@ export class Create extends Component {
 	}
 
 	private getScale(): number {
-		if (this.videoPreview.readyState == 4 && this.imagePreview.src != '') {
+		if (this.videoPreview.readyState == 4 && this.videoPreview.src != '' && this.imagePreview.src != '') {
 			return this.preview.offsetWidth / this.videoPreview.videoWidth;
 		}
 		return this.preview.offsetWidth / this.imagePreview.naturalWidth;
