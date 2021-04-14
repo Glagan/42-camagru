@@ -120,7 +120,7 @@ class Create extends Controller
 			// Add all decorations on the source
 			$ffmpeg = new FFMPEG();
 			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".webm";
-			$result = $ffmpeg->decorate($path, $rawDecoration, $scale, Env::get('Camagru', 'uploads') . "/{$output}");
+			$result = $ffmpeg->decorate($path, $rawDecoration, Env::get('Camagru', 'uploads') . "/{$output}");
 
 			// Clear
 			\unlink($path);

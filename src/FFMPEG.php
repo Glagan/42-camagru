@@ -7,7 +7,7 @@ class FFMPEG
 	 * 	filter force use rgba (yuva420p on webm) on both inputs and overlay on given position
 	 * 	output with yuva420p for alpha channel with shortest inputs (webm).
 	 */
-	public function decorate(string $source, array $decoration, int $scale, string $output): bool
+	public function decorate(string $source, array $decoration, string $output): bool
 	{
 		$filter = ["[0]format=rgba[background];"];
 		$filter[] = "[1:v]format=rgba[decoration];";
