@@ -60,14 +60,13 @@ class UserSession extends Model
 	 * @param int $lifetime
 	 * @return void
 	 */
-	private function setSessionCookie(string $session, int $lifetime): void
+	private function setSessionCookie(\Camagru\Http\Request $request, string $session, int $lifetime): void
 	{
-		$domain = (\strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? $_SERVER['HTTP_HOST'] : false;
 		$setCookie = \setcookie('session', $session, [
 			'expires' => time() + $lifetime,
 			'path' => '/',
-			'domain' => $domain,
-			'secure' => true,
+			'domain' => $request->getCookieDomain(),
+			'secure' => $request->isSecure(),
 			'httponly' => true,
 			'samesite' => 'Strict',
 		]);
@@ -81,12 +80,12 @@ class UserSession extends Model
 	 * Set 1 year if remember me is enabled.
 	 * @return void
 	 */
-	public function setCookie(): void
+	public function setCookie(\Camagru\Http\Request $request): void
 	{
 		if ($this->rememberMe) {
-			$this->setSessionCookie($this->session, 60 * 60 * 24 * 365); // 1 year
+			$this->setSessionCookie($request, $this->session, 60 * 60 * 24 * 365); // 1 year
 		} else {
-			$this->setSessionCookie($this->session, 60 * 60); // 1 hour
+			$this->setSessionCookie($request, $this->session, 60 * 60); // 1 hour
 		}
 	}
 

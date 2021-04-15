@@ -17,6 +17,7 @@ class Account extends Controller
 	{
 		$this->validate([
 			'email' => [
+				'type' => 'string',
 				'validate' => \FILTER_VALIDATE_EMAIL,
 			],
 		]);
@@ -74,9 +75,11 @@ class Account extends Controller
 	{
 		$this->validate([
 			'code' => [
+				'type' => 'string',
 				'min' => 50, 'max' => 50,
 			],
 			'password' => [
+				'type' => 'string',
 				'name' => 'new password',
 				'min' => 8,
 				'max' => 72,
@@ -162,6 +165,7 @@ class Account extends Controller
 	{
 		$this->validate([
 			'code' => [
+				'type' => 'string',
 				'min' => 50, 'max' => 50,
 			],
 		]);
@@ -200,17 +204,20 @@ class Account extends Controller
 		];
 		$this->validate([
 			'username' => [
+				'type' => 'string',
 				'optional' => true,
 				'min' => 4,
 				'max' => 100,
 			],
 			'email' => [
+				'type' => 'string',
 				'optional' => true,
 				'validate' => \FILTER_VALIDATE_EMAIL,
 				'min' => 4,
 				'max' => 100,
 			],
 			'password' => [
+				'type' => 'string',
 				'name' => 'new password',
 				'min' => 8,
 				'max' => 72,
@@ -221,6 +228,7 @@ class Account extends Controller
 				'optional' => true,
 			],
 			'currentPassword' => [
+				'type' => 'string',
 				'min' => 8,
 				'max' => 72,
 				'match' => $passwordMatch,
@@ -263,6 +271,7 @@ class Account extends Controller
 			$this->user->password = \password_hash($password, \PASSWORD_BCRYPT);
 		}
 
+		$this->user->receiveComments = $this->input->get('receiveComments', false) == true;
 		$this->user->persist();
 		return $this->json(['success' => 'Profile updated !', 'verified' => $this->user->verified]);
 	}
