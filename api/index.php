@@ -1,12 +1,13 @@
 <?php require_once __DIR__ . '/../src/autoload.php';
 
+// Create Request and set Session default Cookie
+$request = Camagru\Http\Request::make();
 \session_name('session');
-$domain = (\strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? $_SERVER['HTTP_HOST'] : false;
 \session_set_cookie_params([
 	'lifetime' => time() + 60 * 60, // 1 hour
 	'path' => '/',
-	'domain' => $domain,
-	'secure' => true,
+	'domain' => $request->getCookieDomain(),
+	'secure' => $request->isSecure(),
 	'httponly' => true,
 	'samesite' => 'Strict',
 ]);
@@ -70,7 +71,6 @@ $router->group(Controller\Decorations::class, function ($router) {
 });
 
 // Create and start App
-$request = Camagru\Http\Request::make();
 $app = new Camagru\Application($router, $root);
 $response = $app->run($request);
 $response->prepare($request);

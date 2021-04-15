@@ -135,6 +135,7 @@ class Creations extends Controller
 	{
 		$this->validate([
 			'message' => [
+				'type' => 'string',
 				'min' => 1,
 				'max' => 16384,
 			],

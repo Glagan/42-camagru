@@ -24,6 +24,10 @@ class Request
 	 */
 	protected $input;
 	/**
+	 * @var string
+	 */
+	protected $cookieDomain;
+	/**
 	 * @var bool
 	 */
 	protected $isSecure;
@@ -39,6 +43,7 @@ class Request
 			$this->headers->add($name, $value);
 		}
 		$this->input = new RequestInput($this->method, $this->headers);
+		$this->cookieDomain = (\strpos($_SERVER['HTTP_HOST'], 'localhost') === false) ? $_SERVER['HTTP_HOST'] : false;
 		$this->isSecure =
 			(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
 			|| $_SERVER['SERVER_PORT'] == 443;
@@ -151,5 +156,15 @@ class Request
 			}
 		}
 		return Env::get('Camagru', 'url', '');
+	}
+
+	public function getCookieDomain(): string
+	{
+		return $this->cookieDomain;
+	}
+
+	public function isSecure(): string
+	{
+		return $this->isSecure;
 	}
 }

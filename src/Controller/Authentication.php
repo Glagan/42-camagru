@@ -20,14 +20,17 @@ class Authentication extends Controller
 	{
 		$this->validate([
 			'username' => [
+				'type' => 'string',
 				'min' => 3,
 				'max' => 100,
 			],
 			'email' => [
+				'type' => 'string',
 				'validate' => \FILTER_VALIDATE_EMAIL,
 			],
 			// Must have at least 1 lower and 1 upper characters, 1 number and 1 special character
 			'password' => [
+				'type' => 'string',
 				'min' => 8,
 				// @see https://www.php.net/manual/en/function.password-hash.php
 				'max' => 72,
@@ -72,7 +75,7 @@ class Authentication extends Controller
 			'rememberMe' => false,
 		]);
 		$userSession->persist();
-		$userSession->setCookie();
+		$userSession->setCookie($this->request);
 
 		// Generate a token for the email verification link
 		$token = UserToken::first(['user' => $user->id, 'scope' => 'verification']);
@@ -114,10 +117,12 @@ class Authentication extends Controller
 	{
 		$this->validate([
 			'username' => [
+				'type' => 'string',
 				'min' => 3,
 				'max' => 100,
 			],
 			'password' => [
+				'type' => 'string',
 				'min' => 8,
 				'max' => 72,
 			],
@@ -170,7 +175,7 @@ class Authentication extends Controller
 			$userSession->rememberMe = $rememberMe;
 			$userSession->refresh();
 		}
-		$userSession->setCookie();
+		$userSession->setCookie($this->request);
 
 		return $this->json([
 			'success' => 'Logged in !',
