@@ -26,8 +26,7 @@ class Creations extends Controller
 
 		$images = Creation::select()
 			->columns(self::MODEL_COLUMNS)
-			->where(['private' => false]) // ? OR image.user = auth.user
-			->page($page, 10)
+			->page($page, 15)
 			->orderBy('id', Query::DESC)
 			->all(Creation::class);
 		$result = [];
@@ -54,24 +53,18 @@ class Creations extends Controller
 
 		if ($this->auth->isLoggedIn() && $this->user->id == $id) {
 			$user = $this->user;
-			$private = true;
 		} else {
 			$user = User::get($id);
 			if ($user === false) {
 				return $this->json(['error' => 'User not found.'], Response::NOT_FOUND);
 			}
-			$private = false;
 		}
 
-		// Filter out private Images if it's not looking at our profile
-		$conditions = ['user' => $id];
-		if (!$private) {
-			$conditions['private'] = false;
-		}
+		// Get all Images
 		$images = Creation::select()
 			->columns(self::MODEL_COLUMNS)
-			->where($conditions)
-			->page($page, 10)
+			->where(['user' => $id])
+			->page($page, 15)
 			->orderBy('id', Query::DESC)
 			->all(Creation::class);
 		$result = [];
@@ -106,9 +99,6 @@ class Creations extends Controller
 		}
 		if ($this->user->id == $image->user) {
 			return $this->json(['error' => 'You can\'t like your own Image.'], Response::BAD_REQUEST);
-		}
-		if ($image->private && $this->user->id !== $image->user) {
-			return $this->json(['error' => 'Private Image.'], Response::UNAUTHORIZED);
 		}
 
 		$like = Like::first(['user' => $this->user->id, 'image' => $id]);
@@ -152,9 +142,6 @@ class Creations extends Controller
 		$image = Creation::get($id);
 		if ($image === false) {
 			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
-		}
-		if ($image->private && $this->user->id !== $image->user) {
-			return $this->json(['error' => 'Private Image.'], Response::UNAUTHORIZED);
 		}
 
 		$comment = new Comment([
@@ -223,9 +210,6 @@ class Creations extends Controller
 		$image = Creation::get($id);
 		if ($image === false) {
 			return $this->json(['error' => 'Image not found.'], Response::NOT_FOUND);
-		}
-		if ($image->private && (!$this->auth->isLoggedIn() || $this->user->id != $image->user)) {
-			return $this->json(['error' => 'Private Image.'], Response::UNAUTHORIZED);
 		}
 
 		// User

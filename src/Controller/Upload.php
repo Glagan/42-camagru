@@ -31,9 +31,6 @@ class Upload extends Controller
 		if ($image === false) {
 			return $this->file($this->path('404.png'), Response::NOT_FOUND);
 		}
-		if ($image->private && (!$this->auth->isLoggedIn() || $this->user->id != $image->user)) {
-			return $this->file($this->path('401.png'), Response::UNAUTHORIZED);
-		}
 		return $this->file($this->path($image->name));
 	}
 }

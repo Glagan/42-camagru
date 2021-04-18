@@ -7,7 +7,6 @@ use Camagru\Model;
  * @property int $user
  * @property string $name
  * @property bool $animated
- * @property bool $private
  * @property \DateTime $at
  */
 class Creation extends Model
@@ -19,7 +18,6 @@ class Creation extends Model
 		'user',
 		'name',
 		'animated',
-		'private',
 		'at',
 	];
 
@@ -29,7 +27,6 @@ class Creation extends Model
 	protected static $casts = [
 		'user' => User::class,
 		'animated' => 'bool',
-		'private' => 'bool',
 		'at' => 'date',
 	];
 }
