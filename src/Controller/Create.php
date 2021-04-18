@@ -147,7 +147,6 @@ class Create extends Controller
 			'user' => $this->user->id,
 			'name' => $output,
 			'animated' => $isAnimated,
-			'private' => false,
 		]);
 		$creation->persist();
 

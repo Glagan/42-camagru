@@ -15,7 +15,6 @@
 * id: ``int``
 * user: ``User.id``
 * name: ``string``
-* private: ``boolean``
 * at: ``Date``
 
 ## Decoration
@@ -39,8 +38,6 @@
 * user: ``User.id``
 * message: ``string``
 * at: ``Date``
-* edited: ``Date`` Date of the last edition if there is one
-* deleted: ``boolean`` Is the message deleted, only the content is not visible
 
 ## Session
 
