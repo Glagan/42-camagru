@@ -28,6 +28,7 @@ class Creations extends Controller
 			->columns(self::MODEL_COLUMNS)
 			->where(['private' => false]) // ? OR image.user = auth.user
 			->page($page, 10)
+			->orderBy('id', Query::DESC)
 			->all(Creation::class);
 		$result = [];
 		foreach ($images as $image) {
@@ -71,6 +72,7 @@ class Creations extends Controller
 			->columns(self::MODEL_COLUMNS)
 			->where($conditions)
 			->page($page, 10)
+			->orderBy('id', Query::DESC)
 			->all(Creation::class);
 		$result = [];
 		foreach ($images as $image) {
