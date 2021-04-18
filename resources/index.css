@@ -304,9 +304,9 @@ input.error {
 .decorations img,
 .decorations video {
 	@apply rounded overflow-hidden bg-transparent cursor-pointer bg-opacity-0 select-none;
-	min-width: 100px;
-	min-height: 100px;
-	max-height: 10vh;
+	min-width: 10vw;
+	min-height: 10vh;
+	max-height: 15vh;
 	object-fit: contain;
 }
 
