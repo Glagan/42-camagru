@@ -228,7 +228,7 @@ class Creations extends Controller
 
 		// Comments
 		$comments = Comment::all(
-			['image' => $image->id, 'deleted' => false],
+			['image' => $image->id],
 			['id' => Query::DESC]
 		);
 		// Find all Users associated to each comments
