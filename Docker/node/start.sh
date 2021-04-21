@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Build assets -- always
+cd /app
 echo 'Installing dependencies...'
 echo 'This can take a long time !'
 npm install
@@ -9,7 +10,6 @@ npm run build
 
 # First initialization if Decorations and uploads doesn't exist
 if [ ! -f "/app/storage/.initialized" ]; then
-	cd /app
 	# Create folder is they still don't exist somehow
 	mkdir -p /app/storage/decorations /app/storage/uploads /app/storage/tmp /app/storage/logs
 	# Download decorations
