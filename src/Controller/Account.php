@@ -256,6 +256,7 @@ class Account extends Controller
 
 		// Email, if updated reset verified to false
 		$email = $this->input->get('email');
+		$updatedMail = false;
 		if ($email !== false && $email != $this->user->email) {
 			$exists = User::first(['email' => $email]);
 			if ($exists !== false) {
@@ -263,6 +264,7 @@ class Account extends Controller
 			}
 			$this->user->email = $email;
 			$this->user->verified = false;
+			$updatedMail = true;
 		}
 
 		// Password
@@ -271,8 +273,43 @@ class Account extends Controller
 			$this->user->password = \password_hash($password, \PASSWORD_BCRYPT);
 		}
 
+		// Save
 		$this->user->receiveComments = $this->input->get('receiveComments', false) == true;
 		$this->user->persist();
+
+		// Send mail if needed
+		if ($updatedMail) {
+			// Generate a token for the email verification link
+			$token = UserToken::first(['user' => $this->user->id, 'scope' => 'verification']);
+			if ($token !== false) {
+				$token->remove();
+			}
+			$token = UserToken::generate($this->user->id, 'verification');
+			$token->persist();
+
+			// Send mail
+			$link = Env::get('Camagru', 'url') . "/verify?code={$token->token}";
+			$sendMail = Mail::send(
+				$this->user,
+				"[camagru] Email changed",
+				[
+					"You changed your email on camagru.",
+					"Use this link to verify your account again: <a href=\"{$link}\" rel=\"noreferer noopener\">{$link}</a>.",
+					"As an alternative, you can enter this code in the verification page: {$token->token}",
+					"You have 24 hours to use this code until it expires.",
+				]
+			);
+			if (!$sendMail) {
+				return $this->json([
+					'success' => 'Profile updated but failed to send an Activation code, retry while logged in.',
+					'verified' => $this->user->verified,
+				]);
+			}
+			return $this->json([
+				'success' => 'Profile updated ! A link was sent to your new email to verify it. You have 24hours to validate it.',
+				'verified' => $this->user->verified,
+			]);
+		}
 		return $this->json(['success' => 'Profile updated !', 'verified' => $this->user->verified]);
 	}
 }
