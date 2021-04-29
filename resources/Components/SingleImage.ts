@@ -256,14 +256,14 @@ export class SingleImage extends Component {
 		this.author.textContent = this.response.user.username;
 		this.author.href = `/user/${this.response.user.id}`;
 		Badge.set(this.authorBadge, this.response.user.verified);
-		const media = `/uploads/${this.response.image.id}`;
+		const media = `/uploads/${this.response.image.name}`;
 		let display: HTMLElement;
 		if (this.response.image.animated) {
 			display = this.videoSlot;
 			this.videoSlot.src = media;
 		} else {
 			display = this.imageSlot;
-			this.imageSlot.src = `/uploads/${this.response.image.id}`;
+			this.imageSlot.src = media;
 		}
 		this.likeCount.textContent = `${this.response.likes}`;
 		if (

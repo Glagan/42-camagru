@@ -129,7 +129,7 @@ export class Create extends Component {
 		DOM.clear(this.visibleDecoration);
 		delete this.currentDecoration;
 		this.imagePreview.src = '';
-		this.enableCapture();
+		this.disableCapture();
 		this.submit.disabled = true;
 		this.allowCamera.classList.remove('hidden');
 		this.noCamera.classList.add('hidden');

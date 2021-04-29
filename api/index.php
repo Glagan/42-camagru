@@ -48,11 +48,6 @@ $router->group(Controller\Account::class, function ($router) {
 	$router->patch('/account/update', ['auth' => true, 'use' => 'update']);
 });
 
-// Uploads
-$router->group(Controller\Upload::class, function ($router) {
-	$router->get('/uploads/{id}', ['noPrefix' => true, 'use' => 'single']);
-});
-
 // Creations
 $router->post('/upload', ['auth' => true, 'use' => 'Controller\Create@upload']);
 $router->group(Controller\Creations::class, function ($router) {
