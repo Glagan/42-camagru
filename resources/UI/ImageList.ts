@@ -44,7 +44,7 @@ export class ImageList {
 			const image = list[i];
 			const display = DOM.create(image.animated ? 'video' : 'img', {
 				src: image.animated ? LOADING_VIDEO : LOADING_IMG,
-				dataset: { src: `/uploads/${image.id}` },
+				dataset: { src: `/uploads/${image.name}` },
 				autoplay: true,
 				loop: true,
 				volume: 0,
