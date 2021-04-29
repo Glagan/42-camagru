@@ -24,9 +24,13 @@ export class Account extends Component {
 	receiveCommentsToggle!: { label: HTMLLabelElement; checkbox: HTMLInputElement };
 	footer!: HTMLElement;
 	submit!: HTMLButtonElement;
+	logoutHeader!: HTMLElement;
+	logoutInformation!: HTMLElement;
+	logoutWrapper!: HTMLElement;
+	logoutButton!: HTMLButtonElement;
 
 	create(): void {
-		this.header = DOM.create('h1', { className: 'header', textContent: 'Account' });
+		this.header = DOM.create('h1', { className: 'header', textContent: 'Account Informations' });
 		this.labelUsername = DOM.create('label', {
 			htmlFor: 'update-username',
 			textContent: 'Username',
@@ -108,6 +112,14 @@ export class Account extends Component {
 			return value !== this.password.value ? 'Password does not match.' : true;
 		});
 		this.validators.currentPassword = new Validator(this.currentPassword, Validator.password);
+		this.logoutHeader = DOM.create('h1', { className: 'header mb-2', textContent: 'Security' });
+		this.logoutInformation = Alert.make(
+			'info',
+			`This will log you out of all active Sessions on other devices except this one.`
+		);
+		this.logoutButton = DOM.button('error', 'x-circle', 'Logout of all Sessions');
+		this.logoutButton.classList.add('mt-2');
+		this.logoutWrapper = DOM.create('div', { className: 'text-center', childs: [this.logoutButton] });
 	}
 
 	bind(): void {
@@ -175,12 +187,25 @@ export class Account extends Component {
 				[this.username, this.email, this.password, this.confirmPassword, this.currentPassword, this.submit]
 			);
 		});
+		this.logoutButton.addEventListener('click', async (event) => {
+			event.preventDefault();
+			if (!this.logoutButton.disabled) {
+				this.logoutButton.disabled = true;
+				const response = await Http.delete<{ success: string }>('/api/logout/all');
+				if (response.ok) {
+					Notification.show('success', response.body.success);
+				} else {
+					Notification.show('danger', `Error: ${response.body.error}`);
+				}
+				this.logoutButton.disabled = false;
+			}
+		});
 	}
 
 	render(): void {
 		this.username.value = this.application.auth.user.username;
 		this.email.value = this.application.auth.user.email;
 		this.receiveCommentsToggle.checkbox.checked = this.application.auth.user.receiveComments;
-		DOM.append(this.parent, this.header, this.form);
+		DOM.append(this.parent, this.header, this.form, this.logoutHeader, this.logoutInformation, this.logoutWrapper);
 	}
 }
