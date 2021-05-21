@@ -57,8 +57,8 @@ export class Navigation extends Component {
 		this.logout.addEventListener('click', async (event) => {
 			event.preventDefault();
 			await Http.delete('/api/logout');
-			// Always refresh Components
 			this.application.loggedOut();
+			this.application.navigate('/');
 		});
 	}
 

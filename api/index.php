@@ -46,6 +46,7 @@ $router->group(Controller\Account::class, function ($router) {
 	$router->put('/account/send-verification', ['auth' => true, 'use' => 'sendVerification']);
 	$router->patch('/account/verify', ['auth' => true, 'use' => 'verify']);
 	$router->patch('/account/update', ['auth' => true, 'use' => 'update']);
+	$router->delete('/account', ['auth' => true, 'use' => 'deleteAccount']);
 });
 
 // Creations
