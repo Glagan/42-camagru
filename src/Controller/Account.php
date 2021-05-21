@@ -5,7 +5,9 @@ use Camagru\Http\JSONResponse;
 use Camagru\Http\Response;
 use Camagru\Mail;
 use Env;
+use Models\Creation;
 use Models\User;
+use Models\UserSession;
 use Models\UserToken;
 
 class Account extends Controller
@@ -311,5 +313,49 @@ class Account extends Controller
 			]);
 		}
 		return $this->json(['success' => 'Profile updated !', 'verified' => $this->user->verified]);
+	}
+
+	/**
+	 * @return \Camagru\Http\JSONResponse
+	 */
+	public function deleteAccount(): JSONResponse
+	{
+		$this->validate([
+			'password' => [
+				'type' => 'string',
+				'min' => 8,
+				'max' => 72,
+				'match' => [
+					'/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W]).*/',
+					'Invalid password. It must contains at least 1 lowercase character, 1 uppercase character, 1 number and 1 special character.',
+				],
+			],
+		]);
+
+		// Check password
+		$password = $this->input->get('password');
+		if ($password === false) {
+			return $this->json(['error' => 'You need your current password to delete your profile !'], Response::UNAUTHORIZED);
+		}
+		if (!\password_verify($password, $this->user->password)) {
+			return $this->json(['error' => 'Invalid credentials.'], Response::UNAUTHORIZED);
+		}
+
+		$creations = Creation::select()
+			->columns(['name'])
+			->where(['user' => $this->user->id])
+			->all();
+
+		foreach ($creations as $creation) {
+			unlink(Env::get('Camagru', 'uploads') . "/{$creation['name']}");
+		}
+
+		$session = \session_id();
+		UserSession::delete()->where([
+			'session' => $session,
+		])->execute();
+
+		$this->user->delete()->where(['id' => $this->user->id])->execute();
+		return $this->json(['success' => 'Account deleted !']);
 	}
 }

@@ -28,6 +28,12 @@ export class Account extends Component {
 	logoutInformation!: HTMLElement;
 	logoutWrapper!: HTMLElement;
 	logoutButton!: HTMLButtonElement;
+	deleteHeader!: HTMLElement;
+	deleteForm!: HTMLFormElement;
+	deleteLabelPassword!: HTMLLabelElement;
+	deletePassword!: HTMLInputElement;
+	deleteFooter!: HTMLElement;
+	deleteSubmit!: HTMLButtonElement;
 
 	create(): void {
 		this.header = DOM.create('h1', { className: 'header', textContent: 'Account Informations' });
@@ -120,6 +126,32 @@ export class Account extends Component {
 		this.logoutButton = DOM.button('error', 'x-circle', 'Logout of all Sessions');
 		this.logoutButton.classList.add('mt-2');
 		this.logoutWrapper = DOM.create('div', { className: 'text-center', childs: [this.logoutButton] });
+		this.deleteHeader = DOM.create('h1', { className: 'header mb-2', textContent: 'Delete' });
+		this.deletePassword = DOM.create('input', {
+			type: 'password',
+			id: 'current-password-delete',
+			name: 'current-password-delete',
+			placeholder: 'Current Password',
+		});
+		this.deleteLabelPassword = DOM.create('label', {
+			htmlFor: 'current-password-delete',
+			textContent: 'Current Password',
+		});
+		this.validators.deletePassword = new Validator(this.deletePassword, Validator.password);
+		this.deleteSubmit = DOM.button('error', 'x-circle', 'Delete');
+		this.deleteFooter = DOM.create('div', { className: 'footer', childs: [this.deleteSubmit] });
+		this.deleteForm = DOM.create('form', {
+			className: 'flex flex-col flex-wrap items-stretch',
+			childs: [
+				Alert.make(
+					'danger',
+					`This will permanently delete your account, your posts, their comments and all of your comments.`
+				),
+				this.deleteLabelPassword,
+				this.deletePassword,
+				this.deleteFooter,
+			],
+		});
 	}
 
 	bind(): void {
@@ -200,12 +232,48 @@ export class Account extends Component {
 				this.logoutButton.disabled = false;
 			}
 		});
+		this.deleteForm.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			this.runOnce(
+				this.form,
+				async () => {
+					// We need to check each fields individually since they are not all required
+					const password = this.deletePassword.value.trim();
+					if (
+						password != '' &&
+						(!this.validators.deletePassword.validate() || !this.validators.confirmPassword.validate())
+					) {
+						return;
+					}
+					// Send the request
+					const body: { password: string } = { password: this.deletePassword.value.trim() };
+					const response = await Http.delete<{ success: string }>('/api/account', body);
+					if (response.ok) {
+						Notification.show('success', response.body.success);
+						this.application.loggedOut();
+						this.application.navigate('/');
+					} else {
+						Notification.show('danger', `Error: ${response.body.error}`);
+					}
+				},
+				[this.deletePassword, this.deleteSubmit]
+			);
+		});
 	}
 
 	render(): void {
 		this.username.value = this.application.auth.user.username;
 		this.email.value = this.application.auth.user.email;
 		this.receiveCommentsToggle.checkbox.checked = this.application.auth.user.receiveComments;
-		DOM.append(this.parent, this.header, this.form, this.logoutHeader, this.logoutInformation, this.logoutWrapper);
+		DOM.append(
+			this.parent,
+			this.header,
+			this.form,
+			this.logoutHeader,
+			this.logoutInformation,
+			this.logoutWrapper,
+			this.deleteHeader,
+			this.deleteForm
+		);
 	}
 }
