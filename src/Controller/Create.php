@@ -25,11 +25,8 @@ class Create extends Controller
 			'upload' => [
 				'type' => 'string',
 			],
-			'decoration' => [
+			'decorations' => [
 				'type' => 'array',
-			],
-			'scale' => [
-				'type' => 'int',
 			],
 		]);
 
@@ -64,35 +61,52 @@ class Create extends Controller
 			return $this->json(['error' => 'Empty or invalid upload.'], Response::BAD_REQUEST);
 		}
 
-		// Check decoration
-		$rawDecoration = $this->input->get('decoration');
-		$validDecoration = (
-			\array_key_exists('id', $rawDecoration)
-			&& \array_key_exists('position', $rawDecoration)
-			&& \is_array($rawDecoration['position'])
-			&& \array_key_exists('x', $rawDecoration['position'])
-			&& \array_key_exists('y', $rawDecoration['position']));
-		if (!$validDecoration) {
-			return $this->json(['error' => 'You need to add one valid Decoration.'], Response::BAD_REQUEST);
+		// Check decorations
+		$rawDecorations = $this->input->get('decorations');
+		if (\count($rawDecorations) < 1) {
+			return $this->json(['error' => 'You need to add at least 1 Decoration.'], Response::BAD_REQUEST);
 		}
-		$decoration = Decoration::first([
-			'id' => $rawDecoration['id'],
+		if (\count($rawDecorations) > 5) {
+			return $this->json(['error' => 'You can only add up to 5 Decorations.'], Response::BAD_REQUEST);
+		}
+		foreach ($rawDecorations as $decoration) {
+			$validDecoration = (
+				\array_key_exists('id', $decoration)
+				&& \array_key_exists('position', $decoration)
+				&& \is_array($decoration['position'])
+				&& \array_key_exists('x', $decoration['position'])
+				&& \array_key_exists('y', $decoration['position']));
+			if (!$validDecoration) {
+				return $this->json(['error' => "Invalid decoration #{$decoration['id']}, x: {$decoration['position']['x']} y: {$decoration['position']['y']}."], Response::BAD_REQUEST);
+			}
+		}
+		$decorations = Decoration::all([
+			'id' => \array_column($rawDecorations, 'id'),
 			'public' => true,
 		]);
-		if ($decoration === false) {
-			return $this->json(['error' => 'You need to add one valid Decoration.'], Response::BAD_REQUEST);
-		}
 
-		// Update raw decoration with the database for animated state and path
-		$isAnimated = $decoration->animated;
-		$rawDecoration['animated'] = $decoration->animated;
-		$rawDecoration['name'] = $decoration->name;
-		$scale = $this->input->get('scale');
-		if ($scale <= 0) {
-			return $this->json(['error' => 'The Image scale must be more than 0.'], Response::BAD_REQUEST);
+		// Check if there is missing decorations and set the animated flag
+		$animatedCount = 0;
+		foreach ($rawDecorations as $key => $rawDecoration) {
+			$foundDecoration = false;
+			foreach ($decorations as $decoration) {
+				if ($decoration->id == $rawDecoration['id']) {
+					$rawDecorations[$key]['animated'] = $decoration->animated;
+					if ($decoration->animated) {
+						$animatedCount++;
+					}
+					$rawDecorations[$key]['name'] = $decoration->name;
+					$foundDecoration = true;
+					break;
+				}
+			}
+			if (!$foundDecoration) {
+				return $this->json(['error' => 'Invalid Decorations.'], Response::BAD_REQUEST);
+			}
 		}
-		$rawDecoration['x'] = \round($rawDecoration['position']['x'] / $scale);
-		$rawDecoration['y'] = \round($rawDecoration['position']['y'] / $scale);
+		if ($animatedCount > 1) {
+			return $this->json(['error' => 'You can only have 1 animated Decoration.'], Response::BAD_REQUEST);
+		}
 
 		// Static background
 		$image = Image::fromString($decodedUpload);
@@ -107,8 +121,18 @@ class Create extends Controller
 		}
 		$now = (new \DateTime())->format('His');
 
-		// Animated upload
-		if ($isAnimated) {
+		// Set the required informations in rawDecorations
+		$width = $image->width();
+		$height = $image->height();
+		foreach ($rawDecorations as $key => $rawDecoration) {
+			// Positions are percentages on the X and Y axis
+			$rawDecorations[$key]['x'] = \round($width * $rawDecoration['position']['x']);
+			$rawDecorations[$key]['y'] = \round($height * $rawDecoration['position']['y']);
+		}
+
+		// If there is one animated image, we create everything in one command with FFMPEG
+		// All images are added as layers on top of the background
+		if ($animatedCount > 0) {
 			// Save backgrond image for FFMPEG
 			$name = "{$now}_" . \bin2hex(\random_bytes(5)) . ".png";
 			$path = Env::get('Camagru', 'tmp') . "/{$name}";
@@ -117,10 +141,10 @@ class Create extends Controller
 				return $this->json(['error' => 'Failed to save background Image.'], Response::BAD_REQUEST);
 			}
 
-			// Add all decorations on the source
+			// Add all decorations to the source
 			$ffmpeg = new FFMPEG();
 			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".webm";
-			$result = $ffmpeg->decorate($path, $rawDecoration, Env::get('Camagru', 'uploads') . "/{$output}");
+			$result = $ffmpeg->decorate($path, $rawDecorations, Env::get('Camagru', 'uploads') . "/{$output}");
 
 			// Clear
 			\unlink($path);
@@ -128,12 +152,18 @@ class Create extends Controller
 				return $this->json(['error' => 'Failed to generate animated Image.'], Response::INTERNAL_SERVER_ERROR);
 			}
 		}
-		// Static upload
+		// If there is no animated images, they are all added incrementally on top of each others
 		else {
-			// Load decoration
-			$path = Env::get('Camagru', 'decorations') . "/{$rawDecoration['name']}";
-			$decorationResource = Image::fromString(\file_get_contents($path));
-			$image->merge($decorationResource, $rawDecoration['x'], $rawDecoration['y']);
+			$width = $image->width();
+			$height = $image->height();
+
+			// Merge each decorations
+			foreach ($rawDecorations as $rawDecoration) {
+				$path = Env::get('Camagru', 'decorations') . "/{$rawDecoration['name']}";
+				$decorationResource = Image::fromString(\file_get_contents($path));
+				$image->merge($decorationResource, $rawDecoration['x'], $rawDecoration['y']);
+			}
+
 			// Save
 			$output = "{$now}_" . \bin2hex(\random_bytes(5)) . ".png";
 			$saved = $image->save(Env::get('Camagru', 'uploads') . "/{$output}");
@@ -146,7 +176,7 @@ class Create extends Controller
 		$creation = new Creation([
 			'user' => $this->user->id,
 			'name' => $output,
-			'animated' => $isAnimated,
+			'animated' => $animatedCount > 0,
 		]);
 		$creation->persist();
 

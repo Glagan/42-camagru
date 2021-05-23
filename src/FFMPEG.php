@@ -7,18 +7,45 @@ class FFMPEG
 	 * 	filter force use rgba (yuva420p on webm) on both inputs and overlay on given position
 	 * 	output with yuva420p for alpha channel with shortest inputs (webm).
 	 */
-	public function decorate(string $source, array $decoration, string $output): bool
+	public function decorate(string $source, array $decorations, string $output): bool
 	{
+		// Construct filter
 		$filter = ["[0]format=rgba[background];"];
-		$filter[] = "[1:v]format=rgba[decoration];";
-		$filter[] = "[background][decoration]overlay={$decoration['x']}:{$decoration['y']}";
+		$index = 1;
+		foreach ($decorations as $decoration) {
+			$filter[] = "[{$index}]format=rgba[decoration{$index}];";
+			$index++;
+		}
+		// Merge
+		$filter = [];
+		$index = 1;
+		$last = \count($decorations);
+		$previous = '0';
+		foreach ($decorations as $decoration) {
+			$filter[] = "[{$previous}][{$index}]overlay={$decoration['x']}:{$decoration['y']}[o{$index}]";
+			if ($index < $last) {
+				$filter[] = ";";
+			}
+			$previous = "o{$index}";
+			$index++;
+		}
 		$filter = \implode('', $filter);
+
+		// Construct command
 		$command = ["ffmpeg"];
 		$command[] = "-c:v png -i \"{$source}\""; // Background
-		$path = \realpath(Env::get('Camagru', 'decorations') . "/{$decoration['name']}");
-		$command[] = "-vcodec libvpx-vp9 -i \"{$path}\""; // Decoration
-		$command[] = "-filter_complex \"{$filter}\" -shortest -crf 18 -c:v libvpx-vp9 -pix_fmt yuva420p -movflags +faststart -y {$output}";
+		foreach ($decorations as $decoration) {
+			$path = \realpath(Env::get('Camagru', 'decorations') . "/{$decoration['name']}");
+			if ($decoration['animated']) {
+				$command[] = "-vcodec libvpx-vp9 -i \"{$path}\"";
+			} else {
+				$command[] = "-i \"{$path}\"";
+			}
+		}
+		$command[] = "-filter_complex \"{$filter}\" -map \"[o{$last}]\" -shortest -crf 18 -c:v libvpx-vp9 -pix_fmt yuva420p -movflags +faststart -y {$output}";
 		$command = \implode(' ', $command);
+
+		// Start
 		Log::debug('FFMPEG command', $command);
 		$output = [];
 		$code = 0;

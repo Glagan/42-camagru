@@ -287,20 +287,41 @@ input.error {
 
 .preview-decorations img,
 .preview-decorations video {
-	@apply transform-gpu;
+	@apply transform-gpu absolute;
 	transform-origin: top left;
 	max-width: none;
+}
+
+.previous-capture {
+	@apply flex flex-col flex-wrap;
+	max-width: 15%;
+}
+
+.previous-capture:not(.active) > div{
+	@apply opacity-60 cursor-not-allowed;
+}
+
+.active-decorations {
+	@apply mt-2 p-2 flex flex-row flex-nowrap space-x-2 overflow-x-auto rounded border border-gray-400;
+}
+
+.active-decorations.hidden {
+	display: none;
 }
 
 .decorations {
 	@apply mt-2 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 auto-rows-min justify-items-center items-center;
 }
 
+.active-decorations:not(.active) img,
+.active-decorations:not(.active) video,
 .decorations:not(.active) img,
 .decorations:not(.active) video {
 	@apply opacity-60 cursor-not-allowed;
 }
 
+.active-decorations img,
+.active-decorations video,
 .decorations img,
 .decorations video {
 	@apply rounded overflow-hidden bg-transparent cursor-pointer bg-opacity-0 select-none;
@@ -310,6 +331,9 @@ input.error {
 	object-fit: contain;
 }
 
+
+.active-decorations img:hover,
+.active-decorations video:hover,
 .decorations img:hover,
 .decorations video:hover {
 	@apply shadow-md bg-opacity-100;
