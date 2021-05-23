@@ -2,6 +2,12 @@
 
 The **camagru** project ! Built with PHP on the back, TypeScript and Tailwind on the front.
 
+## Screenshots
+
+Homepage | Image Creation
+:-:|:-:
+![Homepage](/screenshots/home.png) | ![Image Creation page with a lot of cats](/screenshots/create.png)
+
 ## Build
 
 Run ``docker-compose up --build`` and the project will be available at [localhost:8080]().
@@ -14,7 +20,7 @@ Run ``docker-compose up --build`` and the project will be available at [localhos
 * Render animated creations (webm)
 * Allow multiple superposable images
 
-## Resource
+## Resources
 
 * Images
 	* https://www.stickpng.com/
